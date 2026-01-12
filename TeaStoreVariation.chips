@@ -1,0 +1,93 @@
+physical userMachine(
+    sensor bool newPage, 
+    sensor bool requiresAuth,
+    int startTime, // startTime >= 0
+    int endTime, // endTime > startTime
+    int id) // 100 > id > 0
+init {
+    int httpRequest;
+    bool active;
+    bool waiting = false;
+    int time = 0;
+    int authData = 0;
+} then {
+    state = (time>=startTime) && (time<endTime);
+    if (active) {
+        if (!waiting){
+            httpRequest = (int) (random()*10)+1; //nb of data requested
+            waiting = true;
+        } else {
+            if (newPage){
+                waiting = false;
+                if(requiresAuth){
+                    authData = id;
+                }
+            } else {
+                waiting = true;
+            }
+            httpRequest = 0;
+        }
+    } else {
+        httpRequest = 0;
+    }
+    time = time+1;
+} -> actuator toInternet(httpRequest)
+-> actuator authenticationData(authData)
+
+
+physical ServerMachine(
+    sensor int fromInternet,
+    sensor int authData,
+    bool pageServiceAuthRequest,
+    bool pageServiceNewPage)
+with {
+    ServerChannel next;
+    ServerChannel prev;
+} init {} then {} 
+-> actuator toInternet(pageServiceNewPage)
+-> actuator authDataRequest(pageServiceAuthRequest)
+-> toHttpInterpreter(fromInternet)
+-> toAuthInterpreter(authData)
+
+
+logical UserActionInterpreter(int httpReq, int authData) 
+init {} then {}
+-> nbData(httpReq)
+-> authProvided(authData)
+
+
+logical Authenticator(int authData) 
+init {} then {} -> isAuthenticated(authData>0)
+
+
+logical RequestValidator(int nbData, bool isAuthenticated) 
+init {
+    int nbDataToFetch;
+    bool needRedirection;
+} then {
+    needRedirection = (nbData > 5) && (!isAuthenticated);
+    if (!needRedirection){
+        nbDataToFetch = nbData;
+    } else {
+        nbDataToFetch = 0;
+    }
+} -> nbDataRequested(nbDataToFetch)
+-> redirection(needRedirection)
+
+
+logical DataProvider(int nbDataToFetch, bool redirection, bool fromDB)
+init {
+
+} then {
+
+} -> redirect(redirection)
+-> sendDBRequest()
+-> 
+
+logical DataBase(bool newRequest = false) 
+init {}
+then {}
+->
+
+
+// AJOUTER SYSTEME D'ID POUR LES REQUÊTES CLIENTS POUR PERMETTRE D'EN TRAITER PLUSIEURS À LA FOIS
