@@ -1,10 +1,9 @@
-physical userMachine(
-    sensor bool newPage, 
-    sensor bool requiresAuth,
-    int startTime, // startTime >= 0
-    int endTime, // endTime > startTime
-    int id) // 100 > id > 0
-init {
+physical userMachine(sensor bool newPage, sensor bool requiresAuth, int startTime, int endTime, int id) 
+ // startTime >= 0 // endTime > startTime // 100 > id > 0
+with{
+    UserChannel next;
+    UserChannel prev;
+} init {
     int httpRequest;
     bool active;
     bool waiting = false;
@@ -35,11 +34,7 @@ init {
 -> actuator authenticationData(authData)
 
 
-physical ServerMachine(
-    sensor int fromInternet,
-    sensor int authData,
-    bool pageServiceAuthRequest,
-    bool pageServiceNewPage)
+physical ServerMachine(sensor int fromInternet, sensor int authData, bool pageServiceAuthRequest, bool pageServiceNewPage)
 with {
     ServerChannel next;
     ServerChannel prev;
@@ -324,10 +319,25 @@ init {
 -> sendDBRequest(state == 2)
 
 
-logical DataBase(bool newRequest = false) 
-init {}
-then {}
+logical DataBase(bool newRequest = false)
+init {} then {}
 -> toDataProvider(newRequest)
 
 
-// AJOUTER SYSTEME D'ID POUR LES REQUÊTES CLIENTS POUR PERMETTRE D'EN TRAITER PLUSIEURS À LA FOIS
+logical WebPageService(int respondToThisID = 0) 
+init {} then {}
+-> toInternet(respondToThisID)
+
+object UI {
+    UIchannel next;
+    UIchannel prev;
+}
+
+object Backend {
+    BackChannel next;
+    BackChannel prev;
+}
+
+system {
+
+}
