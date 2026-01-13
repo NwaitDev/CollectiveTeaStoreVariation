@@ -102,45 +102,146 @@ init {
     for i in range(maxSimultaneousRequests){
         remainingDataByID[i] = 0;
     }
+
+    // index of where we store the number of data 
+    // remaining for the currently treated request
     int treatedReqIndex = 0;
+    int lastReqOfTheQueue = -1;
+
+    // id of the request to which the DataProvider 
+    // has retrieved all the data
+    // 0 means there is no response
+    int responseToID = 0;
     
     // 0 : not searching / 1 : cache searching / 2 : DB searching
     int state = 0;
+    bool hasWork;
 
     int minCacheSize = 10;
     int maxCacheSize = 100;
     int [maxCacheSize] cache;
-    bool requestingDB;
+    bool requestingDB = false;
 
     // Modeling the data requested by
     // the user with a random integer
     // between 1 and nbDifferentData
     int data;
-    int nbDifferentData;
-    bool foundInCache;
-    int oldestCacheIndex = 0;
+    int nbDifferentData = 20;
+    bool foundInCache = false;
+    int oldestCacheIndex = 0; // for implementing a queue
 
 } then {
-    if(state == 0) {
-        if(requestID == 0) {
-            // currently not searching 
-            // and no new data to fetch
-            // so we keep doing nothing
-        } else {
-            // this is a new request
-            // this is our first request
-            // since we're doing nothing
-            // so remainingDataByID is
-            // theoretically filled with 0s
-            if (!redirection) {
-                treatedReqIndex = requestID-1;
-                remainingDataByID[treatedReqIndex] = nbDataToFetch;
-                state = 1;
-            } else {
-                // keep doing nothing
+
+    
+    if (requestID != 0){ // if treating new request
+        if (!redirection) { // if the request must not be redirected
+            
+            
+            //
+            // Setting if we have to redirect the user or append its data request
+            //
+
+            if (remainingDataByID[requestID-1]!=0){// if there is already a pending request for that ID
+                // it means we reached the maximum number of
+                // clients we can have at the same time so we must redirect
+                // the current request (i.e set responseToID to the users ID)
+                responseToID = requestID;
+            } else { // there is no current request for that ID
+                // we can add the quantity of data required by the user to the pending requested data
+                remainingDataByID[requestID-1] = nbDataToFetch;
+                // and we can't respond their request right now because it needs processing
+                respondToID = 0;
             }
+            
+
+            if (state == 0){ // if we are done with all our previous tasks
+                treatedReqIndex = requestID-1; // we can start working on the current request
+                state = 1; // and we first search in the cache
+            } else { // if we were already doing something
+                if (state == 1){ // if our latest task was searching in the cache
+                    // currently searching in the cache.
+                    data = (int)(random()*(1+nbDifferentData));
+                    foundInCache = false;
+                    for i in range(cacheSize) {
+                        if (cache[i] == data) {
+                            foundInCache = true;
+                        }
+                    }
+
+                    if(foundInCache){
+                        // when data is in the cache, we reduce the quantity of data to fetch
+                        remainingDataByID[treatedReqIndex] = remainingDataByID[treatedReqIndex] - 1;
+                        if (remainingDataByID[treatedReqIndex]>0){
+                            // if the quantity of data to fetch is greater than zero, 
+                            // we must keep searching for data
+                            state = 1;
+                        } else {
+                            // if the quantity of data to fetch is zero (or less, but it shouldn't happen), 
+                            // then we start analyzing the quantity of data to fetch for the next request
+                            treatedReqIndex = (treatedReqIndex+1)%maxSimultaneousRequests;
+                            if (remainingDataByID[treatedReqIndex]>0)) {
+                                // if there is data to fetch, we keep searching in the 
+                                // cache for the next "clock cycle"
+                                state = 1;
+                            } else {
+                                // otherwise, we're done
+                                state = 0;
+                            }
+                        }
+                    } else {
+                        // if data is not foundInCache
+                        // then we add it to the cache as 
+                        // it will contain it after the 
+                        // database response
+                        state = 2;
+                        int firstZeroIndex = -1;
+                        for i in range(cacheSize) {
+                            if ((firstZeroIndex == -1) && (cache[i]==0)){
+                                firstZeroIndex = i;
+                            }
+                        }
+                        if(firstZeroIndex != -1){
+                            // an empty space has been found
+                            cache[firstZeroIndex] = data;
+                        } else {
+                            // override
+                            cache[oldestCacheIndex] = data;
+                            oldestCacheIndex = (oldestCacheIndex+1)%cacheSize;
+                        }
+                    }
+                } else {
+                    // state == 2 // if we were searching in the database
+                    if (DbResponse){
+                        remainingDataByID[treatedReqIndex] = remainingDataByID[treatedReqIndex] - 1;
+                        if (remainingDataByID[treatedReqIndex]>0){
+                            // if the quantity of data to fetch is greater than zero, 
+                            // we must keep searching for data
+                            state = 1;
+                        } else {
+                            // we're done with this request so we respond to the client
+                            responseToID = treatedReqIndex+1;
+                            // if the quantity of data to fetch is zero (or less, but it shouldn't happen), 
+                            // then we start analyzing the quantity of data to fetch for the next request
+                            treatedReqIndex = (treatedReqIndex+1)%maxSimultaneousRequests;
+                            if (remainingDataByID[treatedReqIndex]>0)) {
+                                // if there is data to fetch, we keep searching in the 
+                                // cache for the next "clock cycle"
+                                state = 1;
+                            } else {
+                                // otherwise, we're done
+                                state = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // if redirected, the request
+            // can be responded to right now
+            responseToID = requestID;
         }
     } else {
+        // if no new request
         if (state == 1) {
             // currently searching in the cache.
             data = (int)(random()*(1+nbDifferentData));
@@ -159,7 +260,7 @@ init {
                     // we must keep searching for data
                     state = 1;
                 } else {
-                    // if the quantity of data to fetcth is zero (or less, but it shouldn't happen), 
+                    // if the quantity of data to fetch is zero (or less, but it shouldn't happen), 
                     // then we start analyzing the quantity of data to fetch for the next request
                     treatedReqIndex = (treatedReqIndex+1)%maxSimultaneousRequests;
                     if (remainingDataByID[treatedReqIndex]>0)) {
@@ -194,36 +295,35 @@ init {
             }
             
         } else {
-            // state == 2
-            if (DbResponse){
-                remainingDataByID[treatedReqIndex] = remainingDataByID[treatedReqIndex] - 1;
-                if (remainingDataByID[treatedReqIndex]>0){
-                    // if the quantity of data to fetch is greater than zero, 
-                    // we must keep searching for data
-                    state = 1;
-                } else {
-                    // if the quantity of data to fetcth is zero (or less, but it shouldn't happen), 
-                    // then we start analyzing the quantity of data to fetch for the next request
-                    treatedReqIndex = (treatedReqIndex+1)%maxSimultaneousRequests;
-                    if (remainingDataByID[treatedReqIndex]>0)) {
-                        // if there is data to fetch, we keep searching in the 
-                        // cache for the next "clock cycle"
+            if (state == 2){
+                if (DbResponse){
+                    remainingDataByID[treatedReqIndex] = remainingDataByID[treatedReqIndex] - 1;
+                    if (remainingDataByID[treatedReqIndex]>0){
+                        // if the quantity of data to fetch is greater than zero, 
+                        // we must keep searching for data
                         state = 1;
                     } else {
-                        // otherwise, we're done
-                        state = 0;
+                        // if the quantity of data to fetch is zero (or less, but it shouldn't happen), 
+                        // then we start analyzing the quantity of data to fetch for the next request
+                        treatedReqIndex = (treatedReqIndex+1)%maxSimultaneousRequests;
+                        if (remainingDataByID[treatedReqIndex]>0)) {
+                            // if there is data to fetch, we keep searching in the 
+                            // cache for the next "clock cycle"
+                            state = 1;
+                        } else {
+                            // otherwise, we're done
+                            state = 0;
+                        }
                     }
                 }
             }
         }
     }
-
-    if(remainingDataByID[treatedReqIndex] > 0){
-
-    }
-} -> redirect(redirection)
+    
+}
+-> responseID(responseToID)
 -> sendDBRequest(state == 2)
--> 
+
 
 logical DataBase(bool newRequest = false) 
 init {}
