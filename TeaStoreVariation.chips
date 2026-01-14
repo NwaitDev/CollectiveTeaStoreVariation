@@ -1,4 +1,4 @@
-physical userMachine(sensor bool newPage, sensor bool requiresAuth, int startTime, int endTime, int id) 
+physical UserMachine(sensor bool newPage, sensor bool requiresAuth, int startTime, int endTime, int id) 
  // startTime >= 0 // endTime > startTime // 100 > id > 0
 with{
     UserChannel next;
@@ -317,6 +317,7 @@ init {
 }
 -> responseID(responseToID)
 -> sendDBRequest(state == 2)
+-> requiresAuth(redirection)
 
 
 logical DataBase(bool newRequest = false)
@@ -324,9 +325,10 @@ init {} then {}
 -> toDataProvider(newRequest)
 
 
-logical WebPageService(int respondToThisID = 0) 
+logical WebPageService(int respondToThisID = 0, bool requiresAuth) 
 init {} then {}
 -> toInternet(respondToThisID)
+-> reqAuth(requiresAuth)
 
 object UI {
     UIchannel next;
@@ -338,6 +340,72 @@ object Backend {
     BackChannel prev;
 }
 
-system {
+object Persistence {
+    PersistChannel next;
+    PersistChannel prev;
+}
 
+system {
+    int maxUsers = 100;
+    int constantCacheSize = 20;
+
+    // instanciation of components
+    UserMachine umachine;
+    ServerMachine smachine;
+
+    UserActionInterpreter uainterpreter;
+    WebPageService wpservice;
+    UI uiobject;
+    link uainterpreter to uiobject;
+    link wpservice to uiobject;
+    link uiobject to smachine;
+
+    RequestValidator rvalidator;
+    Authenticator authenticator;
+    DataProvider dprovider
+
+    Backend bobject;
+    link rvalidator to bobject;
+    link authenticator to bobject;
+    link dprovider to bobject;
+    link bobject to smachine;
+
+    Persistence perstist
+    DataBase dbase;
+    link dbase to persist;
+    link persist to smachine
+
+    // connecting outputs to inputs
+    umachine.newPage(smachine.toInternet);
+    umachine.requiresAuth(smachine.authDataRequest);
+    umachine.startTime(10);
+    umachine.endTime(100);
+    umachine.id(1);
+
+    smachine.fromInternet(umachine.toInternet);
+    smachine.authData(umachine.authenticationData);
+    smachine.pageServiceAuthRequest(wpservice.reqAuth);
+    smachine.pageServiceNewPage(wpservice.toInternet);
+
+    uainterpreter.httpReq(smachine.toHttpInterpreter);
+    uainterpreter.authData(smachine.toAuthInterpreter);
+    uainterpreter.maxSimultaneousRequests(maxUsers);
+
+    authenticator.authData(uainterpreter.authProvided)
+    
+    rvalidator.nbData(uainterpreter.nbData);
+    rvalidator.requestID(uainterpreter.reqID);
+    rvalidator.isAuthenticated(authenticator.isAuthenticated);
+
+    dprovider.requestID(rvalidator.forDataReqID);
+    dprovider.nbDataToFetch(rvalidator.nbDataRequested);
+    dprovider.redirection(rvalidator.redirection);
+    dprovider.DbResponse(dbase.toDataProvider);
+    dprovider.cacheSize(constantCacheSize);
+    dprovider.maxSimultaneousRequests(maxUsers);
+
+    dbase.newRequest(dprovider.sendDBRequest);
+    
+    wpservice.respondToThisID(dprovider.responseID);
+    wpservice.requiresAuth(dprovider.requiresAuth);
 }
