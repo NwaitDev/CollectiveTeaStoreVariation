@@ -54,7 +54,7 @@ with{
 
 // from internet is equal to (auth ? -1 : 1)*((maxNbData+1)*ID + nbData) with nbData in [1, maxNbData]
 physical ServerMachine(sensor int[100] fromInternet, 
-    int userID, bool pageServiceNewPage, int maxNbData = 10)
+    int wpServed, int maxNbData = 10)
 with {
     ServerChannel next;
     ServerChannel prev;
@@ -83,11 +83,7 @@ with {
     }
 
     ////////////////// treating server responses one by one
-    if(pageServiceNewPage){
-        httpResponse = userID;
-    } else {
-        httpResponse = 0;
-    }
+    httpResponse = wpServed;
 } 
 -> actuator fromServerToInternet(httpResponse)
 -> nbData(requestList[currentRequest]%(maxNbData+1)) 
@@ -142,10 +138,7 @@ init {
 logical Cache (int requestedData, int cacheSize) init {
     int maxCacheSize = 100;
     int minCacheSize = 10;
-    int [maxCacheSize] cache;
-    for i in range(maxCacheSize) {
-        cache[i] = 0;
-    }
+    int [maxCacheSize] cache = zeros(maxCacheSize);
     int newestDataIndex=0;
     bool found = false;
     int foundIndex = 0;
@@ -200,10 +193,7 @@ logical DataProvider (bool redirection, int userID, int dataQty, bool cacheRespo
 init {
     int maxDifferentData = 40;
     int maxUserID = 100;
-    int [maxUserID] dataPerUserID;
-    for i in range(maxUserID) {
-        dataPerUserID[i] = 0;
-    }
+    int [maxUserID] dataPerUserID = zeros(maxUserID);
     int currentlyTreatedUserRequest = -1;
 
     ///////
@@ -296,7 +286,7 @@ init {
     requestsToAnswerTo[currentRequestAnswered] = 0;
     requestFound = false;
     for i in range(100) {
-        if(respondToThisID[i]!=0){
+        if(respondToThisIDs[i]!=0){
             requestsToAnswerTo[i] = respondToThisIDs[i];
         }
     }
@@ -304,6 +294,7 @@ init {
     for reqShift in range(100) { // weird way to do it to avoid starvation of clients
         if ( !requestFound && (requestsToAnswerTo[(currentRequestAnswered + reqShift)%100] != 0)) {
             currentRequestAnswered = (currentRequestAnswered + reqShift)%100;
+            requestFound = true;
         }
     }
 } // this is already the content of the httpAnswer
@@ -369,8 +360,8 @@ logical PidController(float requested_time, float resulting_time, bool enabled) 
 } then {
     if (enabled){
         dt = resulting_time;
-        error = expected - received;
-        integral += error * dt;
+        error = requested_time - resulting_time;
+        integral = integral + error * dt;
         derivative = error / dt;
         knob_value = (int) (p*error + i*integral + d*derivative);
 
@@ -413,8 +404,8 @@ among Backend {
         nextBackendData = stop;
     }else{
         nbJumps = nbJumps+1;
-        nextBackendData = userID;
         currentBackendTransmittedID = 0;
+        nextBackendData = userID;
     }
 } -> @(currentBackendTransmittedID)
 -> next(nextBackendData, nbJumps)
@@ -423,11 +414,10 @@ among Backend {
 system {
     int maxUsers = 100;
     int nbUsers = 10;
-    int constantCacheSize = 18;
 
     
     int nbCaches = 4;
-    float ControllerRequestedTime = 4.0;
+    float controllerRequestedTime = 4.0;
     
 
 
@@ -454,18 +444,17 @@ system {
     DataProvider[nbCaches] dprovider;
 
     Backend [nbCaches] bobject;
-    link rlimiter to bobject[0];
+    link rlimiter to smachine;
+    
     for i in range(nbCaches){
         link cache[i] to bobject[i];
         link ctrl[i] to bobject[i];
-        link dprovider[i] to bobject[0];
-    }
-    link rvalidator to bobject[0];
-    link authenticator to bobject[0];
-    
-    for i in range(nbCaches){
+        link dprovider[i] to bobject[i];
         link bobject[i] to smachine;
     }
+
+    link rvalidator to smachine;
+    link authenticator to smachine;
     
 
     // connecting outputs to inputs
@@ -481,9 +470,7 @@ system {
         }
     }
     
-    smachine.pageServiceAuthRequest(wpservice.reqAuth);
-    smachine.pageServiceNewPage(wpservice.isNewPage);
-    smachine.userID(wpservice.idToRespondTo)
+    smachine.wpServed(wpservice.idToRespondTo)
 
     uainterpreter.nbDataRcvd(smachine.nbData);
     uainterpreter.authDataRcvd(smachine.userAuth);
@@ -510,13 +497,10 @@ system {
         dprovider[i].cacheResponse(cache[i].foundInCache);
         cache[i].requestedData(dprovider[i].cacheRequest);
         cache[i].cacheSize(ctrl[i].knob);
-        ctrl[i].requested_time(ControllerRequestedTime);
+        ctrl[i].requested_time(controllerRequestedTime);
         ctrl[i].resulting_time(dprovider[i].timeSpentOnReq);
         ctrl[i].enabled(dprovider[i].enableTimeReading);
         wpservice.respondToThisID((allDataProvidersOutputs)dprovider[i].userID);
     }
-    
 
-    
-    
 }
