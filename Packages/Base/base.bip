@@ -1,0 +1,74 @@
+@cpp(include="stdio.h")
+/*
+    Package for trivial bip components, types or connectors
+*/
+package base
+
+    extern function srand(int) // from C
+    extern function float randomdouble() // using C rand() function
+
+    extern function int asint(float f)
+    extern function float asfloat(int f)
+
+    extern data type intarray
+    extern function intarray zeros(int dim1);
+    extern function intarray range(const int upto);
+
+    extern data type c_int
+    extern data type c_float
+    extern data type c_bool
+    extern data type c_intarray
+
+    
+
+    // port that serves as a trigger
+    port type port_t()
+
+    // port holding a float
+    port type port1float_t(float v)
+
+    // port holding an integer
+    port type port1int_t(int v)
+
+    // port holding a boolean
+    port type port1bool_t(bool v)
+
+    // connector allowing to send a boolean from src to t
+    connector type flow1bool_t(port1bool_t src, port1bool_t t)
+        define src t
+        on src t down {
+            t.v = src.v;
+        }
+    end
+
+    // connector allowing to send a float from src to t
+    connector type flow1float_t(port1float_t src, port1float_t t0)
+        define src t0
+        on src t0 down {
+            t0.v = src.v;
+        }
+    end
+    // connector allowing to send a bool from src to t
+    connector type flow1int_t(port1int_t src, port1int_t t0)
+        define src t0
+        on src t0 down {
+            t0.v = src.v;
+        }
+    end
+
+
+    // connector that fills a float port not connected to anything 
+    // (mainly useful to avoid useless warnings)
+    connector type singleton1float_t(port1float_t p)
+        define p
+    end
+
+    connector type sync1port_t(port_t p)
+        define p
+    end
+
+    connector type sync1to1port_t(port_t p0, port_t p1)
+        define p0 p1
+    end
+
+end

@@ -1,0 +1,13 @@
+@cpp(include="stdio.h,base.hpp")
+
+
+package System
+
+    use base
+
+    compound type SystemCompound()
+
+        
+
+    end
+end

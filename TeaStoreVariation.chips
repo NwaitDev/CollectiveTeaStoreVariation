@@ -92,7 +92,6 @@ with {
 
 
 logical UserActionInterpreter(int nbDataRcvd, bool authDataRcvd, int userIDRcvd) 
-init {} then {}
 -> nbData(nbDataRcvd)
 -> reqID(userIDRcvd)
 -> authProvided(authDataRcvd)

@@ -1,0 +1,257 @@
+@cpp(src="ChipsFunctions.cpp",include="ChipsFunctions.hpp")
+
+// utility functions to write information to external files of the bip system
+// see bipio.hpp for more information
+package ChipsFunctions
+
+    // (input) 
+    // int httpResponse
+    // int startTime
+    // int endTime
+    // int id
+    // int maxNbData
+
+    // (ctx) 
+    // int computerID
+
+    // (inner variables)
+    // bool active
+    // bool waiting
+    // int time
+    // bool requiresAuth
+    // bool newPage
+    // int currentRequest
+    // int httpRequest
+
+    // (output)
+    // int fromUserToInternet
+    extern function UserMachineInit(int, int, int, int, int, int, bool, bool, int, bool, bool, int, int, int)
+    extern function UserMachineThen(int, int, int, int, int, int, bool, bool, int, bool, bool, int, int, int)
+
+
+    // (input)
+    // intarray fromInternet
+    // int wpServed
+    // int maxNbData
+    
+    // (inner variables)
+    // int httpResponse
+    // int currentRequest
+    // bool requestFound
+    // intarray requestList
+
+    // (output)
+    // int fromServerToInternet
+    // int nbData
+    // int userID
+    // bool userAuth
+    extern function ServerMachineInit(intarray, int, int, int, int, bool, intarray, int, int, int, bool)
+    extern function ServerMachineThen(intarray, int, int, int, int, bool, intarray, int, int, int, bool)
+
+
+    // (input)
+    // int nbDataRcvd
+    // bool authDataRcvd
+    // int userIDRcvd
+
+    // (output)
+    // int nbData
+    // int reqID
+    // authProvided
+    extern function UserActionInterpreterInit(int, bool, int, int, int, bool)
+    extern function UserActionInterpreterThen(int, bool, int, int, int, bool)
+
+
+    // (input)
+    // bool authProvided
+
+    // (output)
+    // bool isAuthenticated
+    extern function AuthenticatorInit(bool,bool)
+    extern function AuthenticatorThen(bool,bool)
+
+
+    // (output)
+    // int nbData
+    // int requestID
+    // bool isAuthenticated
+    
+    // (inner variables)
+    // int nbDataToFetch
+    // bool needRedirection
+    
+    // (output)
+    // int nbDataRequested
+    // int userID
+    // bool redirection
+    extern function RequestValidatorInit(int, int, bool, int, bool, int, int, bool)
+    extern function RequestValidatorThen(int, int, bool, int, bool, int, int, bool)
+
+
+    // (input)
+    // bool redirection
+    // int maxRequests
+    // int userID
+    // int nbDataToFetch
+    // int nbAnsweredReqs
+
+    // (inner variables)
+    // int currentNbRequests
+
+    // (output)
+    // bool redirection
+    // int userID
+    // int dataQty
+    extern function RequestLimiterInit(bool, int, int, int, int, int, bool, int, int)
+
+
+    // (input)
+    // int requestedData
+    // int cacheSize
+
+    // (inner variables)
+    // int maxCacheSize
+    // int minCacheSize
+    // intarray cache
+    // int newestDataIndex
+    // bool found
+    // int foundIndex
+
+    // (output)
+    // bool foundInCache
+    extern function CacheInit(int, int, int, int, intarray, int, bool, int, bool)
+    extern function CacheThen(int, int, int, int, intarray, int, bool, int, bool)
+
+
+    // (input)
+    // bool redirection
+    // int userID
+    // int dataQty
+    // bool cacheResponse
+
+    // (inner variables)
+    // int maxDifferentData
+    // int maxUserID
+    // intarray dataPerUserID
+    // int currentlyTreatedUserRequest
+    // int idToRespondTo
+    // int dataToFetch
+    // float time
+    // bool cacheSearching
+    // bool oneLessPendingRequest
+    
+    // (output)
+    // int userID
+    // cacheRequest
+    // oneLessPendingRequest
+    // timeSpentOnReq
+    // enableTimeReading
+    extern function DataProviderInit(bool, int, int, bool, int, int, intarray, int, int, int, float, bool, bool, int, int, bool, float, bool)
+    extern function DataProviderThen(bool, int, int, bool, int, int, intarray, int, int, int, float, bool, bool, int, int, bool, float, bool)
+
+
+    // (default input accumulator) 
+    // c_intarray answers
+
+    // (target object)
+    // c_intarray
+
+    // (default channel output accumulator)
+    // c_intarray
+    extern function allDataProvidersOutputsCollect(c_intarray, c_intarray, c_intarray)
+
+
+    // (input)
+    // intarray respondToThisIDs
+
+    // (inner variables)
+    // int currentRequestAnswered
+    // intarray requestsToAnswerTo
+    // bool requestFound
+    
+    // (output)
+    // int idToRespondTo
+    extern function WebPageServiceInit(intarray,int,intarray,bool,int)
+    extern function WebPageServiceThen(intarray,int,intarray,bool,int)
+
+
+    // (default input accumulator) 
+    // c_int fromInternet
+
+    // (target object)
+    // c_int
+
+    // (default channel output accumulator)
+    // c_int
+    extern function responseToTheRightUserSpread(c_int, c_int, c_int)
+
+    // (default input accumulator) 
+    // c_intarray currentListOfRequests
+
+    // (target object)
+    // c_intarray
+
+    // (default channel output accumulator)
+    // c_intarray
+    extern function aggregatingRequestsCollect(c_intarray, c_intarray, c_intarray)
+
+
+    // (input)
+    // float requested_time
+    // float resulting_time
+    // bool enabled
+
+    // (inner variables)
+    // float derivative
+    // float integral
+    // float error
+    // float dt
+    // float p
+    // float i
+    // float d
+    // int knob_value
+    // int min_knob_value
+    // int max_knob_value
+
+    // (output)
+    // int knob
+    extern function PidControllerInit(float, float, bool, float, float, float, float, float, float, float, int, int, int, int)
+    extern function PidControllerThen(float, float, bool, float, float, float, float, float, float, float, int, int, int, int)
+
+
+    // (default input accumulator)
+    // c_bool redirection
+
+    // (target object)
+    // c_bool
+
+    // (default channel output accumulator)
+    // c_bool
+    extern function broadcastRedirectionSpread(c_bool, c_bool, c_bool)
+
+    // (default input accumulator)
+    // c_int dataQtyToFind
+
+    // (target object)
+    // c_int
+
+    // (default channel output accumulator)
+    // c_int
+    extern function broadcastDataQtySpread(c_int, c_int, c_int)
+
+    // (default input accumulator)
+    // c_int userID
+    // c_int nbJumps
+
+    // (target object)
+    // c_int
+
+    // (next object accumulator)
+    // c_int, c_int
+
+    // (prev object accumulator)
+    // stop
+    extern function findRightDataProviderSpread(c_int, c_int, c_int, c_int, c_int)
+
+    
+end
