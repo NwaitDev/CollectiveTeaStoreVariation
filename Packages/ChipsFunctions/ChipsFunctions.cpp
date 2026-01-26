@@ -1,28 +1,7 @@
 #include "ChipsFunctions.hpp"
 #include <algorithm>
-#include <tuple>
 
-// (input) 
-// int httpResponse
-// int startTime
-// int endTime
-// int id
-// int maxNbData
 
-// (ctx) 
-// int computerID
-
-// (inner variables)
-// bool active
-// bool waiting
-// int time
-// bool requiresAuth
-// bool newPage
-// int currentRequest
-// int httpRequest
-
-// (output)
-// int fromUserToInternet
 void UserMachineInit(int& httpResponse_in, int& startTime_in, int& endTime_in, int& id_in, int& maxNbData_in, int& computerID_ctx, bool& active_inner, bool& waiting__inner, int& time_inner, bool& requiresAuth_inner, bool& newPage_inner, int&currentRequest_inner, int& httpRequest_inner, int& fromUserToInternet_out){
 
     // default values :
@@ -77,22 +56,6 @@ void UserMachineThen(int& httpResponse_in, int& startTime_in, int& endTime_in, i
     fromUserToInternet_out = httpRequest_inner;
 }
 
-// (input)
-// intarray fromInternet
-// int wpServed
-// int maxNbData
-
-// (inner variables)
-// int httpResponse
-// int currentRequest
-// bool requestFound
-// intarray requestList
-
-// (output)
-// int fromServerToInternet
-// int nbData
-// int userID
-// bool userAuth
 void ServerMachineInit(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
     // default values :
     maxNbData_in = 10;
@@ -138,15 +101,6 @@ void ServerMachineThen(intarray& fromInternet_in, int& wpServed_in, int& maxNbDa
     userAuth_out = requestList_inner[currentRequest_inner]<0;
 }
 
-// (input)
-// int nbDataRcvd
-// bool authDataRcvd
-// int userIDRcvd
-
-// (output)
-// int nbData
-// int reqID
-// authProvided
 void UserActionInterpreterInit(int& nbDataRcvd_in, bool& authDataRcvd_in, int& userIDRcvd_in, int& nbData_out, int& reqID_out, bool& authProvided_out){
     //outputs
     nbData_out = nbDataRcvd_in;
@@ -161,11 +115,6 @@ void UserActionInterpreterThen(int& nbDataRcvd_in, bool& authDataRcvd_in, int& u
 
 }
 
-// (input)
-// bool authProvided
-
-// (output)
-// bool isAuthenticated
 void AuthenticatorInit(bool& authProvided_in,bool& isAuthenticated_out){
     // outputs
     isAuthenticated_out = authProvided_in;
@@ -175,19 +124,6 @@ void AuthenticatorThen(bool& authProvided_in,bool& isAuthenticated_out){
     isAuthenticated_out = authProvided_in;
 }
 
-// (output)
-// int nbData
-// int requestID
-// bool isAuthenticated
-
-// (inner variables)
-// int nbDataToFetch
-// bool needRedirection
-
-// (output)
-// int nbDataRequested
-// int userID
-// bool redirection
 void RequestValidatorInit(int& nbData_in, int& requestID_in, bool& isAuthenticated_in, int& nbDataToFetch_inner, bool& needRedirection_inner, int& nbDataRequested_out, int& userID_out, bool& redirection_out){
     nbDataRequested_out = nbDataToFetch_inner;
     userID_out = requestID_in;
@@ -208,20 +144,6 @@ void RequestValidatorThen(int& nbData_in, int& requestID_in, bool& isAuthenticat
     redirection_out = needRedirection_inner;
 }
 
-// (input)
-// bool redirection
-// int maxRequests
-// int userID
-// int nbDataToFetch
-// int nbAnsweredReqs
-
-// (inner variables)
-// int currentNbRequests
-
-// (output)
-// bool redirection
-// int userID
-// int dataQty
 void RequestLimiterInit(bool& redirection_in, int& maxRequests_in, int& userID_in, int& nbDataToFetch_in, int& nbAnsweredReqs_in, int& currentNbRequests_inner, bool& redirection_out, int& userID_out, int& dataQty_out){
     currentNbRequests_inner = 0;
 
@@ -248,20 +170,7 @@ void RequestLimiterThen(bool& redirection_in, int& maxRequests_in, int& userID_i
     dataQty_out = nbDataToFetch_in;
 }
 
-// (input)
-// int requestedData
-// int cacheSize
 
-// (inner variables)
-// int maxCacheSize
-// int minCacheSize
-// intarray cache
-// int newestDataIndex
-// bool found
-// int foundIndex
-
-// (output)
-// bool foundInCache
 void CacheInit(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, intarray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
     maxCacheSize_inner = 100;
     minCacheSize_inner = 10;
@@ -322,29 +231,6 @@ void CacheThen(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner
     foundInCache_out = found_inner;
 }
 
-// (input)
-// bool redirection
-// int userID
-// int dataQty
-// bool cacheResponse
-
-// (inner variables)
-// int maxDifferentData
-// int maxUserID
-// intarray dataPerUserID
-// int currentlyTreatedUserRequest
-// int idToRespondTo
-// int dataToFetch
-// float time
-// bool cacheSearching
-// bool oneLessPendingRequest
-
-// (output)
-// int userID
-// cacheRequest
-// oneLessPendingRequest
-// timeSpentOnReq
-// enableTimeReading
 void DataProviderInit(bool& redirection_in, int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, intarray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
     maxDifferentData_inner = 40;
     maxUserID_inner = 100;
@@ -454,16 +340,7 @@ void allDataProvidersOutputsCollect(int input, c_intarray& answers, c_intarray& 
     output = std::get<0>(answers);
 }
 
-// (input)
-// intarray respondToThisIDs
 
-// (inner variables)
-// int currentRequestAnswered
-// intarray requestsToAnswerTo
-// bool requestFound
-
-// (output)
-// int idToRespondTo
 void WebPageServiceInit(intarray& respondToThisIDs_in, int& currentRequestAnswered_inner, intarray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
 
     currentRequestAnswered_inner = 0;
@@ -555,25 +432,6 @@ void aggregatingRequestsCollect(int input, c_intarray& requests, c_intarray& pre
 }
 
 
-// (input)
-// float requested_time
-// float resulting_time
-// bool enabled
-
-// (inner variables)
-// float derivative
-// float integral
-// float error
-// float dt
-// float p
-// float i
-// float d
-// int knob_value
-// int min_knob_value
-// int max_knob_value
-
-// (output)
-// int knob
 void PidControllerInit(double& requested__time_in,double& resulting__time_in,bool& enabled_in,double& derivative_inner,double& integral_inner,double& error_inner,double& dt_inner,double& p_inner,double& i_inner,double& d_inner,int& knob__value_inner,int& min__knob__value_inner,int& max__knob__value_inner,int& knob_out){
     derivative_inner = 0;
     integral_inner = 0;
