@@ -1,10 +1,11 @@
 #ifndef __BASE_H__
 #define __BASE_H__
 
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <ostream>
-#include <utility>
+#include <tuple>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
@@ -16,15 +17,22 @@ enum collective_optional{
     STOP
 };
 
-using c_int = std::pair<int, collective_optional>;
-using c_float = std::pair<double, collective_optional>;
-using c_bool = std::pair<bool, collective_optional>;
-using c_intarray = std::pair<intarray, collective_optional>;
+
+using c_int = std::tuple<int, collective_optional>;
+using c_float = std::tuple<double, collective_optional>;
+using c_bool = std::tuple<bool, collective_optional>;
+using c_intarray = std::tuple<intarray, collective_optional>;
+
 
 
 intarray zeros(const int dim1);
 intarray range(const int upto);
 
+
+c_int cpy(c_int&);
+c_bool cpy(c_bool&);
+c_float cpy(c_float&);
+c_intarray cpy(c_intarray&);
 
 inline std::ostream& operator << ( std::ostream& os, const intarray& rhs ) {
     os << "[int_array("<<rhs.size()<<") :";
@@ -37,7 +45,7 @@ inline std::ostream& operator << ( std::ostream& os, const intarray& rhs ) {
 
 double randomdouble();
 
-inline int asint(float f){return (int)f;}
+inline int asint(double f){return (int)f;}
 inline double asfloat(int i){return (double)i;}
 
 

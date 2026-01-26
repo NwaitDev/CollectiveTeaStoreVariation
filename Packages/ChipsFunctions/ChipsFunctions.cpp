@@ -1,4 +1,6 @@
 #include "ChipsFunctions.hpp"
+#include <algorithm>
+#include <tuple>
 
 // (input) 
 // int httpResponse
@@ -429,15 +431,29 @@ void DataProviderThen(bool& redirection_in, int& userID_in, int& dataQty_in, boo
     enableTimeReading_out = oneLessPendingRequest_inner;
 }
 
-// (default input accumulator) 
-// c_intarray answers
 
-// (target object)
-// c_intarray
+void allDataProvidersOutputsCollect(int input, c_intarray& answers, c_intarray& prev_input_answers, c_intarray& next_input_answers, c_intarray& prev_output_answers, c_intarray& next_output_answers, intarray& output){
+    if(input!=0){
+        if(input>0){
+            std::get<0>(answers)[input-1] = input;
+        } else {
+            std::get<0>(answers)[-input-1] = input;
+        }
+    }
+    for (auto i : range(100)) {
+        if(std::get<0>(prev_input_answers)[i]!=0){
+            std::get<0>(answers)[i] = std::get<0>(prev_input_answers)[i];
+        }
+        if(std::get<0>(next_input_answers)[i]!=0){
+            std::get<0>(answers)[i] = std::get<0>(next_input_answers)[i];
+        }
+    }
 
-// (default channel output accumulator)
-// c_intarray
-void allDataProvidersOutputsCollect(c_intarray&, c_intarray&, c_intarray);
+    next_output_answers = cpy(answers);
+    prev_output_answers = cpy(answers);
+    output = std::get<0>(answers);
+}
+
 // (input)
 // intarray respondToThisIDs
 
@@ -448,26 +464,97 @@ void allDataProvidersOutputsCollect(c_intarray&, c_intarray&, c_intarray);
 
 // (output)
 // int idToRespondTo
-void WebPageServiceInit(intarray&,int&,intarray&,bool&,int);
-void WebPageServiceThen(intarray&,int&,intarray&,bool&,int);
-// (default input accumulator) 
-// c_int fromInternet
+void WebPageServiceInit(intarray& respondToThisIDs_in, int& currentRequestAnswered_inner, intarray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
 
-// (target object)
-// c_int
+    currentRequestAnswered_inner = 0;
+    requestsToAnswerTo_inner = zeros(100);
+    requestFound_inner = false;
 
-// (default channel output accumulator)
-// c_int
-void responseToTheRightUserSpread(c_int&, c_int&, c_int&);
-// (default input accumulator) 
-// c_intarray currentListOfRequests
+    //outputs
+    idToRespondTo_out = requestsToAnswerTo_inner[currentRequestAnswered_inner];
+}
+void WebPageServiceThen(intarray& respondToThisIDs_in, int& currentRequestAnswered_inner, intarray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
 
-// (target object)
-// c_intarray
+    requestsToAnswerTo_inner[currentRequestAnswered_inner] = 0;
+    requestFound_inner = false;
+    for (auto i : range(100)) {
+        if(respondToThisIDs_in[i]!=0){
+            requestsToAnswerTo_inner[i] = respondToThisIDs_in[i];
+        }
+    }
 
-// (default channel output accumulator)
-// c_intarray
-void aggregatingRequestsCollect(c_intarray&, c_intarray&, c_intarray&);
+    for (auto reqShift : range(100)) { // weird way to do it to avoid starvation of clients
+        if ( !requestFound_inner && (requestsToAnswerTo_inner[(currentRequestAnswered_inner + reqShift)%100] != 0)) {
+            currentRequestAnswered_inner = (currentRequestAnswered_inner + reqShift)%100;
+            requestFound_inner = true;
+        }
+    }
+
+    //outputs
+    idToRespondTo_out = requestsToAnswerTo_inner[currentRequestAnswered_inner];
+}
+
+
+
+void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& output_acc_prev_channel, c_int& output_acc_next_channel, c_int& output){
+
+    if(std::get<1>(input_acc)==STOP){
+        std::get<1>(output_acc_prev_channel) = STOP;
+        std::get<1>(output_acc_next_channel) = STOP;
+        std::get<1>(output) = STOP;
+        return;
+    }
+
+    c_int id = cpy(input_acc);
+    
+    if (std::get<0>(input_acc) < 0){
+        std::get<0>(id) = -std::get<0>(id);
+    }
+    c_int returned;
+    c_int transmitted;
+    if((std::get<0>(input_acc)==0) || (std::get<0>(id) != computerID)){
+        std::get<0>(returned) = 0;
+        std::get<1>(returned) = REGULAR;
+
+        transmitted = cpy(input_acc);
+    } else {
+        returned = cpy(input_acc);
+        std::get<1>(transmitted) = STOP;
+    }
+
+    output_acc_next_channel = cpy(transmitted);
+    output_acc_prev_channel = cpy(transmitted);
+
+    output = cpy(returned);
+}
+
+
+
+void aggregatingRequestsCollect(int input, c_intarray& requests, c_intarray& prev_input_requests, c_intarray& next_input_requests, c_intarray& prev_output_requests, c_intarray& next_output_requests, intarray& output){
+
+    if(input!=0){
+        if(input<0){
+            std::get<0>(requests)[-input] = input;
+        } else {
+            std::get<0>(requests)[input] = input;
+        }
+    }
+
+    for (auto i : range(100)) {
+        if(std::get<0>(prev_input_requests)[i]!=0){
+            std::get<0>(requests)[i] = std::get<0>(prev_input_requests)[i];
+        }
+        if(std::get<0>(next_input_requests)[i]!=0){
+            std::get<0>(requests)[i] = std::get<0>(next_input_requests)[i];
+        }
+    }
+
+    next_output_requests = cpy(requests);
+    prev_output_requests = cpy(requests);
+    output = std::get<0>(requests);
+}
+
+
 // (input)
 // float requested_time
 // float resulting_time
@@ -487,36 +574,107 @@ void aggregatingRequestsCollect(c_intarray&, c_intarray&, c_intarray&);
 
 // (output)
 // int knob
-void PidControllerInit(double&, double&, bool&, double&, double&, double&, double&, double&, double&, double&, int&, int&, int&, int);
-void PidControllerThen(double&, double&, bool&, double&, double&, double&, double&, double&, double&, double&, int&, int&, int&, int);
-// (default input accumulator)
-// c_bool redirection
+void PidControllerInit(double& requested__time_in,double& resulting__time_in,bool& enabled_in,double& derivative_inner,double& integral_inner,double& error_inner,double& dt_inner,double& p_inner,double& i_inner,double& d_inner,int& knob__value_inner,int& min__knob__value_inner,int& max__knob__value_inner,int& knob_out){
+    derivative_inner = 0;
+    integral_inner = 0;
+    error_inner = 0;
+    dt_inner = 0;
 
-// (target object)
-// c_bool
+    p_inner = -1;
+    i_inner = -0.01;
+    d_inner = 0;
 
-// (default channel output accumulator)
-// c_bool
-void broadcastRedirectionSpread(c_bool&, c_bool&, c_bool&);
-// (default input accumulator)
-// c_int dataQtyToFind
+    knob__value_inner = 20;
+    min__knob__value_inner = 20;
+    max__knob__value_inner = 100;
 
-// (target object)
-// c_int
+    knob_out = knob__value_inner;
+}
 
-// (default channel output accumulator)
-// c_int
-void broadcastDataQtySpread(c_int&, c_int&, c_int&);
-// (default input accumulator)
-// c_int userID
-// c_int nbJumps
+void PidControllerThen(double& requested__time_in,double& resulting__time_in,bool& enabled_in,double& derivative_inner,double& integral_inner,double& error_inner,double& dt_inner,double& p_inner,double& i_inner,double& d_inner,int& knob__value_inner,int& min__knob__value_inner,int& max__knob__value_inner,int& knob_out){
 
-// (target object)
-// c_int
+    if (enabled_in){
+        dt_inner = resulting__time_in;
+        error_inner = requested__time_in - resulting__time_in;
+        integral_inner = integral_inner + error_inner * dt_inner;
+        derivative_inner = error_inner / dt_inner;
+        knob__value_inner = (int) (p_inner*error_inner + i_inner*integral_inner + d_inner*derivative_inner);
 
-// (next object accumulator)
-// c_int&, c_int
+        knob__value_inner = std::min(max__knob__value_inner, knob__value_inner);
+        knob__value_inner = std::max(min__knob__value_inner, knob__value_inner);
+    }
+    knob_out = knob__value_inner;
+}
 
-// (prev object accumulator)
-// stop
-void findRightDataProviderSpread(c_int&, c_int&, c_int&, c_int&, c_int&);
+
+void numberOfRespondedRequestsCollect(bool input, c_int& sum, c_int& next_input_sum, c_int& next_output_sum, c_int& prev_input_sum, c_int& prev_output_sum, int& output){
+    // if not receiving next, assuming next == default (ie. int sum = 0)
+    // same for prev
+    std::get<0>(sum) = std::get<0>(sum) + std::get<0>(prev_input_sum) + std::get<0>(next_input_sum);
+    if(input){
+        std::get<0>(sum) = std::get<0>(sum) + 1;
+    }
+
+    output = std::get<0>(sum);
+    next_output_sum = cpy(sum);
+    prev_output_sum = cpy(sum);
+}
+
+void broadcastRedirectionSpread(c_bool& input_acc, c_bool& output_acc_prev_channel, c_bool& output_acc_next_channel, c_bool& output){
+    if(std::get<1>(input_acc)==STOP){
+        std::get<1>(output_acc_prev_channel) = STOP;
+        std::get<1>(output_acc_next_channel) = STOP;
+        std::get<1>(output) = STOP;
+        return;
+    }
+
+    output_acc_next_channel = cpy(input_acc);
+    output_acc_prev_channel = cpy(input_acc);
+    output = cpy(input_acc);
+}
+
+
+void broadcastDataQtySpread(c_int& input_acc, c_int& output_acc_prev_channel, c_int& output_acc_next_channel, c_int& output){
+
+    if(std::get<1>(input_acc)==STOP){
+        std::get<1>(output_acc_prev_channel) = STOP;
+        std::get<1>(output_acc_next_channel) = STOP;
+        std::get<1>(output) = STOP;
+        return;
+    }
+
+    output_acc_next_channel = cpy(input_acc);
+    output_acc_prev_channel = cpy(input_acc);
+    output = cpy(input_acc);
+}
+
+
+void findRightDataProviderSpread(c_int& input_acc_userID, c_int& input_acc_nbJumps, c_int& output_acc_prev_channel_userID, c_int& output_acc_prev_channel_nbJumps, c_int& output_acc_next_channel_userID,c_int& output_acc_next_channel_nbJumps, c_int& output){
+
+    if(std::get<1>(input_acc_userID)==STOP || std::get<1>(input_acc_nbJumps)==STOP){
+        std::get<1>(output_acc_prev_channel_nbJumps) = STOP;
+        std::get<1>(output_acc_prev_channel_userID) = STOP;
+        std::get<1>(output_acc_next_channel_nbJumps) = STOP;
+        std::get<1>(output_acc_next_channel_userID) = STOP;
+        std::get<1>(output) = STOP;
+        return;
+    }
+
+    c_int currentBackendTransmittedID;
+    c_int nextBackendData;
+
+    if (std::get<0>(input_acc_nbJumps) == (std::get<0>(input_acc_userID)%4)){
+        currentBackendTransmittedID = cpy(input_acc_userID);
+        std::get<1>(nextBackendData) = STOP;
+    }else{
+        std::get<0>(input_acc_nbJumps) = std::get<0>(input_acc_nbJumps)+1;
+        std::get<0>(currentBackendTransmittedID) = 0;
+        nextBackendData = cpy(input_acc_userID);
+    }
+    
+    
+    output_acc_next_channel_userID = cpy(input_acc_userID); 
+    output_acc_next_channel_nbJumps = cpy(input_acc_nbJumps);
+    std::get<1>(output_acc_prev_channel_userID) = STOP;
+    std::get<1>(output_acc_prev_channel_nbJumps) = STOP;
+}
