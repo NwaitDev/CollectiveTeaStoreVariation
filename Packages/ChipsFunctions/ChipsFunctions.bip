@@ -103,6 +103,7 @@ package ChipsFunctions
     // int userID
     // int dataQty
     extern function RequestLimiterInit(bool, int, int, int, int, int, bool, int, int)
+    extern function RequestLimiterThen(bool, int, int, int, int, int, bool, int, int)
 
 
     // (input)
@@ -158,7 +159,7 @@ package ChipsFunctions
 
     // (default channel output accumulator)
     // c_intarray
-    extern function allDataProvidersOutputsCollect(c_intarray, c_intarray, c_intarray)
+    extern function allDataProvidersOutputsCollect(int input, c_intarray, c_intarray, c_intarray, c_intarray, c_intarray, intarray)
 
 
     // (input)
@@ -183,7 +184,7 @@ package ChipsFunctions
 
     // (default channel output accumulator)
     // c_int
-    extern function responseToTheRightUserSpread(c_int, c_int, c_int)
+    extern function responseToTheRightUserSpread(int, c_int, c_int, c_int, c_int)
 
     // (default input accumulator) 
     // c_intarray currentListOfRequests
@@ -193,7 +194,7 @@ package ChipsFunctions
 
     // (default channel output accumulator)
     // c_intarray
-    extern function aggregatingRequestsCollect(c_intarray, c_intarray, c_intarray)
+    extern function aggregatingRequestsCollect(int input, c_intarray, c_intarray, c_intarray, c_intarray, c_intarray, intarray)
 
 
     // (input)
@@ -215,9 +216,11 @@ package ChipsFunctions
 
     // (output)
     // int knob
-    extern function PidControllerInit(float, float, bool, float, float, float, float, float, float, float, int, int, int, int)
-    extern function PidControllerThen(float, float, bool, float, float, float, float, float, float, float, int, int, int, int)
+    extern function PidControllerInit(float,float,bool,float,float,float,float,float,float,float,int,int,int,int)
+    extern function PidControllerThen(float,float,bool,float,float,float,float,float,float,float,int,int,int,int)
 
+
+    extern function numberOfRequestsCollected(bool, c_int, c_int, c_int, c_int, c_int, int)
 
     // (default input accumulator)
     // c_bool redirection
@@ -227,7 +230,7 @@ package ChipsFunctions
 
     // (default channel output accumulator)
     // c_bool
-    extern function broadcastRedirectionSpread(c_bool, c_bool, c_bool)
+    extern function broadcastRedirectionSpread(c_bool, c_bool, c_bool, c_bool)
 
     // (default input accumulator)
     // c_int dataQtyToFind
@@ -237,7 +240,7 @@ package ChipsFunctions
 
     // (default channel output accumulator)
     // c_int
-    extern function broadcastDataQtySpread(c_int, c_int, c_int)
+    extern function broadcastDataQtySpread(c_int, c_int, c_int, c_int)
 
     // (default input accumulator)
     // c_int userID
@@ -251,7 +254,7 @@ package ChipsFunctions
 
     // (prev object accumulator)
     // stop
-    extern function findRightDataProviderSpread(c_int, c_int, c_int, c_int, c_int)
+    extern function findRightDataProviderSpread(c_int, c_int, c_int, c_int, c_int,c_int, c_int)
 
     
 end
