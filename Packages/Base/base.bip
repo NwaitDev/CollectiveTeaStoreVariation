@@ -59,7 +59,7 @@ package base
 
     // connector that fills a float port not connected to anything 
     // (mainly useful to avoid useless warnings)
-    connector type singleton1float_t(port1float_t p)
+    connector type sync1float_t(port1float_t p)
         define p
     end
 
@@ -69,6 +69,47 @@ package base
 
     connector type sync1to1port_t(port_t p0, port_t p1)
         define p0 p1
+    end
+    
+
+    port type port5int_t(int v1, int v2, int v3, int v4, int v5)
+
+    connector type flow1x5to1x5int_t(
+        port5int_t s,
+        port5int_t r 
+    )
+        define s r
+        on s r down {
+            r.v1 = s.v1;
+            r.v2 = s.v2;
+            r.v3 = s.v3;
+            r.v4 = s.v4;
+            r.v5 = s.v5;
+        }
+    end
+
+    connector type export5x1intTo1x5int_t(
+        port1int_t p1,
+        port1int_t p2,
+        port1int_t p3,
+        port1int_t p4,
+        port1int_t p5 
+    )
+        data int v1
+        data int v2
+        data int v3
+        data int v4
+        data int v5
+        export port port5int_t out(v1, v2, v3, v4, v5)
+
+        define p1, p2, p3, p4, p5
+        on p1 p2 p3 p4 p5 up {
+            out.v1 = p1.v;
+            out.v2 = p2.v;
+            out.v3 = p3.v;
+            out.v4 = p4.v;
+            out.v5 = p5.v;
+        }
     end
 
 end

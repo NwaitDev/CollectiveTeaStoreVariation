@@ -1,0 +1,202 @@
+@cpp(src="ChipsComponents.cpp,bipio.cpp,ChipsFunctions.cpp",include="ChipsFunctions.hpp,ChipsComponents.hpp,bipio.hpp")
+
+
+package ChipsComponents
+
+    use base // for the most basic ports of each components
+    use bipio // to write into files
+    use ChipsFunctions // component behaviors
+
+    atom type UserMachineCore(bool isSource)
+
+        // parameters
+        data int httpResponse
+        data int startTime
+        data int endTime
+        data int id
+        data int maxNbData
+        
+        // contextual
+        data int computerID
+
+        // inner variables
+        data bool active
+        data bool waiting
+        data int time
+        data bool requiresAuth
+        data bool newPage
+        data int currentRequest
+        data int httpRequest
+
+        // outputs
+        data int fromUserToInternet
+
+
+        port port_t start()
+        port port_t calc()
+        export port port5int_t recv(httpResponse, startTime, endTime, id, maxNbData)
+        export port port1int_t send(fromServerToInternet)
+
+        places INIT, RECEIVING, THEN, SENT
+
+        initial to INIT do {
+            UserMachineInit(httpResponse, startTime, endTime, id, maxNbData, computerID, active, waiting, time, requiresAuth, newPage, currentRequest, httpRequest);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            UserMachineThen(httpResponse, startTime, endTime, id, maxNbData, computerID, active, waiting, time, requiresAuth, newPage, currentRequest, httpRequest);
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    atom type intRX()
+        data int the_data
+        
+        export port port1int_t from_the_outside(the_data)
+        export port port1int_t to_the_core(the_data)
+
+        places DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_outside from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_core from DATA_SENDING to DATA_RECEIVING
+    end
+
+    atom type floatRX()
+        data float the_data
+        
+        export port port1float_t from_the_outside(the_data)
+        export port port1float_t to_the_core(the_data)
+
+        places DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_outside from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_core from DATA_SENDING to DATA_RECEIVING
+    end
+
+    atom type boolRX()
+        data int the_data
+        
+        export port port1bool_t from_the_outside(the_data)
+        export port port1bool_t to_the_core(the_data)
+
+        places DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_outside from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_core from DATA_SENDING to DATA_RECEIVING
+    end
+
+    atom type intarrayRX()
+        data intarray the_data
+        
+        export port port1intarray_t from_the_outside(the_data)
+        export port port1intarray_t to_the_core(the_data)
+
+        places DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_outside from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_core from DATA_SENDING to DATA_RECEIVING
+    end
+
+
+    atom type intTX()
+        data int the_data
+        
+        export port port1int_t to_the_outside(the_data)
+        export port port1int_t to_the_core(the_data)
+
+        places DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_core from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_outside from DATA_SENDING to DATA_RECEIVING
+    end
+
+    atom type floatTX()
+        data float the_data
+        
+        export port port1float_t to_the_outside(the_data)
+        export port port1float_t from_the_core(the_data)
+
+        places DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_core from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_outside from DATA_SENDING to DATA_RECEIVING
+    end
+
+    atom type boolTX()
+        data int the_data
+        
+        export port port1bool_t to_the_outside(the_data)
+        export port port1bool_t from_the_core(the_data)
+
+        places DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_core from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_outside from DATA_SENDING to DATA_RECEIVING
+    end
+
+    atom type intarrayTX()
+        data intarray the_data
+        
+        export port port1intarray_t to_the_outside(the_data)
+        export port port1intarray_t from_the_core(the_data)
+
+        places DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_core from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_outside from DATA_SENDING to DATA_RECEIVING
+    end
+
+    compound type UserMachineRX()
+
+        component intRX httpResponse()
+        component intRX startTime()
+        component intRX endTime()
+        component intRX id()
+        component intRX maxNbData()
+
+        export port httpResponse.from_the_outside as httpResponse
+        export port startTime.from_the_outside as startTime
+        export port endTime.from_the_outside as endTime
+        export port id.from_the_outside as id
+        export port maxNbData.from_the_outside as maxNbData
+
+        connector export5x1intTo1x5int_t to_the_core
+        export port to_the_core.out as to_the_core
+    end
+
+    compound type UserMachineTX()
+        component intTX httpRequest()
+
+        connector export5x1intTo1x5int_t to_the_core
+        export port to_the_core.out as to_the_core
+    end
+end
