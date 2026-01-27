@@ -1,16 +1,18 @@
 @cpp(include="stdio.h")
+
 package System
 
-    use base
     use bipio
-    use ChipsFunctions
     use ChipsComponents
+    use base
+    
     
 
     // strict minimum of c printf functions
     extern function printf(string)
     extern function printf(string, int)
     extern function printf(string, float)
+
 
 
     atom type constant_int_stream(int cst, int streamsize)
@@ -85,7 +87,7 @@ package System
 
     atom type constant_intarray_stream(int array_type, int array_size, int streamsize)
         data intarray the_data
-        data intarray the_data_copy
+        data base.intarray the_data_copy
         data int ticks
 
         export port port1intarray_t output(the_data)
@@ -95,18 +97,18 @@ package System
         initial to STREAMING do {
             ticks = 1;
             if (array_type == 0) then
-                the_data = zeros(array_size);
-                the_data_copy = zeros(array_size);
+                the_data = base.zeros(array_size);
+                the_data_copy = base.zeros(array_size);
             fi
             if (array_type != 0) then
-                the_data = range(array_size);
-                the_data_copy = range(array_size);
+                the_data = base.range(array_size);
+                the_data_copy = base.range(array_size);
             fi
         }
 
         on output from STREAMING to STREAMING provided (ticks < streamsize) do {
             ticks = ticks + 1;
-            if (!are_copies(the_data, the_data_copy)) then 
+            if (!base.are_copies(the_data, the_data_copy)) then 
                 printf("error, the data in the stream has been modified.\n");
                 ticks = streamsize;
             fi
@@ -158,7 +160,7 @@ package System
     end
 
     atom type intarray_stream_eater()
-        data intarray the_data
+        data base.intarray the_data
 
         export port port1intarray_t input(the_data)
 

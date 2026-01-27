@@ -1,6 +1,7 @@
 package ChipsComponents
 
-    use ChipsFunctions // component behaviors
+    use base
+    use ChipsFunctions
 
     atom type UserMachineCore(bool isSource)
 

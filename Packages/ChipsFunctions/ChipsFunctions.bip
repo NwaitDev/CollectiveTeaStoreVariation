@@ -2,6 +2,8 @@
 
 package ChipsFunctions
 
+    use base
+
     // (input) 
     // int httpResponse
     // int startTime

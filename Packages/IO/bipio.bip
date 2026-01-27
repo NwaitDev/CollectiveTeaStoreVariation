@@ -4,6 +4,8 @@
 // see bipio.hpp for more information
 package bipio
 
+    use base 
+    
     extern function print(intarray)
 
 
