@@ -1,9 +1,11 @@
-@cpp(include="stdio.h,base.hpp")
+@cpp(src="ChipsComponents.cpp,bipio.cpp,ChipsFunctions.cpp",include="ChipsFunctions.hpp,ChipsComponents.hpp,bipio.hpp")
 
 
 package System
 
     use base
+    use bipio
+    use ChipsFunctions
 
     compound type SystemCompound()
 

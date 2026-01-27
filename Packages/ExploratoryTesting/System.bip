@@ -1,0 +1,197 @@
+@cpp(include="stdio.h")
+package System
+
+    use base
+    use bipio
+    use ChipsFunctions
+    use ChipsComponents
+    
+
+    // strict minimum of c printf functions
+    extern function printf(string)
+    extern function printf(string, int)
+    extern function printf(string, float)
+
+
+    atom type constant_int_stream(int cst, int streamsize)
+        data int the_data
+        data int ticks
+
+        export port port1int_t output(the_data)
+
+        place STREAMING, FINISHED
+
+        initial to STREAMING do {
+            the_data = cst;
+            ticks = 1;
+        }
+
+        on output from STREAMING to STREAMING provided (ticks < streamsize) do {
+            ticks = ticks + 1;
+            if (the_data != cst) then 
+                printf("error, the data in the stream has been modified. new value: %i\n",the_data);
+                ticks = streamsize;
+            fi
+        }
+        on output from STREAMING to FINISHED provided (ticks >= streamsize)
+
+    end
+
+    atom type constant_float_stream(float cst, int streamsize)
+        data float the_data
+        data int ticks
+
+        export port port1float_t output(the_data)
+
+        place STREAMING, FINISHED
+
+        initial to STREAMING do {
+            the_data = cst;
+            ticks = 1;
+        }
+
+        on output from STREAMING to STREAMING provided (ticks < streamsize) do {
+            ticks = ticks + 1;
+            if (the_data != cst) then 
+                printf("error, the data in the stream has been modified. new value: %f\n",the_data);
+                ticks = streamsize;
+            fi
+        }
+        on output from STREAMING to FINISHED provided (ticks >= streamsize)
+    end
+
+    atom type constant_bool_stream(bool cst, int streamsize)
+        data bool the_data
+        data int ticks
+
+        export port port1bool_t output(the_data)
+
+        place STREAMING, FINISHED
+
+        initial to STREAMING do {
+            the_data = cst;
+            ticks = 1;
+        }
+
+        on output from STREAMING to STREAMING provided (ticks < streamsize) do {
+            ticks = ticks + 1;
+            if (the_data) then 
+                printf("error, the data in the stream has been modified.\n");
+                ticks = streamsize;
+            fi
+        }
+        on output from STREAMING to FINISHED provided (ticks >= streamsize)
+    end
+
+    atom type constant_intarray_stream(int array_type, int array_size, int streamsize)
+        data intarray the_data
+        data intarray the_data_copy
+        data int ticks
+
+        export port port1intarray_t output(the_data)
+
+        place STREAMING, FINISHED
+
+        initial to STREAMING do {
+            ticks = 1;
+            if (array_type == 0) then
+                the_data = zeros(array_size);
+                the_data_copy = zeros(array_size);
+            fi
+            if (array_type != 0) then
+                the_data = range(array_size);
+                the_data_copy = range(array_size);
+            fi
+        }
+
+        on output from STREAMING to STREAMING provided (ticks < streamsize) do {
+            ticks = ticks + 1;
+            if (!are_copies(the_data, the_data_copy)) then 
+                printf("error, the data in the stream has been modified.\n");
+                ticks = streamsize;
+            fi
+        }
+        on output from STREAMING to FINISHED provided (ticks >= streamsize)
+    end
+
+    atom type int_stream_eater()
+        data int the_data
+
+        export port port1int_t input(the_data)
+
+        place EATING
+        initial to EATING
+
+        on input from EATING to EATING do {
+            printf("eaten value: %i\n", the_data);
+        }
+    end
+
+    atom type float_stream_eater()
+        data float the_data
+
+        export port port1float_t input(the_data)
+
+        place EATING
+        initial to EATING
+
+        on input from EATING to EATING do {
+            printf("eaten value: %f\n", the_data);
+        }
+    end
+
+    atom type bool_stream_eater()
+        data bool the_data
+
+        export port port1bool_t input(the_data)
+
+        place EATING
+        initial to EATING
+
+        on input from EATING to EATING do {
+            if(the_data) then
+                printf("eaten value: true\n");
+            else 
+                printf("eaten value: false\n");
+            fi
+        }
+    end
+
+    atom type intarray_stream_eater()
+        data intarray the_data
+
+        export port port1intarray_t input(the_data)
+
+        place EATING
+        initial to EATING
+
+        on input from EATING to EATING do {
+            printf("eaten value :");
+            print(the_data);
+            printf("\n");
+        }
+    end
+
+
+
+    compound type SystemCompound()
+
+        component UserMachine sut(false)
+
+        component constant_int_stream httpResponse(0,100)
+        component constant_int_stream startTime(10,100)
+        component constant_int_stream endTime(20,100)
+        component constant_int_stream id(1,100)
+        component constant_int_stream maxNbData(10,100)
+
+        component int_stream_eater httpRequest()
+
+        connector flow1int_t httpResponse2sut(httpResponse.output, sut.httpResponse)
+        connector flow1int_t startTime2sut(startTime.output, sut.startTime)
+        connector flow1int_t endTime2sut(endTime.output, sut.endTime)
+        connector flow1int_t id2sut(id.output, sut.id)
+        connector flow1int_t maxNbData2sut(maxNbData.output, sut.maxNbData)
+
+        connector flow1int_t sut2httpRequest(sut.httpRequest, httpRequest.input)
+    end
+end

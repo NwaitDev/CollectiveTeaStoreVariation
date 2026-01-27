@@ -1,7 +1,5 @@
 @cpp(src="ChipsFunctions.cpp",include="ChipsFunctions.hpp")
 
-// utility functions to write information to external files of the bip system
-// see bipio.hpp for more information
 package ChipsFunctions
 
     // (input) 

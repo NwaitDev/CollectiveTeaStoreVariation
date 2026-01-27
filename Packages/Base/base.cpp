@@ -25,7 +25,7 @@ c_intarray cpy(c_intarray& toBeAssigned){
 
 intarray zeros(const int dim1){
     intarray out = std::vector<int>(dim1);
-    for(size_t i = 0; i<dim1; ++i){
+    for(size_t i = 0; i<(size_t)dim1; ++i){
         out[i] = 0;
     }
     return out;
@@ -33,11 +33,24 @@ intarray zeros(const int dim1){
 
 intarray range(const int upto){
     intarray out = std::vector<int>(upto);
-    for(size_t i = 0; i<upto; ++i){
+    for(size_t i = 0; i<(size_t)upto; ++i){
         out[i] = i;
     }
     return out;
 }
+
+bool are_copies(intarray& a, intarray& b){
+    if (a.size() != b.size()) {
+        return false;
+    }
+    for (size_t i=0; i<a.size(); ++i) {
+        if(a[i]!=b[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
 
 
 double randomdouble(){

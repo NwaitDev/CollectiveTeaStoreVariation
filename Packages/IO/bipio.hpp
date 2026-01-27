@@ -1,6 +1,6 @@
-#ifndef __PIPIO_H__
-#define __PIPIO_H__
-
+#ifndef __BIPIO_H__
+#define __BIPIO_H__
+#include "../Base/base.hpp"
 #include <fstream>
 using CppOutStream = std::ofstream;
 using CppInStream = std::ifstream;
@@ -9,6 +9,8 @@ inline std::ostream& operator << ( std::ostream& os, const CppOutStream& rhs ) {
     os << (rhs.is_open() ? "an instanciated file stream" : "no_file file_stream");
     return os;
 }
+
+void print(intarray & arr);
 
 void emptyFile(std::string filename);
 CppOutStream openOutStream(std::string filename);
@@ -30,4 +32,4 @@ void readInStream(CppInStream& inputstream, int& n);
 void readInStream(CppInStream& inputstream, double& x);
 void closeStream(CppInStream& inputstream);
 
-#endif // __PIPIO_H__
+#endif // __BIPIO_H__

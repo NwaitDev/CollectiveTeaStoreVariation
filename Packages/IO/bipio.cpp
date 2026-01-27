@@ -1,7 +1,13 @@
 #include "bipio.hpp"
 #include <string>
 
-
+void print(intarray & arr){
+    std::cout<<"[";
+    for (int i : arr) {
+        std::cout<<i<<", ";
+    }
+    std::cout<<"]"<<std::endl;
+}
 
 void emptyFile(std::string filename){
     std::ofstream myfile;

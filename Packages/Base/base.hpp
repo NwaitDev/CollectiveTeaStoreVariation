@@ -1,7 +1,6 @@
 #ifndef __BASE_H__
 #define __BASE_H__
 
-#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <ostream>
@@ -27,6 +26,8 @@ using c_intarray = std::tuple<intarray, collective_optional>;
 
 intarray zeros(const int dim1);
 intarray range(const int upto);
+bool are_copies(intarray&, intarray&);
+void print(intarray&);
 
 
 c_int cpy(c_int&);

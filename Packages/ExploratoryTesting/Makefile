@@ -5,10 +5,10 @@ PGM := System
 COMPOUND := $(PGM)Compound
 
 # Packages path
-PPATH := ../Packages
+PPATH := ..
 
 # Packages names
-PNAMES := IO Base ChipsFunctions
+PNAMES := ChipsComponents ChipsFunctions Base IO
 
 BIPSOURCES := $(shell find $(PPATH) -name '*.bip')
 CPPSOURCES := $(shell find $(PPATH) -name '*.cpp')
@@ -31,14 +31,17 @@ COLOR_BLUE := \033[34m
 all: output/build/system
 
 version:
-	$(COMPILER_DISTRIB_PATH)/bipc --version
+	bipc --version
 
 # Compile $(PGM)
 output/build/system: $(PGM).bip $(BIPSOURCES) $(CPPSOURCES)
 	mkdir -p output/build
-
-	bipc -p $(PGM) -d "$(COMPOUND)()" $(INCLUDE_BIP_PACKAGES) $(INCLUDE_CPP_PACKAGES) \
+	bipc \
+		-p $(PGM) \
+		-d "$(COMPOUND)()" \
 		--genbip-follow-used-packages \
+		$(INCLUDE_BIP_PACKAGES) \
+		$(INCLUDE_CPP_PACKAGES) \
 		--gencpp-follow-used-packages \
 		$(CPP_EXTRA_OBJ)\
 		--gencpp-output output

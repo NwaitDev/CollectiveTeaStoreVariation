@@ -4,8 +4,9 @@
 // see bipio.hpp for more information
 package bipio
 
+    extern function print(intarray)
 
-    use base
+
     /////////////////////////OutputStreamManagement////////////////////////////////
     extern data type CppOutStream
     extern function emptyFile(string)
