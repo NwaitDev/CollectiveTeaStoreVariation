@@ -1,7 +1,9 @@
+@cpp(include="ChipsFunctions.hpp")
 package ChipsComponents
 
-    use base
     use ChipsFunctions
+    use base
+    
 
     atom type UserMachineCore(bool isSource)
 
@@ -44,6 +46,7 @@ package ChipsComponents
 
         on recv from RECEIVING to THEN 
         on calc from THEN to SENDING do {
+                        // (int,          int,       int,     int,int,       int,        bool,   bool,    int,  bool,         bool,    int,            int,         int)
             UserMachineThen(httpResponse, startTime, endTime, id, maxNbData, computerID, active, waiting, time, requiresAuth, newPage, currentRequest, httpRequest, fromUserToInternet);
         }
         on send from SENDING to RECEIVING

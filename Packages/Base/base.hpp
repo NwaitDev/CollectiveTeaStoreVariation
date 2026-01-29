@@ -48,6 +48,7 @@ double randomdouble();
 
 inline int asint(double f){return (int)f;}
 inline double asfloat(int i){return (double)i;}
-
+inline double floatIdentity(double f){return f;}
+inline double intIdentity(int i){return i;}
 
 #endif // __BASE_H__

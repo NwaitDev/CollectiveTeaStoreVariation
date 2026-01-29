@@ -1,14 +1,13 @@
 .PHONY: all clean run runverb view version
 
-
 PGM := System
 COMPOUND := $(PGM)Compound
 
 # Packages path
-PPATH := ..
+PPATH := ../Packages
 
 # Packages names
-PNAMES := ChipsComponents ChipsFunctions Base IO
+PNAMES := Base IO ChipsFunctions ChipsComponents
 
 BIPSOURCES := $(shell find $(PPATH) -name '*.bip')
 CPPSOURCES := $(shell find $(PPATH) -name '*.cpp')
@@ -66,7 +65,7 @@ runverb:
 	@echo "$(COLOR_BLUE)Running complete! trace written to output/std{out,err}.log$(COLOR_RESET)"
 
 generatexmi:
-	$(COMPILER_DISTRIB_PATH)bipc.sh -p $(PGM) -d "$(COMPOUND)()" $(INCLUDE_BIP_PACKAGES) $(INCLUDE_CPP_PACKAGES) \
+	bipc -p $(PGM) -d "$(COMPOUND)()" $(INCLUDE_BIP_PACKAGES) $(INCLUDE_CPP_PACKAGES) \
 		--genbip-follow-used-packages \
 		--profile --v FINER -so output -s xmi
 

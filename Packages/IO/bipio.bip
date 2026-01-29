@@ -14,7 +14,7 @@ package bipio
     extern function emptyFile(string)
     extern function CppOutStream openOutStream(string)
     extern function printInStream(CppOutStream, string) // adds the string to the stream as-is
-    extern function printInStream(CppOutStream, float) // adds the number preceded by a space
+    //extern function printInStream(CppOutStream, float) // adds the number preceded by a space
     extern function printInStream(CppOutStream, int) // adds the number preceded by a space
 
     extern function closeStream(CppOutStream)
@@ -25,7 +25,7 @@ package bipio
     extern function CppInStream openInStream(string)
     extern function jump_n_lines(CppInStream, int)
     extern function readInStream(CppInStream, string) // reads the next string delimited by a non-printable char
-    extern function readInStream(CppInStream, float) // reads the next floating point value
+    //extern function readInStream(CppInStream, float) // reads the next floating point value
     extern function readInStream(CppInStream, int) // reads the next integer
 
     extern function closeStream(CppInStream)

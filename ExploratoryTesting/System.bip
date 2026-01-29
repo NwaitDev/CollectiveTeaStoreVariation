@@ -15,6 +15,7 @@ package System
 
 
 
+
     atom type constant_int_stream(int cst, int streamsize)
         data int the_data
         data int ticks
@@ -31,7 +32,7 @@ package System
         on output from STREAMING to STREAMING provided (ticks < streamsize) do {
             ticks = ticks + 1;
             if (the_data != cst) then 
-                printf("error, the data in the stream has been modified. new value: %i\n",the_data);
+                printf("error, the data in the stream has been modified. new value: %i\n",intIdentity(the_data));
                 ticks = streamsize;
             fi
         }
@@ -55,7 +56,7 @@ package System
         on output from STREAMING to STREAMING provided (ticks < streamsize) do {
             ticks = ticks + 1;
             if (the_data != cst) then 
-                printf("error, the data in the stream has been modified. new value: %f\n",the_data);
+                printf("error, the data in the stream has been modified. new value: %f\n",floatIdentity(the_data));
                 ticks = streamsize;
             fi
         }
@@ -87,8 +88,9 @@ package System
 
     atom type constant_intarray_stream(int array_type, int array_size, int streamsize)
         data intarray the_data
-        data base.intarray the_data_copy
+        data intarray the_data_copy
         data int ticks
+        data bool testVariable
 
         export port port1intarray_t output(the_data)
 
@@ -97,18 +99,20 @@ package System
         initial to STREAMING do {
             ticks = 1;
             if (array_type == 0) then
-                the_data = base.zeros(array_size);
-                the_data_copy = base.zeros(array_size);
+                the_data = zeros(array_size);
+                the_data_copy = zeros(array_size);
             fi
             if (array_type != 0) then
-                the_data = base.range(array_size);
-                the_data_copy = base.range(array_size);
+                the_data = range(array_size);
+                the_data_copy = range(array_size);
             fi
+            testVariable = false;
         }
 
         on output from STREAMING to STREAMING provided (ticks < streamsize) do {
             ticks = ticks + 1;
-            if (!base.are_copies(the_data, the_data_copy)) then 
+            testVariable = !are_copies(the_data, the_data_copy);
+            if (testVariable) then 
                 printf("error, the data in the stream has been modified.\n");
                 ticks = streamsize;
             fi
@@ -125,7 +129,7 @@ package System
         initial to EATING
 
         on input from EATING to EATING do {
-            printf("eaten value: %i\n", the_data);
+            printf("eaten value: %i\n", intIdentity(the_data));
         }
     end
 
@@ -160,7 +164,7 @@ package System
     end
 
     atom type intarray_stream_eater()
-        data base.intarray the_data
+        data intarray the_data
 
         export port port1intarray_t input(the_data)
 
@@ -175,8 +179,17 @@ package System
     end
 
 
-
     compound type SystemCompound()
+
+
+        component constant_int_stream sut(0,100)
+
+        component int_stream_eater reader()
+
+        connector flow1int_t sut2httpRequest(sut.output, reader.input)
+    end
+
+    compound type SystemoCompound()
 
         component UserMachine sut(false)
 

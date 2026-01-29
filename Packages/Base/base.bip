@@ -8,7 +8,9 @@ package base
     extern function float randomdouble() // using C rand() function
 
     extern function int asint(float f)
-    extern function float asfloat(int f)
+    extern function float asfloat(int i)
+    extern function int intIdentity(int i)
+    extern function float floatIdentity(float i)
 
     extern data type intarray
     extern function intarray zeros(int dim1)
