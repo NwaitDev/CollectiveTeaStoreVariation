@@ -1,4 +1,4 @@
-@cpp(src="bipio.cpp",include="bipio.hpp")
+@cpp(src="bipio.cpp",include="bipio.hpp,stdio.h")
 
 // utility functions to write information to external files of the bip system
 // see bipio.hpp for more information
@@ -6,7 +6,11 @@ package bipio
 
     use base 
     
-    extern function print(intarray)
+    extern function printIntArray(IntArray)
+    // strict minimum of c printf functions
+    extern function printf(string)
+    extern function printf(string, int)
+    extern function printf(string, float)
 
 
     /////////////////////////OutputStreamManagement////////////////////////////////

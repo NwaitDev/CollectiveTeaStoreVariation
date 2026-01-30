@@ -56,7 +56,7 @@ void UserMachineThen(int& httpResponse_in, int& startTime_in, int& endTime_in, i
     fromUserToInternet_out = httpRequest_inner;
 }
 
-void ServerMachineInit(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
+void ServerMachineInit(IntArray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, IntArray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
     // default values :
     maxNbData_in = 10;
 
@@ -73,7 +73,7 @@ void ServerMachineInit(intarray& fromInternet_in, int& wpServed_in, int& maxNbDa
     userAuth_out = requestList_inner[currentRequest_inner]<0;
 }
 
-void ServerMachineThen(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
+void ServerMachineThen(IntArray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, IntArray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
 
     ////////////////// treating client requests one by one
     requestList_inner[currentRequest_inner] = 0;
@@ -171,7 +171,7 @@ void RequestLimiterThen(bool& redirection_in, int& maxRequests_in, int& userID_i
 }
 
 
-void CacheInit(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, intarray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
+void CacheInit(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, IntArray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
     maxCacheSize_inner = 100;
     minCacheSize_inner = 10;
     cache_inner = zeros(maxCacheSize_inner);
@@ -182,7 +182,7 @@ void CacheInit(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner
     //outputs
     foundInCache_out = found_inner;
 }
-void CacheThen(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, intarray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
+void CacheThen(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, IntArray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
     
     if(cacheSize_in > maxCacheSize_inner){
         cacheSize_in = maxCacheSize_inner;
@@ -231,7 +231,7 @@ void CacheThen(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner
     foundInCache_out = found_inner;
 }
 
-void DataProviderInit(bool& redirection_in, int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, intarray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
+void DataProviderInit(bool& redirection_in, int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, IntArray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
     maxDifferentData_inner = 40;
     maxUserID_inner = 100;
     dataPerUserID_inner = zeros(maxUserID_inner);
@@ -254,7 +254,7 @@ void DataProviderInit(bool& redirection_in, int& userID_in, int& dataQty_in, boo
     timeSpentOnReq_out = time_inner;
     enableTimeReading_out = oneLessPendingRequest_inner;
 }
-void DataProviderThen(bool& redirection_in, int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, intarray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
+void DataProviderThen(bool& redirection_in, int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, IntArray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
     oneLessPendingRequest_inner = false;
     idToRespondTo_inner = 0;
     if(userID_in != 0){
@@ -318,7 +318,7 @@ void DataProviderThen(bool& redirection_in, int& userID_in, int& dataQty_in, boo
 }
 
 
-void allDataProvidersOutputsCollect(int input, c_intarray& answers, c_intarray& prev_input_answers, c_intarray& next_input_answers, c_intarray& prev_output_answers, c_intarray& next_output_answers, intarray& output){
+void allDataProvidersOutputsCollect(int input, c_IntArray& answers, c_IntArray& prev_input_answers, c_IntArray& next_input_answers, c_IntArray& prev_output_answers, c_IntArray& next_output_answers, IntArray& output){
     if(input!=0){
         if(input>0){
             std::get<0>(answers)[input-1] = input;
@@ -341,7 +341,7 @@ void allDataProvidersOutputsCollect(int input, c_intarray& answers, c_intarray& 
 }
 
 
-void WebPageServiceInit(intarray& respondToThisIDs_in, int& currentRequestAnswered_inner, intarray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
+void WebPageServiceInit(IntArray& respondToThisIDs_in, int& currentRequestAnswered_inner, IntArray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
 
     currentRequestAnswered_inner = 0;
     requestsToAnswerTo_inner = zeros(100);
@@ -350,7 +350,7 @@ void WebPageServiceInit(intarray& respondToThisIDs_in, int& currentRequestAnswer
     //outputs
     idToRespondTo_out = requestsToAnswerTo_inner[currentRequestAnswered_inner];
 }
-void WebPageServiceThen(intarray& respondToThisIDs_in, int& currentRequestAnswered_inner, intarray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
+void WebPageServiceThen(IntArray& respondToThisIDs_in, int& currentRequestAnswered_inner, IntArray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
 
     requestsToAnswerTo_inner[currentRequestAnswered_inner] = 0;
     requestFound_inner = false;
@@ -407,7 +407,7 @@ void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& outp
 
 
 
-void aggregatingRequestsCollect(int input, c_intarray& requests, c_intarray& prev_input_requests, c_intarray& next_input_requests, c_intarray& prev_output_requests, c_intarray& next_output_requests, intarray& output){
+void aggregatingRequestsCollect(int input, c_IntArray& requests, c_IntArray& prev_input_requests, c_IntArray& next_input_requests, c_IntArray& prev_output_requests, c_IntArray& next_output_requests, IntArray& output){
 
     if(input!=0){
         if(input<0){

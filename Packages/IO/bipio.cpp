@@ -1,10 +1,10 @@
 #include "bipio.hpp"
 #include <string>
 
-void print(intarray & arr){
+void printIntArray(IntArray& arr){
     std::cout<<"[";
     for (int i : arr) {
-        std::cout<<i<<", ";
+        std::cout<<i<<" ";
     }
     std::cout<<"]"<<std::endl;
 }

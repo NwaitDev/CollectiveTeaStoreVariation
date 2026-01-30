@@ -1,8 +1,9 @@
-@cpp(include="ChipsFunctions.hpp")
-package ChipsComponents
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package UserMachine
 
     use ChipsFunctions
     use base
+    use bipio
     
 
     atom type UserMachineCore(bool isSource)
@@ -32,7 +33,7 @@ package ChipsComponents
 
         port port_t start()
         port port_t calc()
-        export port port5int_t recv(httpResponse, startTime, endTime, id, maxNbData)
+        export port portIntIntIntIntInt_t recv(httpResponse, startTime, endTime, id, maxNbData)
         export port port1int_t send(fromUserToInternet)
 
         place INIT, RECEIVING, THEN, SENDING
@@ -48,6 +49,28 @@ package ChipsComponents
         on calc from THEN to SENDING do {
                         // (int,          int,       int,     int,int,       int,        bool,   bool,    int,  bool,         bool,    int,            int,         int)
             UserMachineThen(httpResponse, startTime, endTime, id, maxNbData, computerID, active, waiting, time, requiresAuth, newPage, currentRequest, httpRequest, fromUserToInternet);
+            printf("httpResponse:%i\t",httpResponse);
+            printf("startTime:%i\t",startTime);
+            printf("endTime:%i\t",endTime);
+            printf("id:%i\t",id);
+            printf("maxNbData:%i\t", maxNbData);
+            printf("computerID:%i\t",computerID);
+            if (active) then
+                printf("active!\t");
+            fi
+            if (waiting) then
+                printf("waiting...\t");
+            fi
+            printf("time:%i\t", time);
+            if (requiresAuth) then
+                printf("requiresAuth.\t");
+            fi
+            if (newPage) then
+                printf("newPage <3\t");
+            fi
+            printf("currentRequest:%i\t",currentRequest);
+            printf("httpRequest:%i\t", httpRequest);
+            printf("fromUserToInternet:%i\t", fromUserToInternet);            
         }
         on send from SENDING to RECEIVING
 
@@ -57,13 +80,14 @@ package ChipsComponents
 
     compound type UserMachineRX()
 
+
         component intRX httpResponse()
         component intRX startTime()
         component intRX endTime()
         component intRX id()
         component intRX maxNbData()
-        
-        connector export5x1intTo1x5int_t to_the_core(httpResponse.to_the_core, startTime.to_the_core, endTime.to_the_core, id.to_the_core, maxNbData.to_the_core)
+
+        connector many2one_IntIntIntIntInt_t to_the_core(httpResponse.to_the_core, startTime.to_the_core, endTime.to_the_core, id.to_the_core, maxNbData.to_the_core)
         
         export port httpResponse.from_the_outside as httpResponse
         export port startTime.from_the_outside as startTime
@@ -71,32 +95,32 @@ package ChipsComponents
         export port id.from_the_outside as id
         export port maxNbData.from_the_outside as maxNbData
 
-        export port to_the_core.out as to_the_core
+        export port to_the_core.r0 as to_the_core
     end
 
     compound type UserMachineTX()
         component intTX httpRequest()
 
-        export port httpRequest.to_the_outside as to_the_outside
+        export port httpRequest.to_the_outside as httpRequest
         export port httpRequest.from_the_core as from_the_core
     end
 
     compound type UserMachine(bool isSource)
 
-        component UserMachineRX parameters()
-        component UserMachineTX outputs()
+        component UserMachineRX inputParameters()
+        component UserMachineTX outputParameters()
 
         component UserMachineCore core(isSource)
 
-        connector flow1x5to1x5int_t RX2Core(parameters.to_the_core, core.recv)
-        connector flow1int_t Core2TX(core.send, outputs.from_the_core)
+        connector flowIntIntIntIntInt_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowInt_t Core2TX(core.send, outputParameters.from_the_core)
         
-        export port parameters.httpResponse as httpResponse
-        export port parameters.startTime as startTime
-        export port parameters.endTime as endTime
-        export port parameters.id as id
-        export port parameters.maxNbData as maxNbData
+        export port inputParameters.httpResponse as httpResponse
+        export port inputParameters.startTime as startTime
+        export port inputParameters.endTime as endTime
+        export port inputParameters.id as id
+        export port inputParameters.maxNbData as maxNbData
         
-        export port outputs.to_the_outside as httpRequest
+        export port outputParameters.httpRequest as httpRequest
     end
 end

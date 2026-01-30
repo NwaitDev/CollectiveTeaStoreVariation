@@ -1,20 +1,11 @@
-@cpp(include="stdio.h")
+@cpp(include="stdio.h,bipio.hpp,base.hpp")
 
 package System
 
     use bipio
-    use ChipsComponents
+    use UserMachine
+    use ServerMachine
     use base
-    
-    
-
-    // strict minimum of c printf functions
-    extern function printf(string)
-    extern function printf(string, int)
-    extern function printf(string, float)
-
-
-
 
     atom type constant_int_stream(int cst, int streamsize)
         data int the_data
@@ -56,7 +47,7 @@ package System
         on output from STREAMING to STREAMING provided (ticks < streamsize) do {
             ticks = ticks + 1;
             if (the_data != cst) then 
-                printf("error, the data in the stream has been modified. new value: %f\n",floatIdentity(the_data));
+                printf("error, the data in the stream has been modified. new value: %f\n",the_data);
                 ticks = streamsize;
             fi
         }
@@ -86,13 +77,13 @@ package System
         on output from STREAMING to FINISHED provided (ticks >= streamsize)
     end
 
-    atom type constant_intarray_stream(int array_type, int array_size, int streamsize)
-        data intarray the_data
-        data intarray the_data_copy
+    atom type constant_IntArray_stream(int array_type, int array_size, int streamsize)
+        data IntArray the_data
+        data IntArray the_data_copy
         data int ticks
         data bool testVariable
 
-        export port port1intarray_t output(the_data)
+        export port portIntArray_t output(the_data)
 
         place STREAMING, FINISHED
 
@@ -129,7 +120,7 @@ package System
         initial to EATING
 
         on input from EATING to EATING do {
-            printf("eaten value: %i\n", intIdentity(the_data));
+            printf("eaten value: %i\n", the_data);
         }
     end
 
@@ -163,33 +154,22 @@ package System
         }
     end
 
-    atom type intarray_stream_eater()
-        data intarray the_data
+    atom type IntArray_stream_eater()
+        data IntArray the_data
 
-        export port port1intarray_t input(the_data)
+        export port portIntArray_t input(the_data)
 
         place EATING
         initial to EATING
 
         on input from EATING to EATING do {
             printf("eaten value :");
-            print(the_data);
+            printIntArray(the_data);
             printf("\n");
         }
     end
 
-
-    compound type SystemCompound()
-
-
-        component constant_int_stream sut(0,100)
-
-        component int_stream_eater reader()
-
-        connector flow1int_t sut2httpRequest(sut.output, reader.input)
-    end
-
-    compound type SystemoCompound()
+    compound type SystemCompound1()
 
         component UserMachine sut(false)
 
@@ -201,12 +181,38 @@ package System
 
         component int_stream_eater httpRequest()
 
-        connector flow1int_t httpResponse2sut(httpResponse.output, sut.httpResponse)
-        connector flow1int_t startTime2sut(startTime.output, sut.startTime)
-        connector flow1int_t endTime2sut(endTime.output, sut.endTime)
-        connector flow1int_t id2sut(id.output, sut.id)
-        connector flow1int_t maxNbData2sut(maxNbData.output, sut.maxNbData)
+        connector flowInt_t httpResponse2sut(httpResponse.output, sut.httpResponse)
+        connector flowInt_t startTime2sut(startTime.output, sut.startTime)
+        connector flowInt_t endTime2sut(endTime.output, sut.endTime)
+        connector flowInt_t id2sut(id.output, sut.id)
+        connector flowInt_t maxNbData2sut(maxNbData.output, sut.maxNbData)
 
-        connector flow1int_t sut2httpRequest(sut.httpRequest, httpRequest.input)
+        connector flowInt_t sut2httpRequest(sut.httpRequest, httpRequest.input)
+    end
+
+    compound type SystemCompound()
+
+
+        component ServerMachine sut(false)
+
+
+////////////////////////////////////////////////////////////////////////////////////
+        component constant_IntArray_stream fromInternet(1, 10, 100)
+        component constant_int_stream wpServed(1,100)
+        component constant_int_stream maxNbData(10,100)
+
+        connector flowIntArray_t fromInternet2sut(fromInternet.output, sut.fromInternet)
+        connector flowInt_t wpServed2sut(wpServed.output, sut.wpServed)
+        connector flowInt_t maxNbData2sut(maxNbData.output, sut.maxNbData)
+////////////////////////////////////////////////////////////////////////////////////
+        component int_stream_eater fromServerToInternet()
+        component int_stream_eater nbData()
+        component int_stream_eater userID()
+        component bool_stream_eater userAuth()
+
+        connector flowInt_t sut2fromServerToInternet(sut.fromServerToInternet, fromServerToInternet.input)
+        connector flowInt_t sut2nbData(sut.nbData, nbData.input)
+        connector flowInt_t sut2userID(sut.userID, userID.input)
+        connector flowBool_t sut2userAuth(sut.userAuth, userAuth.input)
     end
 end

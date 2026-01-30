@@ -1,0 +1,106 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package ServerMachine
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+    atom type ServerMachineCore(bool isSource)
+
+        // parameters
+        data IntArray fromInternet
+        data int wpServed
+        data int maxNbData
+        
+        // contextual
+        
+        // inner variables
+        data int httpResponse
+        data int currentRequest
+        data bool requestFound
+        data IntArray requestList
+        
+        // outputs
+        data int fromServerToInternet
+        data int nbData
+        data int userID
+        data bool userAuth
+
+        port port_t start()
+        port port_t calc()
+        export port portIntArrayIntInt_t recv(fromInternet,wpServed,maxNbData)
+        export port portIntIntIntBool_t send(fromServerToInternet,nbData,userID,userAuth)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            ServerMachineInit(fromInternet,wpServed,maxNbData,httpResponse,currentRequest,requestFound,requestList,fromServerToInternet,nbData,userID,userAuth);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            ServerMachineThen(fromInternet,wpServed,maxNbData,httpResponse,currentRequest,requestFound,requestList,fromServerToInternet,nbData,userID,userAuth);      
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type ServerMachineRX()
+
+        component IntArrayRX fromInternet()
+        component intRX wpServed()
+        component intRX maxNbData()
+        
+        connector many2one_IntArrayIntInt_t to_the_core(fromInternet.to_the_core, wpServed.to_the_core, maxNbData.to_the_core)
+        
+        export port fromInternet.from_the_outside as fromInternet
+        export port wpServed.from_the_outside as wpServed
+        export port maxNbData.from_the_outside as maxNbData
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+    compound type ServerMachineTX()
+
+        component intTX fromServerToInternet()
+        component intTX nbData()
+        component intTX userID()
+        component boolTX userAuth()
+
+        connector one2many_IntIntIntBool_t from_the_core(fromServerToInternet.from_the_core, nbData.from_the_core, userID.from_the_core, userAuth.from_the_core)
+
+        export port fromServerToInternet.to_the_outside as fromServerToInternet
+        export port nbData.to_the_outside as nbData
+        export port userID.to_the_outside as userID
+        export port userAuth.to_the_outside as userAuth
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type ServerMachine(bool isSource)
+
+        component ServerMachineRX inputParameters()
+        component ServerMachineTX outputParameters()
+
+        component ServerMachineCore core(isSource)
+
+        connector flowIntArrayIntInt_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowIntIntIntBool_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.fromInternet as fromInternet
+        export port inputParameters.wpServed as wpServed
+        export port inputParameters.maxNbData as maxNbData
+        
+        export port outputParameters.fromServerToInternet as fromServerToInternet
+        export port outputParameters.nbData as nbData
+        export port outputParameters.userID as userID
+        export port outputParameters.userAuth as userAuth
+    end
+
+end

@@ -1,0 +1,76 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package ChipsComponentTemplate
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+    atom type AnyComponentCore(bool isSource)
+
+        // parameters
+
+        // contextual
+
+        // inner variables
+
+        // outputs
+
+
+        port port_t start()
+        port port_t calc()
+        export port port_t recv()
+        export port port_t send()
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            AnyInit();
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            //AnyThen();        
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type AnyRX()
+
+        component intRX parameter()
+        
+        connector export1port_t to_the_core(parameter.to_the_core)
+        
+        export port parameter.from_the_outside as from_the_outside
+
+        export port to_the_core.out as to_the_core
+    end
+
+    compound type UserMachineTX()
+        component intTX parameter()
+
+        export port parameter.to_the_outside as to_the_outside
+        export port parameter.from_the_core as from_the_core
+    end
+
+    compound type AnyComponent(bool isSource)
+
+        component anyRX inputParameters()
+        component UserMachineTX outputParameters()
+
+        component AnyComponentCore core(isSource)
+
+        connector flow_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flow_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.from_the_outside as from_the_outside
+        
+        export port outputParameters.to_the_outside as to_the_outside
+    end
+
+end

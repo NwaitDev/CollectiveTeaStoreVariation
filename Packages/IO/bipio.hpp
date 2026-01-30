@@ -10,7 +10,7 @@ inline std::ostream& operator << ( std::ostream& os, const CppOutStream& rhs ) {
     return os;
 }
 
-void print(intarray & arr);
+void printIntArray(IntArray & arr);
 
 void emptyFile(std::string filename);
 CppOutStream openOutStream(std::string filename);

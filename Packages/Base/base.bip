@@ -12,64 +12,71 @@ package base
     extern function int intIdentity(int i)
     extern function float floatIdentity(float i)
 
-    extern data type intarray
-    extern function intarray zeros(int dim1)
-    extern function intarray range(const int upto)
-    extern function bool are_copies(intarray, intarray)
+    extern data type IntArray
+    extern function IntArray zeros(int dim1)
+    extern function IntArray range(const int upto)
+    extern function bool are_copies(IntArray, IntArray)
 
 
     extern data type c_int
     extern data type c_float
     extern data type c_bool
-    extern data type c_intarray
+    extern data type c_IntArray
 
     
     // port that serves as a trigger
     port type port_t()
 
     // port holding a float
-    port type port1float_t(float v)
+    port type port1float_t(float v0)
 
     // port holding an integer
-    port type port1int_t(int v)
+    port type port1int_t(int v0)
 
     // port holding a boolean
-    port type port1bool_t(bool v)
+    port type port1bool_t(bool v0)
 
-    port type port1intarray_t(intarray v)
+    port type portIntArray_t(IntArray v0)
 
-    // connector allowing to send a boolean from src to t
-    connector type flow1bool_t(port1bool_t src, port1bool_t t)
-        define src t
-        on src t down {
-            t.v = src.v;
+    port type portIntIntIntIntInt_t(int v0, int v1, int v2, int v3, int v4)
+
+    port type portIntArrayIntInt_t(IntArray v0, int v1, int v2)
+
+    port type portIntIntIntBool_t(int v0, int v1, int v2, bool v3)
+
+
+    // connector allowing to send a boolean from s0 to r0
+    connector type flowBool_t(port1bool_t s0, port1bool_t r0)
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
         }
     end
 
-    // connector allowing to send a float from src to t
-    connector type flow1float_t(port1float_t src, port1float_t t0)
-        define src t0
-        on src t0 down {
-            t0.v = src.v;
+    // connector allowing to send a float from s0 to r0
+    connector type flowFloat_t(port1float_t s0, port1float_t r0)
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
         }
     end
-    // connector allowing to send a bool from src to t
-    connector type flow1int_t(port1int_t src, port1int_t t0)
-        define src t0
-        on src t0 down {
-            t0.v = src.v;
+    // connector allowing to send a bool from s0 to r0
+    connector type flowInt_t(port1int_t s0, port1int_t r0)
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
         }
     end
 
 
     // connector that fills a float port not connected to anything 
     // (mainly useful to avoid useless warnings)
-    connector type sync1float_t(port1float_t p)
-        define p
+    connector type sync1float_t(port1float_t p0)
+        define p0
     end
 
-    connector type sync1port_t(port_t p)
-        define p
+    connector type sync1port_t(port_t p0)
+        define p0
     end
 
     connector type sync1to1port_t(port_t p0, port_t p1)
@@ -77,43 +84,113 @@ package base
     end
     
 
-    port type port5int_t(int v1, int v2, int v3, int v4, int v5)
 
-    connector type flow1x5to1x5int_t(
-        port5int_t s,
-        port5int_t r
+    connector type flowIntIntIntIntInt_t(
+        portIntIntIntIntInt_t s0,
+        portIntIntIntIntInt_t r0
     )
-        define s r
-        on s r down {
-            r.v1 = s.v1;
-            r.v2 = s.v2;
-            r.v3 = s.v3;
-            r.v4 = s.v4;
-            r.v5 = s.v5;
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
+            r0.v1 = s0.v1;
+            r0.v2 = s0.v2;
+            r0.v3 = s0.v3;
+            r0.v4 = s0.v4;
         }
     end
 
-    connector type export5x1intTo1x5int_t(
-        port1int_t p1,
-        port1int_t p2,
-        port1int_t p3,
-        port1int_t p4,
-        port1int_t p5 
+    connector type many2one_IntIntIntIntInt_t(
+        port1int_t s0,
+        port1int_t s1,
+        port1int_t s2,
+        port1int_t s3,
+        port1int_t s4
     )
-        data int v1
-        data int v2
-        data int v3
-        data int v4
-        data int v5
-        export port port5int_t out(v1, v2, v3, v4, v5)
+        data int v0,v1,v2,v3,v4
+        export port portIntIntIntIntInt_t r0(v0,v1,v2,v3,v4)
 
-        define p1 p2 p3 p4 p5
-        on p1 p2 p3 p4 p5 up {
-            v1 = p1.v;
-            v2 = p2.v;
-            v3 = p3.v;
-            v4 = p4.v;
-            v5 = p5.v;
+        define s0 s1 s2 s3 s4
+        on s0 s1 s2 s3 s4 up {
+            v0 = s0.v0;
+            v1 = s1.v0;
+            v2 = s2.v0;
+            v3 = s3.v0;
+            v4 = s4.v0;
+        }
+    end
+
+
+    connector type many2one_IntArrayIntInt_t(
+        portIntArray_t s0,
+        port1int_t s1,
+        port1int_t s2
+    )
+        data IntArray v0
+        data int v1,v2
+        export port portIntArrayIntInt_t r0(v0,v1,v2)
+
+        define s0 s1 s2
+        on s0 s1 s2 up {
+            v0 = s0.v0;
+            v1 = s1.v0;
+            v2 = s2.v0;
+        }
+    end
+
+
+    connector type one2many_IntIntIntBool_t(
+        port1int_t r0,
+        port1int_t r1,
+        port1int_t r2,
+        port1bool_t r3
+    )
+        data int v0,v1,v2
+        data bool v3
+
+        export port portIntIntIntBool_t s0(v0,v1,v2, v3)
+        
+        define r0 r1 r2 r3 
+        on r0 r1 r2 r3 down {
+            r0.v0 = v0;
+            r1.v0 = v1;
+            r2.v0 = v2;
+            r3.v0 = v3;
+        }
+    end
+
+
+    connector type flowIntArray_t(
+        portIntArray_t s0,
+        portIntArray_t r0
+    )
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
+        }
+    end
+
+    connector type flowIntArrayIntInt_t(
+        portIntArrayIntInt_t s0,
+        portIntArrayIntInt_t r0
+    )
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
+            r0.v1 = s0.v1;
+            r0.v2 = s0.v2;
+        }
+    end
+
+    connector type flowIntIntIntBool_t(
+        portIntIntIntBool_t s0,
+        portIntIntIntBool_t r0
+    )
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
+            r0.v1 = s0.v1;
+            r0.v2 = s0.v2;
+            r0.v3 = s0.v3;
         }
     end
 
@@ -162,11 +239,11 @@ package base
         on to_the_core from DATA_SENDING to DATA_RECEIVING
     end
 
-    atom type intarrayRX()
-        data intarray the_data
+    atom type IntArrayRX()
+        data IntArray the_data
         
-        export port port1intarray_t from_the_outside(the_data)
-        export port port1intarray_t to_the_core(the_data)
+        export port portIntArray_t from_the_outside(the_data)
+        export port portIntArray_t to_the_core(the_data)
 
         place DATA_RECEIVING, DATA_SENDING
 
@@ -223,11 +300,11 @@ package base
         on to_the_outside from DATA_SENDING to DATA_RECEIVING
     end
 
-    atom type intarrayTX()
-        data intarray the_data
+    atom type IntArrayTX()
+        data IntArray the_data
         
-        export port port1intarray_t to_the_outside(the_data)
-        export port port1intarray_t from_the_core(the_data)
+        export port portIntArray_t to_the_outside(the_data)
+        export port portIntArray_t from_the_core(the_data)
 
         place DATA_RECEIVING, DATA_SENDING
 

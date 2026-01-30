@@ -30,7 +30,7 @@ package ChipsFunctions
 
 
     // (input)
-    // intarray fromInternet
+    // IntArray fromInternet
     // int wpServed
     // int maxNbData
     
@@ -38,15 +38,15 @@ package ChipsFunctions
     // int httpResponse
     // int currentRequest
     // bool requestFound
-    // intarray requestList
+    // IntArray requestList
 
     // (output)
     // int fromServerToInternet
     // int nbData
     // int userID
     // bool userAuth
-    extern function ServerMachineInit(intarray, int, int, int, int, bool, intarray, int, int, int, bool)
-    extern function ServerMachineThen(intarray, int, int, int, int, bool, intarray, int, int, int, bool)
+    extern function ServerMachineInit(IntArray, int, int, int, int, bool, IntArray, int, int, int, bool)
+    extern function ServerMachineThen(IntArray, int, int, int, int, bool, IntArray, int, int, int, bool)
 
 
     // (input)
@@ -113,15 +113,15 @@ package ChipsFunctions
     // (inner variables)
     // int maxCacheSize
     // int minCacheSize
-    // intarray cache
+    // IntArray cache
     // int newestDataIndex
     // bool found
     // int foundIndex
 
     // (output)
     // bool foundInCache
-    extern function CacheInit(int, int, int, int, intarray, int, bool, int, bool)
-    extern function CacheThen(int, int, int, int, intarray, int, bool, int, bool)
+    extern function CacheInit(int, int, int, int, IntArray, int, bool, int, bool)
+    extern function CacheThen(int, int, int, int, IntArray, int, bool, int, bool)
 
 
     // (input)
@@ -133,7 +133,7 @@ package ChipsFunctions
     // (inner variables)
     // int maxDifferentData
     // int maxUserID
-    // intarray dataPerUserID
+    // IntArray dataPerUserID
     // int currentlyTreatedUserRequest
     // int idToRespondTo
     // int dataToFetch
@@ -147,33 +147,33 @@ package ChipsFunctions
     // oneLessPendingRequest
     // timeSpentOnReq
     // enableTimeReading
-    extern function DataProviderInit(bool, int, int, bool, int, int, intarray, int, int, int, float, bool, bool, int, int, bool, float, bool)
-    extern function DataProviderThen(bool, int, int, bool, int, int, intarray, int, int, int, float, bool, bool, int, int, bool, float, bool)
+    extern function DataProviderInit(bool, int, int, bool, int, int, IntArray, int, int, int, float, bool, bool, int, int, bool, float, bool)
+    extern function DataProviderThen(bool, int, int, bool, int, int, IntArray, int, int, int, float, bool, bool, int, int, bool, float, bool)
 
 
     // (default input accumulator) 
-    // c_intarray answers
+    // c_IntArray answers
 
     // (target object)
-    // c_intarray
+    // c_IntArray
 
     // (default channel output accumulator)
-    // c_intarray
-    extern function allDataProvidersOutputsCollect(int input, c_intarray, c_intarray, c_intarray, c_intarray, c_intarray, intarray)
+    // c_IntArray
+    extern function allDataProvidersOutputsCollect(int input, c_IntArray, c_IntArray, c_IntArray, c_IntArray, c_IntArray, IntArray)
 
 
     // (input)
-    // intarray respondToThisIDs
+    // IntArray respondToThisIDs
 
     // (inner variables)
     // int currentRequestAnswered
-    // intarray requestsToAnswerTo
+    // IntArray requestsToAnswerTo
     // bool requestFound
     
     // (output)
     // int idToRespondTo
-    extern function WebPageServiceInit(intarray,int,intarray,bool,int)
-    extern function WebPageServiceThen(intarray,int,intarray,bool,int)
+    extern function WebPageServiceInit(IntArray,int,IntArray,bool,int)
+    extern function WebPageServiceThen(IntArray,int,IntArray,bool,int)
 
 
     // (default input accumulator) 
@@ -187,14 +187,14 @@ package ChipsFunctions
     extern function responseToTheRightUserSpread(int, c_int, c_int, c_int, c_int)
 
     // (default input accumulator) 
-    // c_intarray currentListOfRequests
+    // c_IntArray currentListOfRequests
 
     // (target object)
-    // c_intarray
+    // c_IntArray
 
     // (default channel output accumulator)
-    // c_intarray
-    extern function aggregatingRequestsCollect(int input, c_intarray, c_intarray, c_intarray, c_intarray, c_intarray, intarray)
+    // c_IntArray
+    extern function aggregatingRequestsCollect(int input, c_IntArray, c_IntArray, c_IntArray, c_IntArray, c_IntArray, IntArray)
 
 
     // (input)

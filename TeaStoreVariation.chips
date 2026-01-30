@@ -53,8 +53,7 @@ with{
 
 
 // from internet is equal to (auth ? -1 : 1)*((maxNbData+1)*ID + nbData) with nbData in [1, maxNbData]
-physical ServerMachine(sensor int[100] fromInternet, 
-    int wpServed, int maxNbData = 10)
+physical ServerMachine(sensor int[100] fromInternet, int wpServed, int maxNbData = 10)
 with {
     ServerChannel next;
     ServerChannel prev;
