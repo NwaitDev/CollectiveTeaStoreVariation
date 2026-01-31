@@ -34,7 +34,7 @@ package UserMachine
         port port_t start()
         port port_t calc()
         export port portIntIntIntIntInt_t recv(httpResponse, startTime, endTime, id, maxNbData)
-        export port port1int_t send(fromUserToInternet)
+        export port portInt_t send(fromUserToInternet)
 
         place INIT, RECEIVING, THEN, SENDING
 

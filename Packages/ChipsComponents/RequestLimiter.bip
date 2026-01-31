@@ -1,0 +1,111 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package RequestLimiter
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type RequestLimiterCore(bool isSource)
+
+        // parameters
+        data bool redirection_i
+        data int maxRequests
+        data int userID_i
+        data int nbDataToFetch
+        data int nbAnsweredReqs
+        
+        // contextual
+        
+
+        // inner variables
+        data int currentNbRequests
+
+        // outputs
+        data bool redirection_o
+        data int userID_o
+        data int dataQty
+
+        port port_t start()
+        port port_t calc()
+        export port portBoolIntIntIntInt_t recv(redirection_i,maxRequests,userID_i,nbDataToFetch,nbAnsweredReqs)
+        export port portBoolIntInt_t send(redirection_o,userID_o,dataQty)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            RequestLimiterInit(redirection_i,maxRequests,userID_i,nbDataToFetch,nbAnsweredReqs,currentNbRequests,redirection_o,userID_o,dataQty);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            RequestLimiterThen(redirection_i,maxRequests,userID_i,nbDataToFetch,nbAnsweredReqs,currentNbRequests,redirection_o,userID_o,dataQty);          
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type RequestLimiterRX()
+
+
+        component boolRX redirection_i()
+        component intRX maxRequests()
+        component intRX userID_i()
+        component intRX nbDataToFetch()
+        component intRX nbAnsweredReqs()
+
+        connector many2one_BoolIntIntIntInt_t to_the_core(redirection_i.to_the_core,maxRequests.to_the_core,userID_i.to_the_core,nbDataToFetch.to_the_core,nbAnsweredReqs.to_the_core)
+        
+        export port redirection_i.from_the_outside as redirection_i
+        export port maxRequests.from_the_outside as maxRequests
+        export port userID_i.from_the_outside as userID_i
+        export port nbDataToFetch.from_the_outside as nbDataToFetch
+        export port nbAnsweredReqs.from_the_outside as nbAnsweredReqs
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+
+    compound type RequestLimiterTX()
+
+        component boolTX redirection_o()
+        component intTX userID_o()
+        component intTX dataQty()
+
+        connector one2many_BoolIntInt_t from_the_core(redirection_o.from_the_core,userID_o.from_the_core,dataQty.from_the_core)
+
+        export port redirection_o.to_the_outside as redirection_o
+        export port userID_o.to_the_outside as userID_o
+        export port dataQty.to_the_outside as dataQty
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type RequestLimiter(bool isSource)
+
+        component RequestLimiterRX inputParameters()
+        component RequestLimiterTX outputParameters()
+
+        component RequestLimiterCore core(isSource)
+
+        connector flowBoolIntIntIntInt_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowBoolIntInt_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.redirection_i as redirection_i
+        export port inputParameters.maxRequests as maxRequests
+        export port inputParameters.userID_i as userID_i
+        export port inputParameters.nbDataToFetch as nbDataToFetch
+        export port inputParameters.nbAnsweredReqs as nbAnsweredReqs
+        
+        export port outputParameters.redirection_o as redirection_o
+        export port outputParameters.userID_o as userID_o
+        export port outputParameters.dataQty as dataQty
+
+    end
+end

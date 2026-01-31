@@ -1,0 +1,107 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package PidController
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type PidControllerCore(bool isSource)
+
+        // parameters
+        data float requested_time
+        data float resulting_time
+        data bool enabled
+        
+        // contextual
+        
+
+        // inner variables
+        data float derivative
+        data float integral
+        data float _error
+        data float dt
+
+        data float p
+        data float i
+        data float d
+
+        data int knob_value
+        data int min_knob_value
+        data int max_knob_value
+
+        // outputs
+        data int knob
+
+
+        port port_t start()
+        port port_t calc()
+        export port portFloatFloatBool_t recv(requested_time,resulting_time,enabled)
+        export port portInt_t send(knob)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            PidControllerInit(requested_time,resulting_time,enabled,derivative,integral,_error,dt,p,i,d,knob_value,min_knob_value,max_knob_value,knob);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            PidControllerThen(requested_time,resulting_time,enabled,derivative,integral,_error,dt,p,i,d,knob_value,min_knob_value,max_knob_value,knob);          
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type PidControllerRX()
+
+
+        component floatRX requested_time()
+        component floatRX resulting_time()
+        component boolRX enabled()
+
+        connector many2one_FloatFloatBool_t to_the_core(requested_time.to_the_core,resulting_time.to_the_core,enabled.to_the_core)
+        
+        export port requested_time.from_the_outside as requested_time
+        export port resulting_time.from_the_outside as resulting_time
+        export port enabled.from_the_outside as enabled
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+
+    compound type PidControllerTX()
+
+        component intTX knob()
+
+        connector one2many_Int_t from_the_core(knob.from_the_core)
+
+        export port knob.to_the_outside as knob
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type PidController(bool isSource)
+
+        component PidControllerRX inputParameters()
+        component PidControllerTX outputParameters()
+
+        component PidControllerCore core(isSource)
+
+        connector flowFloatFloatBool_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowInt_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.requested_time as requested_time
+        export port inputParameters.resulting_time as resulting_time
+        export port inputParameters.enabled as enabled
+        
+        export port outputParameters.knob as knob
+
+    end
+end

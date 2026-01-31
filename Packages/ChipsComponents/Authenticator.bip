@@ -1,0 +1,87 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package Authenticator
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type AuthenticatorCore(bool isSource)
+
+        // parameters
+        data bool authProvided
+        
+        // contextual
+        
+
+        // inner variables
+
+        // outputs
+        data bool isAuthenticated
+
+
+        port port_t start()
+        port port_t calc()
+        export port portBool_t recv(authProvided)
+        export port portBool_t send(isAuthenticated)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            AuthenticatorInit(authProvided,isAuthenticated);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            AuthenticatorThen(authProvided,isAuthenticated);          
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type AuthenticatorRX()
+
+
+        component boolRX authProvided()
+
+        connector many2one_Bool_t to_the_core(authProvided.to_the_core)
+        
+        export port authProvided.from_the_outside as authProvided
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+
+    compound type AuthenticatorTX()
+
+        component boolTX isAuthenticated()
+
+        connector one2many_Bool_t from_the_core(isAuthenticated.from_the_core)
+
+        export port isAuthenticated.to_the_outside as isAuthenticated
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type Authenticator(bool isSource)
+
+        component AuthenticatorRX inputParameters()
+        component AuthenticatorTX outputParameters()
+
+        component AuthenticatorCore core(isSource)
+
+        connector flowBool_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowBool_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.authProvided as authProvided
+        
+        export port outputParameters.isAuthenticated as isAuthenticated
+
+    end
+end

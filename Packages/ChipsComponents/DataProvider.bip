@@ -1,0 +1,124 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package DataProvider
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type DataProviderCore(bool isSource)
+
+        // parameters
+        data bool redirection
+        data int userID_i
+        data int dataQty
+        data bool cacheResponse
+        
+        // contextual
+        
+
+        // inner variables
+        data int maxDifferentData
+        data int maxUserID
+        data IntArray dataPerUserID
+        data int currentlyTreatedUserRequest
+        data int idToRespondTo
+        data int dataToFetch
+        data float time
+        data bool cacheSearching
+        data bool oneLessPendingRequest_inner
+
+        // outputs
+        data int userID_o
+        data int cacheRequest
+        data bool oneLessPendingRequest
+        data float timeSpentOnReq
+        data bool enableTimeReading
+
+
+        port port_t start()
+        port port_t calc()
+        export port portBoolIntIntBool_t recv(redirection,userID_i,dataQty,cacheResponse)
+        export port portIntIntBoolFloatBool_t send(userID_o,cacheRequest,oneLessPendingRequest,timeSpentOnReq,enableTimeReading)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            DataProviderInit(redirection,userID_i,dataQty,cacheResponse,maxDifferentData,maxUserID,dataPerUserID,currentlyTreatedUserRequest,idToRespondTo,dataToFetch,time,cacheSearching,oneLessPendingRequest_inner,userID_o,cacheRequest,oneLessPendingRequest,timeSpentOnReq,enableTimeReading);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            DataProviderThen(redirection,userID_i,dataQty,cacheResponse,maxDifferentData,maxUserID,dataPerUserID,currentlyTreatedUserRequest,idToRespondTo,dataToFetch,time,cacheSearching,oneLessPendingRequest_inner,userID_o,cacheRequest,oneLessPendingRequest,timeSpentOnReq,enableTimeReading);          
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type DataProviderRX()
+
+
+        component boolRX redirection()
+        component intRX userID_i()
+        component intRX dataQty()
+        component boolRX cacheResponse()
+
+        connector many2one_BoolIntIntBool_t to_the_core(redirection.to_the_core,userID_i.to_the_core,dataQty.to_the_core,cacheResponse.to_the_core)
+        
+        export port redirection.from_the_outside as redirection
+        export port userID_i.from_the_outside as userID_i
+        export port dataQty.from_the_outside as dataQty
+        export port cacheResponse.from_the_outside as cacheResponse
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+
+    compound type DataProviderTX()
+
+        component intTX userID_o()
+        component intTX cacheRequest()
+        component boolTX oneLessPendingRequest()
+        component floatTX timeSpentOnReq()
+        component boolTX enableTimeReading()
+
+        connector one2many_IntIntBoolFloatBool_t from_the_core(userID_o.from_the_core,cacheRequest.from_the_core,oneLessPendingRequest.from_the_core,timeSpentOnReq.from_the_core,enableTimeReading.from_the_core)
+
+        export port userID_o.to_the_outside as userID_o
+        export port cacheRequest.to_the_outside as cacheRequest
+        export port oneLessPendingRequest.to_the_outside as oneLessPendingRequest
+        export port timeSpentOnReq.to_the_outside as timeSpentOnReq
+        export port enableTimeReading.to_the_outside as enableTimeReading
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type DataProvider(bool isSource)
+
+        component DataProviderRX inputParameters()
+        component DataProviderTX outputParameters()
+
+        component DataProviderCore core(isSource)
+
+        connector flowBoolIntIntBool_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowIntIntBoolFloatBool_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.redirection as redirection
+        export port inputParameters.userID_i as userID_i
+        export port inputParameters.dataQty as dataQty
+        export port inputParameters.cacheResponse as cacheResponse
+        
+        export port outputParameters.userID_o as userID_o
+        export port outputParameters.cacheRequest as cacheRequest
+        export port outputParameters.oneLessPendingRequest as oneLessPendingRequest
+        export port outputParameters.timeSpentOnReq as timeSpentOnReq
+        export port outputParameters.enableTimeReading as enableTimeReading
+
+    end
+end

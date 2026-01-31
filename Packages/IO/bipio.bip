@@ -43,7 +43,7 @@ package bipio
         data int data_to_write
         data CppOutStream stream
 
-        export port port1int_t recv(data_to_write)
+        export port portInt_t recv(data_to_write)
         port port_t write()
 
         place DATA_RCVD, DATA_WRITTEN, FINAL
@@ -73,7 +73,7 @@ package bipio
         data int data_read
         data CppInStream stream
 
-        export port port1int_t send(data_to_send)
+        export port portInt_t send(data_to_send)
         port port_t read()
 
         place DATA_SENT, DATA_READ, FINAL

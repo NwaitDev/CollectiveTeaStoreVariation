@@ -1,30 +1,34 @@
 @cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
-package ChipsComponentTemplate
+package _ComponentName_
 
     use ChipsFunctions
     use base
     use bipio
     
-    atom type AnyComponentCore(bool isSource)
+
+    atom type _ComponentName_Core(bool isSource)
 
         // parameters
-
+        data _p_ _p_
+        
         // contextual
+        
 
         // inner variables
 
         // outputs
+        data _p_ _p_
 
 
         port port_t start()
         port port_t calc()
-        export port port_t recv()
-        export port port_t send()
+        export port port_p__t recv(_p_)
+        export port port_p__t send(_p_)
 
         place INIT, RECEIVING, THEN, SENDING
 
         initial to INIT do {
-            AnyInit();
+            _ComponentName_Init(_p_);
         }
 
         on start from INIT to RECEIVING provided(!isSource)
@@ -32,7 +36,7 @@ package ChipsComponentTemplate
 
         on recv from RECEIVING to THEN 
         on calc from THEN to SENDING do {
-            //AnyThen();        
+            _ComponentName_Then(_p_);          
         }
         on send from SENDING to RECEIVING
 
@@ -40,37 +44,44 @@ package ChipsComponentTemplate
 
     
 
-    compound type AnyRX()
+    compound type _ComponentName_RX()
 
-        component intRX parameter()
-        
-        connector export1port_t to_the_core(parameter.to_the_core)
-        
-        export port parameter.from_the_outside as from_the_outside
 
-        export port to_the_core.out as to_the_core
+        component _RXorTX_type_RX _p_()
+
+        connector many2one__p__t to_the_core(_p_.to_the_core)
+        
+        export port _p_.from_the_outside as _p_
+
+        export port to_the_core.r0 as to_the_core
     end
 
-    compound type UserMachineTX()
-        component intTX parameter()
 
-        export port parameter.to_the_outside as to_the_outside
-        export port parameter.from_the_core as from_the_core
+    compound type _ComponentName_TX()
+
+        component _RXorTX_type_TX _p_()
+
+        connector one2many__p__t from_the_core(_p_.from_the_core)
+
+        export port _p_.to_the_outside as _p_
+
+        export port from_the_core.s0 as from_the_core
+
     end
 
-    compound type AnyComponent(bool isSource)
+    compound type _ComponentName_(bool isSource)
 
-        component anyRX inputParameters()
-        component UserMachineTX outputParameters()
+        component _ComponentName_RX inputParameters()
+        component _ComponentName_TX outputParameters()
 
-        component AnyComponentCore core(isSource)
+        component _ComponentName_Core core(isSource)
 
-        connector flow_t RX2Core(inputParameters.to_the_core, core.recv)
-        connector flow_t Core2TX(core.send, outputParameters.from_the_core)
+        connector _flowconnector_ RX2Core(inputParameters.to_the_core, core.recv)
+        connector _flowconnector_ Core2TX(core.send, outputParameters.from_the_core)
         
-        export port inputParameters.from_the_outside as from_the_outside
+        export port inputParameters._p_ as _p_
         
-        export port outputParameters.to_the_outside as to_the_outside
+        export port outputParameters._p_ as _p_
+
     end
-
 end

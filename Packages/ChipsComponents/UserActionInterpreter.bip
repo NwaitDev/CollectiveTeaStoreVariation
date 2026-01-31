@@ -1,0 +1,102 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package UserActionInterpreter
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type UserActionInterpreterCore(bool isSource)
+
+        // parameters
+        data int nbDataRcvd
+        data bool authDataRcvd
+        data int userIDRcvd
+        
+        // contextual
+        
+
+        // inner variables
+
+        // outputs
+        data int nbData
+        data int reqID
+        data bool authProvided
+
+
+        port port_t start()
+        port port_t calc()
+        export port portIntBoolInt_t recv(nbDataRcvd,authDataRcvd,userIDRcvd)
+        export port portIntIntBool_t send(nbData,reqID,authProvided)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            UserActionInterpreterInit(nbDataRcvd,authDataRcvd,userIDRcvd,nbData,reqID,authProvided);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            UserActionInterpreterThen(nbDataRcvd,authDataRcvd,userIDRcvd,nbData,reqID,authProvided);          
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type UserActionInterpreterRX()
+
+
+        component intRX nbDataRcvd()
+        component boolRX authDataRcvd()
+        component intRX userIDRcvd()
+
+        connector many2one_IntBoolInt_t to_the_core(nbDataRcvd.to_the_core, authDataRcvd.to_the_core, userIDRcvd.to_the_core)
+        
+        export port nbDataRcvd.from_the_outside as nbDataRcvd
+        export port authDataRcvd.from_the_outside as authDataRcvd
+        export port userIDRcvd.from_the_outside as userIDRcvd
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+
+    compound type UserActionInterpreterTX()
+
+        component intTX nbData()
+        component intTX reqID()
+        component boolTX authProvided()
+
+        connector one2many_IntIntBool_t from_the_core(nbData.from_the_core, reqID.from_the_core, authProvided.from_the_core)
+
+        export port nbData.to_the_outside as nbData
+        export port reqID.to_the_outside as reqID
+        export port authProvided.to_the_outside as authProvided
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type UserActionInterpreter(bool isSource)
+
+        component UserActionInterpreterRX inputParameters()
+        component UserActionInterpreterTX outputParameters()
+
+        component UserActionInterpreterCore core(isSource)
+
+        connector flowIntBoolInt_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowIntIntBool_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.nbDataRcvd as nbDataRcvd
+        export port inputParameters.authDataRcvd as authDataRcvd
+        export port inputParameters.userIDRcvd as userIDRcvd
+        
+        export port outputParameters.nbData as nbData
+        export port outputParameters.reqID as reqID
+        export port outputParameters.authProvided as authProvided
+    end
+end

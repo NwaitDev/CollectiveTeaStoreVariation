@@ -1,0 +1,96 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package Cache
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type CacheCore(bool isSource)
+
+        // parameters
+        data int requestedData
+        data int cacheSize
+        
+        // contextual
+        
+
+        // inner variables
+        data int maxCacheSize
+        data int minCacheSize
+        data IntArray cache
+        data int newestDataIndex
+        data bool found
+        data int foundIndex
+
+        // outputs
+        data bool foundInCache
+
+        port port_t start()
+        port port_t calc()
+        export port portIntInt_t recv(requestedData,cacheSize)
+        export port portBool_t send(foundInCache)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            CacheInit(requestedData,cacheSize,maxCacheSize,minCacheSize,cache,newestDataIndex,found,foundIndex,foundInCache);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            CacheThen(requestedData,cacheSize,maxCacheSize,minCacheSize,cache,newestDataIndex,found,foundIndex,foundInCache);          
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type CacheRX()
+
+
+        component intRX requestedData()
+        component intRX cacheSize()
+
+        connector many2one_IntInt_t to_the_core(requestedData.to_the_core,cacheSize.to_the_core)
+        
+        export port requestedData.from_the_outside as requestedData
+        export port cacheSize.from_the_outside as cacheSize
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+
+    compound type CacheTX()
+
+        component boolTX foundInCache()
+
+        connector one2many_Bool_t from_the_core(foundInCache.from_the_core)
+
+        export port foundInCache.to_the_outside as foundInCache
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type Cache(bool isSource)
+
+        component CacheRX inputParameters()
+        component CacheTX outputParameters()
+
+        component CacheCore core(isSource)
+
+        connector flowIntInt_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowBool_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.requestedData as requestedData
+        export port inputParameters.cacheSize as cacheSize
+        
+        export port outputParameters.foundInCache as foundInCache
+
+    end
+end

@@ -90,8 +90,8 @@ with {
 -> userAuth(requestList[currentRequest]<0)
 
 
-logical UserActionInterpreter(int nbDataRcvd, bool authDataRcvd, int userIDRcvd) 
--> nbData(nbDataRcvd)
+logical UserActionInterpreter(int nbDataRcvd, bool authDataRcvd, int userIDRcvd)
+init {} then {} -> nbData(nbDataRcvd)
 -> reqID(userIDRcvd)
 -> authProvided(authDataRcvd)
 
@@ -100,7 +100,7 @@ logical Authenticator(bool authProvided)
 init {} then {} -> isAuthenticated(authProvided)
 
 
-logical RequestValidator(int nbData, int requestID, bool isAuthenticated) 
+logical RequestValidator(int nbData, int requestID, bool isAuthenticated)
 init {
     int nbDataToFetch;
     bool needRedirection;
@@ -403,12 +403,12 @@ among Backend {
 // the request is the component that will also receive the ID of
 // the redirected request, so we flood the network
 spread (bool redirection = input) broadcastRedirection 
-among Backend
+among Backend {}
 ->@(redirection)
 -> default(redirection)
 
 spread (int dataQtyToFind = input) broadcastDataQty
-among Backend
+among Backend {}
 -> @(dataQtyToFind)
 -> default(dataQtyToFind)
 

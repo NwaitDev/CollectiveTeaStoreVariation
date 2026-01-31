@@ -1,0 +1,104 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package RequestValidator
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type RequestValidatorCore(bool isSource)
+
+        // parameters
+        data int nbData
+        data int requestID
+        data bool isAuthenticated
+        
+        // contextual
+        
+
+        // inner variables
+        data int nbDataToFetch
+        data bool needRedirection
+
+        // outputs
+        data int nbDataRequested
+        data int userID
+        data bool redirection
+
+        port port_t start()
+        port port_t calc()
+        export port portIntIntBool_t recv(nbData,requestID,isAuthenticated)
+        export port portIntIntBool_t send(nbDataRequested,userID,redirection)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            RequestValidatorInit(nbData,requestID,isAuthenticated,nbDataToFetch,needRedirection,nbDataRequested,userID,redirection);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            RequestValidatorThen(nbData,requestID,isAuthenticated,nbDataToFetch,needRedirection,nbDataRequested,userID,redirection);          
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type RequestValidatorRX()
+
+
+        component intRX nbData()
+        component intRX requestID()
+        component boolRX isAuthenticated()
+
+        connector many2one_IntIntBool_t to_the_core(nbData.to_the_core,requestID.to_the_core,isAuthenticated.to_the_core)
+        
+        export port nbData.from_the_outside as nbData
+        export port requestID.from_the_outside as requestID
+        export port isAuthenticated.from_the_outside as isAuthenticated
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+
+    compound type RequestValidatorTX()
+
+        component intTX nbDataRequested()
+        component intTX userID()
+        component boolTX redirection()
+
+        connector one2many_IntIntBool_t from_the_core(nbDataRequested.from_the_core,userID.from_the_core,redirection.from_the_core)
+
+        export port nbDataRequested.to_the_outside as nbDataRequested
+        export port userID.to_the_outside as userID
+        export port redirection.to_the_outside as redirection
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type RequestValidator(bool isSource)
+
+        component RequestValidatorRX inputParameters()
+        component RequestValidatorTX outputParameters()
+
+        component RequestValidatorCore core(isSource)
+
+        connector flowIntIntBool_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowIntIntBool_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.nbData as nbData
+        export port inputParameters.requestID as requestID
+        export port inputParameters.isAuthenticated as isAuthenticated
+        
+        export port outputParameters.nbDataRequested as nbDataRequested
+        export port outputParameters.userID as userID
+        export port outputParameters.redirection as redirection
+
+    end
+end

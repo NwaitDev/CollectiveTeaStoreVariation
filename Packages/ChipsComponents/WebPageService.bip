@@ -1,0 +1,90 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package WebPageService
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type WebPageServiceCore(bool isSource)
+
+        // parameters
+        data IntArray respondToThisIDs
+        
+        // contextual
+        
+
+        // inner variables
+        data int currentRequestAnswered
+        data IntArray requestsToAnswerTo
+        data bool requestFound
+
+        // outputs
+        data int idToRespondTo
+
+
+        port port_t start()
+        port port_t calc()
+        export port portIntArray_t recv(respondToThisIDs)
+        export port portInt_t send(idToRespondTo)
+
+        place INIT, RECEIVING, THEN, SENDING
+
+        initial to INIT do {
+            WebPageServiceInit(respondToThisIDs,currentRequestAnswered,requestsToAnswerTo,requestFound,idToRespondTo);
+        }
+
+        on start from INIT to RECEIVING provided(!isSource)
+        on start from INIT to SENDING provided(isSource)
+
+        on recv from RECEIVING to THEN 
+        on calc from THEN to SENDING do {
+            WebPageServiceThen(respondToThisIDs,currentRequestAnswered,requestsToAnswerTo,requestFound,idToRespondTo);          
+        }
+        on send from SENDING to RECEIVING
+
+    end
+
+    
+
+    compound type WebPageServiceRX()
+
+
+        component IntArrayRX respondToThisIDs()
+
+        connector many2one_IntArray_t to_the_core(respondToThisIDs.to_the_core)
+        
+        export port respondToThisIDs.from_the_outside as respondToThisIDs
+
+        export port to_the_core.r0 as to_the_core
+    end
+
+
+    compound type WebPageServiceTX()
+
+        component intTX idToRespondTo()
+
+        connector one2many_Int_t from_the_core(idToRespondTo.from_the_core)
+
+        export port idToRespondTo.to_the_outside as idToRespondTo
+
+        export port from_the_core.s0 as from_the_core
+
+    end
+
+    compound type WebPageService(bool isSource)
+
+        component WebPageServiceRX inputParameters()
+        component WebPageServiceTX outputParameters()
+
+        component WebPageServiceCore core(isSource)
+
+        connector flowIntArray_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowInt_t Core2TX(core.send, outputParameters.from_the_core)
+        
+        export port inputParameters.respondToThisIDs as respondToThisIDs
+        
+        export port outputParameters.idToRespondTo as idToRespondTo
+
+    end
+end

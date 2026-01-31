@@ -5,13 +5,21 @@ package System
     use bipio
     use UserMachine
     use ServerMachine
+    use UserActionInterpreter
+    use Authenticator
+    use RequestValidator
+    use RequestLimiter
+    use Cache
+    use DataProvider
+    use WebPageService
+    use PidController
     use base
 
     atom type constant_int_stream(int cst, int streamsize)
         data int the_data
         data int ticks
 
-        export port port1int_t output(the_data)
+        export port portInt_t output(the_data)
 
         place STREAMING, FINISHED
 
@@ -35,7 +43,7 @@ package System
         data float the_data
         data int ticks
 
-        export port port1float_t output(the_data)
+        export port portFloat_t output(the_data)
 
         place STREAMING, FINISHED
 
@@ -58,7 +66,7 @@ package System
         data bool the_data
         data int ticks
 
-        export port port1bool_t output(the_data)
+        export port portBool_t output(the_data)
 
         place STREAMING, FINISHED
 
@@ -114,7 +122,7 @@ package System
     atom type int_stream_eater()
         data int the_data
 
-        export port port1int_t input(the_data)
+        export port portInt_t input(the_data)
 
         place EATING
         initial to EATING
@@ -127,7 +135,7 @@ package System
     atom type float_stream_eater()
         data float the_data
 
-        export port port1float_t input(the_data)
+        export port portFloat_t input(the_data)
 
         place EATING
         initial to EATING
@@ -140,7 +148,7 @@ package System
     atom type bool_stream_eater()
         data bool the_data
 
-        export port port1bool_t input(the_data)
+        export port portBool_t input(the_data)
 
         place EATING
         initial to EATING
@@ -169,7 +177,7 @@ package System
         }
     end
 
-    compound type SystemCompound1()
+    compound type SystemUserMachineOnly()
 
         component UserMachine sut(false)
 
@@ -188,6 +196,20 @@ package System
         connector flowInt_t maxNbData2sut(maxNbData.output, sut.maxNbData)
 
         connector flowInt_t sut2httpRequest(sut.httpRequest, httpRequest.input)
+    end
+
+    compound type AllComponents()
+
+        component UserMachine sut1(false)
+        component ServerMachine sut2(false)
+        component UserActionInterpreter sut3(false)
+        component Authenticator sut4(false)
+        component RequestValidator sut5(false)
+        component RequestLimiter sut6(false)
+        component Cache sut7(false)
+        component DataProvider sut8(false)
+        component WebPageService sut9(false)
+        component PidController sut10(false)
     end
 
     compound type SystemCompound()
