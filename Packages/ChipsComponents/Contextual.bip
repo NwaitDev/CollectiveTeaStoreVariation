@@ -1,0 +1,27 @@
+@cpp(include="ChipsFunctions.hpp,base.hpp,bipio.hpp")
+package Contextual
+
+    use ChipsFunctions
+    use base
+    use bipio
+    
+
+    atom type ContextualInt()
+
+        data int variable
+
+        export port portInt_t giveToken(variable)
+        export port portInt_t receiveToken(variable)
+        export port portInt_t justRead(variable)
+
+        place AVAILABLE, BUSY
+
+        initial to AVAILABLE
+
+        on giveToken from AVAILABLE to BUSY
+        on receiveToken from BUSY to AVAILABLE
+        on justRead from AVAILABLE to AVAILABLE
+
+    end
+
+end

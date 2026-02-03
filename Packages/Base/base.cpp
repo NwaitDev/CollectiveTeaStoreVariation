@@ -52,6 +52,26 @@ bool are_copies(IntArray& a, IntArray& b){
 }
 
 
+bool are_copies(c_IntArray& a, c_IntArray& b){
+    if(std::get<1>(a)!=std::get<1>(b)){
+        return false;
+    }
+    return are_copies(std::get<0>(a),std::get<0>(b));
+}
+bool are_copies(IntArray& a, c_IntArray& b){
+    if(STOP == std::get<1>(b)){
+        return false;
+    }
+    return are_copies(a,std::get<0>(b));
+}
+
+bool are_copies(c_IntArray& a, IntArray& b){
+    if(STOP == std::get<1>(a)){
+        return false;
+    }
+    return are_copies(b,std::get<0>(a));
+}
+
 
 double randomdouble(){
 	return (double)rand() / RAND_MAX;

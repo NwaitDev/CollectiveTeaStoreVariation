@@ -1,15 +1,422 @@
-@cpp(src="ChipsComponents.cpp,bipio.cpp,ChipsFunctions.cpp",include="ChipsFunctions.hpp,ChipsComponents.hpp,bipio.hpp")
-
+@cpp(include="stdio.h,bipio.hpp,base.hpp")
 
 package System
 
-    use base
     use bipio
-    use ChipsFunctions
+    use UserMachine
+    use ServerMachine
+    use UserActionInterpreter
+    use Authenticator
+    use RequestValidator
+    use RequestLimiter
+    use Cache
+    use DataProvider
+    use WebPageService
+    use PidController
+    use base
+
+
+    atom type aggregatingRequests_default_accumulators()
+        data IntArray default_value
+        data c_IntArray prev_output_data
+        data c_IntArray next_output_data
+        data IntArray target_output_data
+        data bool is_constant
+
+        export port portCIntArrayCIntArrayIntArray_t output(prev_output_data,next_output_data,next_output_data)
+
+        place STREAMING
+
+        initial to STREAMING do {
+            default_value = zeros(100);
+            prev_output_data = zeros(100);
+            next_output_data = zeros(100);
+            is_constant = true;
+        }
+
+        on output from STREAMING to STREAMING provided(is_constant) do {
+            is_constant = are_copies(prev_output_data,default_value);
+            if (is_constant) then
+                is_constant = are_copies(next_output_data,default_value);
+                if (is_constant) then 
+                    is_constant = are_copies(target_output_data,default_value);
+                fi
+            fi
+        }
+
+        on output from STREAMING to FINISHED provided (!is_constant) do {
+            printf("Error, the data of the aggregatingRequests_default_accumulators has been modified.");
+            printf("It should be read only!\n")
+        }
+
+    end
+
+    atom type responseToTheRightUser_accumulator_eater()
+        data int accumulated
+
+        export port portInt_t input(accumulated)
+
+        place LISTENING
+
+        initial to LISTENING
+        on input from LISTENING to LISTENING
+    end
+
+    atom type streamConstantInt(int cst)
+        data int constant
+        data bool is_constant
+
+        export port portInt_t output(constant)
+
+        place STREAMING
+
+        initial to STREAMING do {
+            constant = cst;
+            is_constant = true;
+        }
+
+        on output from STREAMING to STREAMING provided(is_constant) do {
+            is_constant = cst == constant;
+        }
+
+        on output from STREAMING to FINISHED provided (!is_constant) do {
+            printf("Error, the constant data has been modified.\n");
+            printf("It should be read only!\n")
+        }
+    end
+
+    atom type streamConstantFloat(float cst)
+        data float constant
+        data bool is_constant
+
+        export port portInt_t output(constant)
+
+        place STREAMING
+
+        initial to STREAMING do {
+            constant = cst;
+            is_constant = true;
+        }
+
+        on output from STREAMING to STREAMING provided(is_constant) do {
+            is_constant = cst == constant;
+        }
+
+        on output from STREAMING to FINISHED provided (!is_constant) do {
+            printf("Error, the constant data has been modified.\n");
+            printf("It should be read only!\n")
+        }
+    end
 
     compound type SystemCompound()
 
-        
+        component UserMachine umachine0(false)
+        component UserMachine umachine1(false)
+        component UserMachine umachine2(false)
+        component UserMachine umachine3(false)
+        component UserMachine umachine4(false)
+        component UserMachine umachine5(false)
+        component UserMachine umachine6(false)
+        component UserMachine umachine7(false)
+        component UserMachine umachine8(false)
+        component UserMachine umachine9(false)
 
+        component ServerMachine smachine(false)
+
+        component UserActionInterpreter uainterpreter(false)
+
+        component WebPageService wpservice(false)
+        
+        component RequestValidator rvalidator(false)
+
+        component RequestLimiter rlimiter(false)
+
+        component Cache cache0(false)
+        component Cache cache1(false)
+        component Cache cache2(false)
+        component Cache cache3(false)
+
+        component PidController ctrl0(false)
+        component PidController ctrl1(false)
+        component PidController ctrl2(false)
+        component PidController ctrl3(false)
+
+        component Authenticator authenticator(false)
+
+        component DataProvider dprovider0(false)
+        component DataProvider dprovider1(false)
+        component DataProvider dprovider2(false)
+        component DataProvider dprovider3(false)
+
+
+        component aggregatingRequests_default_accumulators defaultForUmachine0_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine0_no_prev_value()
+        component aggregatingRequests_default_accumulators defaultForUmachine0_no_next_value()
+
+        component aggregatingRequests_default_accumulators defaultForUmachine1_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine1_no_next_value()
+
+        component aggregatingRequests_default_accumulators defaultForUmachine2_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine2_no_next_value()
+
+        component aggregatingRequests_default_accumulators defaultForUmachine3_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine3_no_next_value()
+
+        component aggregatingRequests_default_accumulators defaultForUmachine4_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine4_no_next_value()
+        
+        component aggregatingRequests_default_accumulators defaultForUmachine5_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine5_no_next_value()
+
+        component aggregatingRequests_default_accumulators defaultForUmachine6_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine6_no_next_value()
+
+        component aggregatingRequests_default_accumulators defaultForUmachine7_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine7_no_next_value()
+
+        component aggregatingRequests_default_accumulators defaultForUmachine8_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine8_no_next_value()
+
+        component aggregatingRequests_default_accumulators defaultForUmachine9_fromUserToInternet()
+        component aggregatingRequests_default_accumulators defaultForUmachine9_no_next_value()
+
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests0(
+                umachine0.fromUserToInternet,
+                defaultForUmachine0_fromUserToInternet.output,
+                defaultForUmachine0_no_prev_value.output,
+                defaultForUmachine0_no_next_value.output
+            )
+        
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests1(
+                umachine1.fromUserToInternet,
+                defaultForUmachine1_fromUserToInternet.output,
+                collective_aggregatingRequests0.accumulated,
+                defaultForUmachine1_no_next_value.output
+            )
+        
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests2(
+                umachine2.fromUserToInternet,
+                defaultForUmachine2_fromUserToInternet.output,
+                collective_aggregatingRequests1.accumulated,
+                defaultForUmachine2_no_next_value.output
+            )
+
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests3(
+                umachine3.fromUserToInternet,
+                defaultForUmachine3_fromUserToInternet.output,
+                collective_aggregatingRequests2.accumulated,
+                defaultForUmachine3_no_next_value.output
+            )
+        
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests4(
+                umachine4.fromUserToInternet,
+                defaultForUmachine4_fromUserToInternet.output,
+                collective_aggregatingRequests3.accumulated,
+                defaultForUmachine4_no_next_value.output
+            )
+        
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests5(portCIntArrayCIntArrayIntArray_t
+                umachine5.fromUserToInternet,
+                defaultForUmachine5_fromUserToInternet.output,
+                collective_aggregatingRequests4.accumulated,
+                defaultForUmachine5_no_next_value.output
+            )
+
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests6(
+                umachine6.fromUserToInternet,
+                defaultForUmachine6_fromUserToInternet.output,
+                collective_aggregatingRequests5.accumulated,
+                defaultForUmachine6_no_next_value.output
+            )
+        
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests7(
+                umachine7.fromUserToInternet,
+                defaultForUmachine7_fromUserToInternet.output,
+                collective_aggregatingRequests6.accumulated,
+                defaultForUmachine7_no_next_value.output
+            )
+        
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests8(
+                umachine8.fromUserToInternet,
+                defaultForUmachine8_fromUserToInternet.output,
+                collective_aggregatingRequests7.accumulated,
+                defaultForUmachine8_no_next_value.output
+            )
+
+        connector collectConnector_aggregatingRequests_among_UserMachine 
+            collective_aggregatingRequests9(
+                umachine9.fromUserToInternet,
+                defaultForUmachine9_fromUserToInternet.output,
+                collective_aggregatingRequests8.accumulated,
+                defaultForUmachine9_no_next_value.output
+            )
+        
+        connector extract_targetOutputf ,collective__CIntArrayCIntArrayIntArray(collective_aggregatingRequests9, smachine.fromInternet)
+
+        component responseToTheRightUser_accumulator_eater userMachine0prevEater()
+        component responseToTheRightUser_accumulator_eater userMachine0nextEater()
+
+        component responseToTheRightUser_accumulator_eater userMachine1nextEater()
+        component responseToTheRightUser_accumulator_eater userMachine2nextEater()
+        component responseToTheRightUser_accumulator_eater userMachine3nextEater()
+        component responseToTheRightUser_accumulator_eater userMachine4nextEater()
+        component responseToTheRightUser_accumulator_eater userMachine5nextEater()
+        component responseToTheRightUser_accumulator_eater userMachine6nextEater()
+        component responseToTheRightUser_accumulator_eater userMachine7nextEater()
+        component responseToTheRightUser_accumulator_eater userMachine8nextEater()
+        component responseToTheRightUser_accumulator_eater userMachine9nextEater()
+
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser0(
+                umachine0.computerID_collective_read,
+                userMachine0nextEater.input, userMachine0prevEater.input,
+                umachine0.httpResponse
+            )
+        
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser1(
+                umachine1.computerID_collective_read,
+                userMachine1nextEater.input, collective_responseToTheRightUser0.accumulated,
+                umachine1.httpResponse
+            )
+
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser2(
+                umachine2.computerID_collective_read,
+                userMachine2nextEater.input, collective_responseToTheRightUser1.accumulated,
+                umachine2.httpResponse
+            )
+        
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser3(
+                umachine3.computerID_collective_read,
+                userMachine3nextEater.input, collective_responseToTheRightUser2.accumulated,
+                umachine3.httpResponse
+            )
+
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser4(
+                umachine4.computerID_collective_read,
+                userMachine4nextEater.input, collective_responseToTheRightUser3.accumulated,
+                umachine4.httpResponse
+            )
+
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser5(
+                umachine5.computerID_collective_read,
+                userMachine5nextEater.input, collective_responseToTheRightUser4.accumulated,
+                umachine5.httpResponse
+            )
+
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser6(
+                umachine6.computerID_collective_read,
+                userMachine6nextEater.input, collective_responseToTheRightUser5.accumulated,
+                umachine6.httpResponse
+            )
+
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser7(
+                umachine7.computerID_collective_read,
+                userMachine7extEater.input, collective_responseToTheRightUser6.accumulated,
+                umachine7.httpResponse
+            )
+
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser8(
+                umachine8.computerID_collective_read,
+                userMachine8nextEater.input, collective_responseToTheRightUser7.accumulated,
+                umachine8.httpResponse
+            )
+
+        connector spreadConnector_responseToTheRightUser_among_UserMachine
+            collective_responseToTheRightUser9(
+                umachine9.computerID_collective_read,
+                userMachine9nextEater.input, collective_responseToTheRightUser8.accumulated,
+                umachine9.httpResponse
+            )
+
+        connector flowInt_t startSpreadResponseToTheRightUser(
+            smachine.fromServerToInternet, collective_responseToTheRightUser9.accumulated
+        )
+
+        component streamConstantInt umachine0StartTime(0)
+        connector flowInt_t startTime0(umachine0StartTime.output, umachine0.startTime)
+        component streamConstantInt umachine1StartTime(2)
+        connector flowInt_t startTime1(umachine1StartTime.output, umachine1.startTime)
+        component streamConstantInt umachine2StartTime(4)
+        connector flowInt_t startTime2(umachine2StartTime.output, umachine2.startTime)
+        component streamConstantInt umachine3StartTime(6)
+        connector flowInt_t startTime3(umachine3StartTime.output, umachine3.startTime)
+        component streamConstantInt umachine4StartTime(8)
+        connector flowInt_t startTime4(umachine4StartTime.output, umachine4.startTime)
+        component streamConstantInt umachine5StartTime(10)
+        connector flowInt_t startTime5(umachine5StartTime.output, umachine5.startTime)
+        component streamConstantInt umachine6StartTime(12)
+        connector flowInt_t startTime6(umachine6StartTime.output, umachine6.startTime)
+        component streamConstantInt umachine7StartTime(14)
+        connector flowInt_t startTime7(umachine7StartTime.output, umachine7.startTime)
+        component streamConstantInt umachine8StartTime(16)
+        connector flowInt_t startTime8(umachine8StartTime.output, umachine8.startTime)
+        component streamConstantInt umachine9StartTime(18)
+        connector flowInt_t startTime9(umachine9StartTime.output, umachine9.startTime)
+
+        component streamConstantInt umachine0EndTime(0)
+        connector flowInt_t endTime0(umachine0EndTime.output, umachine0.endTime)
+        component streamConstantInt umachine1EndTime(2)
+        connector flowInt_t endTime1(umachine1EndTime.output, umachine1.endTime)
+        component streamConstantInt umachine2EndTime(4)
+        connector flowInt_t endTime2(umachine2EndTime.output, umachine2.endTime)
+        component streamConstantInt umachine3EndTime(6)
+        connector flowInt_t endTime3(umachine3EndTime.output, umachine3.endTime)
+        component streamConstantInt umachine4EndTime(8)
+        connector flowInt_t endTime4(umachine4EndTime.output, umachine4.endTime)
+        component streamConstantInt umachine5EndTime(10)
+        connector flowInt_t endTime5(umachine5EndTime.output, umachine5.endTime)
+        component streamConstantInt umachine6EndTime(12)
+        connector flowInt_t endTime6(umachine6EndTime.output, umachine6.endTime)
+        component streamConstantInt umachine7EndTime(14)
+        connector flowInt_t endTime7(umachine7EndTime.output, umachine7.endTime)
+        component streamConstantInt umachine8EndTime(16)
+        connector flowInt_t endTime8(umachine8EndTime.output, umachine8.endTime)
+        component streamConstantInt umachine9EndTime(18)
+        connector flowInt_t endTime9(umachine9EndTime.output, umachine9.endTime)
+
+        component streamConstantInt umachine0id(1)
+        connector flowInt_t id(umachine0id.output, umachine0.id)
+        component streamConstantInt umachine1id(2)
+        connector flowInt_t id(umachine1id.output, umachine1.id)
+        component streamConstantInt umachine2id(3)
+        connector flowInt_t id(umachine2id.output, umachine2.id)
+        component streamConstantInt umachine3id(4)
+        connector flowInt_t id(umachine3id.output, umachine3.id)
+        component streamConstantInt umachine4id(5)
+        connector flowInt_t id(umachine4id.output, umachine4.id)
+        component streamConstantInt umachine5id(6)
+        connector flowInt_t id(umachine5id.output, umachine5.id)
+        component streamConstantInt umachine6id(7)
+        connector flowInt_t id(umachine6id.output, umachine6.id)
+        component streamConstantInt umachine7id(8)
+        connector flowInt_t id(umachine7id.output, umachine7.id)
+        component streamConstantInt umachine8id(9)
+        connector flowInt_t id(umachine8id.output, umachine8.id)
+        component streamConstantInt umachine9id(10)
+        connector flowInt_t id(umachine9id.output, umachine9.id)
+
+        connector flowInt_t wps2smachine(wpservice.idToRespondTo, smachine.wpServed)
+        connector flowInt_t smachin2uaiNbData(smachine.nbData, uainterpreter.nbDataRcvd)
+        connector flowInt_t smachin2uaiAuth(smachine.authDataRcvd, uainterpreter.userAuth)
+        connector flowInt_t smachin2uaiUserID(smachine.userID, uainterpreter.userIDRcvd)
+
+        connector 
     end
 end

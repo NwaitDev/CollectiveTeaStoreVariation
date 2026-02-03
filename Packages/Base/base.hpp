@@ -29,6 +29,9 @@ using c_IntArray = std::tuple<IntArray, collective_optional>;
 IntArray zeros(const int dim1);
 IntArray range(const int upto);
 bool are_copies(IntArray&, IntArray&);
+bool are_copies(c_IntArray&, c_IntArray&);
+bool are_copies(IntArray&, c_IntArray&);
+bool are_copies(c_IntArray&, IntArray&);
 
 
 c_int cpy(c_int&);

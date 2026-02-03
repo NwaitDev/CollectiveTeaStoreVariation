@@ -10,8 +10,6 @@ void UserMachineInit(int& httpResponse_in, int& startTime_in, int& endTime_in, i
 
     waiting__inner = false;
     time_inner = 0;
-    computerID_ctx = id_in;
-
     //nb of data requested
     currentRequest_inner = (int) (randomdouble()*((double)maxNbData_in))+1; 
 
@@ -25,6 +23,7 @@ void UserMachineInit(int& httpResponse_in, int& startTime_in, int& endTime_in, i
     fromUserToInternet_out = httpRequest_inner;
 }
 void UserMachineThen(int& httpResponse_in, int& startTime_in, int& endTime_in, int& id_in, int& maxNbData_in, int& computerID_ctx, bool& active_inner, bool& waiting__inner, int& time_inner, bool& requiresAuth_inner, bool& newPage_inner, int&currentRequest_inner, int& httpRequest_inner, int& fromUserToInternet_out){
+    computerID_ctx = id_in;
     newPage_inner = httpResponse_in !=0;
     requiresAuth_inner = httpResponse_in < 0;
     active_inner = (time_inner>=startTime_in) && (time_inner<endTime_in);
@@ -373,12 +372,12 @@ void WebPageServiceThen(IntArray& respondToThisIDs_in, int& currentRequestAnswer
 
 
 
-void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& output_acc_prev_channel, c_int& output_acc_next_channel, c_int& output){
+void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& output_acc_prev_channel, c_int& output_acc_next_channel, int& output){
 
     if(std::get<1>(input_acc)==STOP){
         std::get<1>(output_acc_prev_channel) = STOP;
         std::get<1>(output_acc_next_channel) = STOP;
-        std::get<1>(output) = STOP;
+        output = 0;
         return;
     }
 
@@ -402,7 +401,7 @@ void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& outp
     output_acc_next_channel = cpy(transmitted);
     output_acc_prev_channel = cpy(transmitted);
 
-    output = cpy(returned);
+    output = std::get<1>(returned);
 }
 
 

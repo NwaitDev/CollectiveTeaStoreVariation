@@ -16,13 +16,19 @@ package base
     extern function IntArray zeros(int dim1)
     extern function IntArray range(const int upto)
     extern function bool are_copies(IntArray, IntArray)
+    extern function bool are_copies(c_IntArray, c_IntArray)
+    extern function bool are_copies(IntArray, c_IntArray)
+    extern function bool are_copies(c_IntArray, IntArray)
 
 
     extern data type c_int
     extern data type c_float
     extern data type c_bool
     extern data type c_IntArray
-
+    extern function bool is_stop(c_int v)
+    extern function bool is_stop(c_bool v)
+    extern function bool is_stop(c_float v)
+    extern function bool is_stop(c_double v)
     
     // port that serves as a trigger
     port type port_t()
@@ -37,6 +43,8 @@ package base
     port type portBool_t(bool v0)
 
     port type portIntArray_t(IntArray v0)
+
+    port type portIntIntIntIntIntInt_t(int v0, int v1, int v2, int v3, int v4, int v5)
 
     port type portIntIntIntIntInt_t(int v0, int v1, int v2, int v3, int v4)
 
@@ -61,6 +69,12 @@ package base
     port type portIntInt_t(int v0, int v1)
 
     port type portIntFloatFloatBool_t(int v0, float v1, float v2, bool v3)
+
+    port type portCInt_t(c_int v0)
+
+    port type portCIntArray_t(c_IntArray v0)
+
+    port type portCIntArrayCIntArrayIntArray_t(c_IntArray v0, c_IntArrayv1, IntArray v2)
 
 
     connector type flowBool_t(portBool_t s0, portBool_t r0)

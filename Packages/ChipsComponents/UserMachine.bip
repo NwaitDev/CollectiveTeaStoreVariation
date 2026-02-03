@@ -2,6 +2,7 @@
 package UserMachine
 
     use ChipsFunctions
+    use Contextual
     use base
     use bipio
     
@@ -33,10 +34,12 @@ package UserMachine
 
         port port_t start()
         port port_t calc()
+        export portInt_t getCtx(computerID)
+        export portInt_t freeCtx(computerID)
         export port portIntIntIntIntInt_t recv(httpResponse, startTime, endTime, id, maxNbData)
         export port portInt_t send(fromUserToInternet)
 
-        place INIT, RECEIVING, THEN, SENDING
+        place INIT, RECEIVING, READ_CTX, THEN, WRITE_CTX, SENDING
 
         initial to INIT do {
             UserMachineInit(httpResponse, startTime, endTime, id, maxNbData, computerID, active, waiting, time, requiresAuth, newPage, currentRequest, httpRequest, fromUserToInternet);
@@ -44,9 +47,9 @@ package UserMachine
 
         on start from INIT to RECEIVING provided(!isSource)
         on start from INIT to SENDING provided(isSource)
-
-        on recv from RECEIVING to THEN 
-        on calc from THEN to SENDING do {
+        on recv from RECEIVING to READ_CTX 
+        on getCtx from READ_CTX to THEN 
+        on calc from THEN to WRITE_CTX do {
                         // (int,          int,       int,     int,int,       int,        bool,   bool,    int,  bool,         bool,    int,            int,         int)
             UserMachineThen(httpResponse, startTime, endTime, id, maxNbData, computerID, active, waiting, time, requiresAuth, newPage, currentRequest, httpRequest, fromUserToInternet);
             printf("httpResponse:%i\t",httpResponse);
@@ -72,6 +75,7 @@ package UserMachine
             printf("httpRequest:%i\t", httpRequest);
             printf("fromUserToInternet:%i\t", fromUserToInternet);            
         }
+        on freeCtx from WRITE_CTX to SENDING
         on send from SENDING to RECEIVING
 
     end
@@ -111,6 +115,10 @@ package UserMachine
         component UserMachineTX outputParameters()
 
         component UserMachineCore core(isSource)
+        component ContextualInt computerID()
+
+        connector flowInt_t userMachineReadAccessToCtx(computerID.giveToken,core.getCtx)
+        connector flowInt_t userMachineWriteAccessToCtx(core.freeCtx, computerID.receiveToken)
 
         connector flowIntIntIntIntInt_t RX2Core(inputParameters.to_the_core, core.recv)
         connector flowInt_t Core2TX(core.send, outputParameters.from_the_core)
@@ -122,5 +130,8 @@ package UserMachine
         export port inputParameters.maxNbData as maxNbData
         
         export port outputParameters.httpRequest as httpRequest
+        export port computerID.giveToken as computerID_tx
+        export port computerID.receiveToken as computerID_rx
+        export port computerID.justRead as computerID_collective_read
     end
 end

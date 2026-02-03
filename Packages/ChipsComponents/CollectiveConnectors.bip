@@ -1,0 +1,62 @@
+@cpp(include="stdio.h,resilience.hpp")
+
+
+package CollectiveConnectors
+
+    use ChipsFunctions
+    use base
+
+    connector type spreadConnector_responseToTheRightUser_among_UserMachine(
+        portInt_t computerID,
+        portCInt_t transmitted_next, portCInt_t transmitted_prev,
+        portInt_t target
+    )
+        data c_int fromInternet
+        data int computerID_data
+        export port portCInt_t accumulated(fromInternet)
+
+        define computerID target transmitted_next transmitted_prev
+        up {
+            computerID_data = computerID.v0;
+        }
+        down {
+            responseToTheRightUserSpread(
+                computerID_data,
+                accumulated.v0,
+                transmitted_prev.v0,
+                transmitted_next.v0,
+                target.v0
+            )
+        }
+    end
+
+    connector type collectConnector_aggregatingRequests_among_UserMachine(
+        portInt_t input, portCInt_t requests_default,
+        portCIntArrayCIntArrayIntArray_t prev_input_requests,
+        portCIntArrayCIntArrayIntArray_t next_input_requests
+    )
+        data c_IntArray prevOutput
+        data c_IntArray nextOutput
+        data IntArray targetOutput
+        export port portCIntArrayCIntArrayIntArray_t accumulated(prevOutput,nextOutput,targetOutput)
+
+        define input requests_default prev_input_requests next_input_requests
+        up {
+            targetOutput = zeros(100);
+            aggregatingRequestsCollect(input.v0, requests_default.v0,
+                prev_input_requests.v1, next_input_requests.v0, // for prev_input, we use nextOutput value (.v1) and for next_input, we use prevOutput (.v0) since this is how components are plugged in chips description
+                prevOutput, nextOutput,
+                targetOutput)
+        }
+    end
+
+    connector type extract_targetOutput_CIntArrayCIntArrayIntArray(
+        portCIntArrayCIntArrayIntArray_t s,
+        portIntArray_t r
+    )
+        define s r 
+        on s r down {
+            r.v0 = s.v2;
+        }
+
+end

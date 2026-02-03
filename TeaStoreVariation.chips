@@ -10,7 +10,6 @@ with{
     bool active;
     bool waiting = false;
     int time = 0;
-    ctx.computerID = id;
     bool requiresAuth;
     bool newPage;
 
@@ -23,6 +22,7 @@ with{
     // httpResponse in the form of
     // response ? (authRequired ? -1 : 1)*(ID) : 0
 } then {
+    ctx.computerID = id;
     newPage = httpResponse !=0;
     requiresAuth = httpResponse < 0;
     active = (time>=startTime) && (time<endTime);
