@@ -39,6 +39,14 @@ c_bool cpy(c_bool&);
 c_float cpy(c_float&);
 c_IntArray cpy(c_IntArray&);
 
+c_int make(int);
+c_float make(double);
+c_bool make(bool);
+c_IntArray make(IntArray);
+bool are_copies(c_int&, c_int&);
+bool are_copies(c_float&, c_float&);
+bool are_copies(c_bool&, c_bool&);
+
 inline std::ostream& operator << ( std::ostream& os, const IntArray& rhs ) {
     os << "[int_array("<<rhs.size()<<") :";
     for( size_t i = 0; i<rhs.size(); ++i){

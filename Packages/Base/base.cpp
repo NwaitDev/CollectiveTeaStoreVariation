@@ -1,6 +1,7 @@
 #include "base.hpp"
 #include <cassert>
 #include <cstdlib>
+#include <tuple>
 #include <vector>
 
 
@@ -70,6 +71,30 @@ bool are_copies(c_IntArray& a, IntArray& b){
         return false;
     }
     return are_copies(b,std::get<0>(a));
+}
+
+
+c_int make(int value){
+    return std::make_tuple(value, REGULAR);
+}
+c_float make(double value){
+    return std::make_tuple(value, REGULAR);
+}
+c_bool make(bool value){
+    return std::make_tuple(value, REGULAR);
+}
+
+bool are_copies(c_int& a, c_int& b){
+    return ((STOP == std::get<1>(b)) && (std::get<1>(a) == STOP)) 
+            || ((std::get<1>(a) == REGULAR) && (std::get<1>(b) == REGULAR) && (std::get<0>(a) == std::get<1>(b)));
+}
+bool are_copies(c_float& a, c_float& b){
+    return ((STOP == std::get<1>(b)) && (std::get<1>(a) == STOP)) 
+            || ((std::get<1>(a) == REGULAR) && (std::get<1>(b) == REGULAR) && (std::get<0>(a) == std::get<1>(b)));
+}
+bool are_copies(c_bool& a, c_bool& b){
+    return ((STOP == std::get<1>(b)) && (std::get<1>(a) == STOP)) 
+            || ((std::get<1>(a) == REGULAR) && (std::get<1>(b) == REGULAR) && (std::get<0>(a) == std::get<1>(b)));
 }
 
 

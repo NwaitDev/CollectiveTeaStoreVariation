@@ -377,7 +377,6 @@ void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& outp
     if(std::get<1>(input_acc)==STOP){
         std::get<1>(output_acc_prev_channel) = STOP;
         std::get<1>(output_acc_next_channel) = STOP;
-        output = 0;
         return;
     }
 
@@ -477,43 +476,40 @@ void numberOfRespondedRequestsCollect(bool input, c_int& sum, c_int& next_input_
     prev_output_sum = cpy(sum);
 }
 
-void broadcastRedirectionSpread(c_bool& input_acc, c_bool& output_acc_prev_channel, c_bool& output_acc_next_channel, c_bool& output){
+void broadcastRedirectionSpread(c_bool& input_acc, c_bool& output_acc_prev_channel, c_bool& output_acc_next_channel, bool& output){
     if(std::get<1>(input_acc)==STOP){
         std::get<1>(output_acc_prev_channel) = STOP;
         std::get<1>(output_acc_next_channel) = STOP;
-        std::get<1>(output) = STOP;
         return;
     }
 
     output_acc_next_channel = cpy(input_acc);
     output_acc_prev_channel = cpy(input_acc);
-    output = cpy(input_acc);
+    output = std::get<0>(input_acc);
 }
 
 
-void broadcastDataQtySpread(c_int& input_acc, c_int& output_acc_prev_channel, c_int& output_acc_next_channel, c_int& output){
+void broadcastDataQtySpread(c_int& input_acc, c_int& output_acc_prev_channel, c_int& output_acc_next_channel, int& output){
 
     if(std::get<1>(input_acc)==STOP){
         std::get<1>(output_acc_prev_channel) = STOP;
         std::get<1>(output_acc_next_channel) = STOP;
-        std::get<1>(output) = STOP;
         return;
     }
 
     output_acc_next_channel = cpy(input_acc);
     output_acc_prev_channel = cpy(input_acc);
-    output = cpy(input_acc);
+    output = std::get<0>(input_acc);
 }
 
 
-void findRightDataProviderSpread(c_int& input_acc_userID, c_int& input_acc_nbJumps, c_int& output_acc_prev_channel_userID, c_int& output_acc_prev_channel_nbJumps, c_int& output_acc_next_channel_userID,c_int& output_acc_next_channel_nbJumps, c_int& output){
+void findRightDataProviderSpread(c_int& input_acc_userID, c_int& input_acc_nbJumps, c_int& output_acc_prev_channel_userID, c_int& output_acc_prev_channel_nbJumps, c_int& output_acc_next_channel_userID,c_int& output_acc_next_channel_nbJumps, int& output){
 
     if(std::get<1>(input_acc_userID)==STOP || std::get<1>(input_acc_nbJumps)==STOP){
         std::get<1>(output_acc_prev_channel_nbJumps) = STOP;
         std::get<1>(output_acc_prev_channel_userID) = STOP;
         std::get<1>(output_acc_next_channel_nbJumps) = STOP;
         std::get<1>(output_acc_next_channel_userID) = STOP;
-        std::get<1>(output) = STOP;
         return;
     }
 
@@ -530,6 +526,7 @@ void findRightDataProviderSpread(c_int& input_acc_userID, c_int& input_acc_nbJum
     }
     
     
+    output = std::get<0>(currentBackendTransmittedID);
     output_acc_next_channel_userID = cpy(input_acc_userID); 
     output_acc_next_channel_nbJumps = cpy(input_acc_nbJumps);
     std::get<1>(output_acc_prev_channel_userID) = STOP;

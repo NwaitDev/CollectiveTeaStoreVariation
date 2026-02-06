@@ -16,21 +16,22 @@ package System
     use base
 
 
-    atom type aggregatingRequests_default_accumulators()
-        data IntArray default_value
+    atom type aggregatingRequestsDevicePlaceholder()
+        data IntArray default_value // for the accumulator (to allow checking no modification has been applied to other values)
         data c_IntArray prev_output_data
         data c_IntArray next_output_data
         data IntArray target_output_data
         data bool is_constant
 
-        export port portCIntArrayCIntArrayIntArray_t output(prev_output_data,next_output_data,next_output_data)
+        export port portCIntArrayCIntArrayIntArray_t output(prev_output_data,next_output_data,target_output_data)
 
-        place STREAMING
+        place STREAMING, FINISHED
 
         initial to STREAMING do {
             default_value = zeros(100);
             prev_output_data = zeros(100);
             next_output_data = zeros(100);
+            target_output_data = zeros(100);
             is_constant = true;
         }
 
@@ -45,16 +46,27 @@ package System
         }
 
         on output from STREAMING to FINISHED provided (!is_constant) do {
-            printf("Error, the data of the aggregatingRequests_default_accumulators has been modified.");
+            printf("Error, the data of the aggregatingRequestsDevicePlaceholder has been modified.");
             printf("It should be read only!\n")
         }
 
     end
 
-    atom type responseToTheRightUser_accumulator_eater()
+    atom type intEaterPlaceholder()
         data int accumulated
 
         export port portInt_t input(accumulated)
+
+        place LISTENING
+
+        initial to LISTENING
+        on input from LISTENING to LISTENING
+    end
+
+     atom type redirection_accumulator_eater()
+        data bool accumulated
+
+        export port portBool_t input(accumulated)
 
         place LISTENING
 
@@ -85,6 +97,29 @@ package System
         }
     end
 
+    atom type streamConstantCIntArray(int size)
+        data c_IntArray constant
+        data bool is_constant
+
+        export port portCInt_t output(constant)
+
+        place STREAMING
+
+        initial to STREAMING do {
+            constant = make(zeros(size));
+            is_constant = true;
+        }
+
+        on output from STREAMING to STREAMING provided(is_constant) do {
+            is_constant =  are_copies(constant, make(zeros(size)));
+        }
+
+        on output from STREAMING to FINISHED provided (!is_constant) do {
+            printf("Error, the constant data has been modified.\n");
+            printf("It should be read only!\n")
+        }
+    end
+
     atom type streamConstantFloat(float cst)
         data float constant
         data bool is_constant
@@ -106,6 +141,100 @@ package System
             printf("Error, the constant data has been modified.\n");
             printf("It should be read only!\n")
         }
+    end
+
+    atom type numberOfRespondedRequestDevicePlaceholder()
+        data c_int prev_output_data
+        data c_int next_output_data
+        data int target_output_data
+        data bool is_constant
+
+        export port portCIntCIntInt_t output(prev_output_data,next_output_data,target_output_data)
+
+        place STREAMING, FINISHED
+
+        initial to STREAMING do {
+            default_value = 0;
+            prev_output_data = make(default_value);
+            next_output_data = make(default_value);
+            target_output_data = make(default_value);
+            is_constant = true;
+        }
+
+        on output from STREAMING to STREAMING provided(is_constant) do {
+            is_constant = are_copies(prev_output_data, default_value);
+            if (is_constant) then
+                is_constant = are_copies(next_output_data, default_value);
+                if (is_constant) then 
+                    is_constant = are_copies(target_output_data, default_value);
+                fi
+            fi
+        }
+
+        on output from STREAMING to FINISHED provided (!is_constant) do {
+            printf("Error, the data of the numberOfRespondedRequestDevicePlaceholder has been modified.");
+            printf("It should be read only!\n")
+        }
+
+    end
+
+    atom type streamConstantCInt(int value)
+        data c_IntArray constant
+        data bool is_constant
+
+        export port portCInt_t output(constant)
+
+        place STREAMING
+
+        initial to STREAMING do {
+            constant = make(value);
+            is_constant = true;
+        }
+
+        on output from STREAMING to STREAMING provided(is_constant) do {
+            is_constant =  are_copies(constant, make(value));
+        }
+
+        on output from STREAMING to FINISHED provided (!is_constant) do {
+            printf("Error, the constant data has been modified.\n");
+            printf("It should be read only!\n")
+        }
+    end
+
+    atom type aggregatingDataProviderOutputPlaceholder()
+        data IntArray default_value // for the accumulator (to allow checking no modification has been applied to other values)
+        data c_IntArray prev_output_data
+        data c_IntArray next_output_data
+        data IntArray target_output_data
+        data bool is_constant
+
+        export port portCIntArrayCIntArrayIntArray_t output(prev_output_data,next_output_data,target_output_data)
+
+        place STREAMING, FINISHED
+
+        initial to STREAMING do {
+            default_value = zeros(100);
+            prev_output_data = zeros(100);
+            next_output_data = zeros(100);
+            target_output_data = zeros(100);
+            is_constant = true;
+        }
+
+        on output from STREAMING to STREAMING provided(is_constant) do {
+            is_constant = are_copies(prev_output_data,default_value);
+            if (is_constant) then
+                is_constant = are_copies(next_output_data,default_value);
+                if (is_constant) then 
+                    is_constant = are_copies(target_output_data,default_value);
+                fi
+            fi
+        }
+
+        on output from STREAMING to FINISHED provided (!is_constant) do {
+            printf("Error, the data of the aggregatingDataProviderOutputPlaceholder has been modified.");
+            printf("It should be read only!\n")
+        }
+
     end
 
     compound type SystemCompound()
@@ -149,38 +278,38 @@ package System
         component DataProvider dprovider3(false)
 
 
-        component aggregatingRequests_default_accumulators defaultForUmachine0_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine0_no_prev_value()
-        component aggregatingRequests_default_accumulators defaultForUmachine0_no_next_value()
+        component streamConstantCIntArray defaultForUmachine0_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine0_no_prev_value()
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine0_no_next_value()
 
-        component aggregatingRequests_default_accumulators defaultForUmachine1_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine1_no_next_value()
+        component streamConstantCIntArray defaultForUmachine1_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine1_no_next_value()
 
-        component aggregatingRequests_default_accumulators defaultForUmachine2_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine2_no_next_value()
+        component streamConstantCIntArray defaultForUmachine2_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine2_no_next_value()
 
-        component aggregatingRequests_default_accumulators defaultForUmachine3_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine3_no_next_value()
+        component streamConstantCIntArray defaultForUmachine3_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine3_no_next_value()
 
-        component aggregatingRequests_default_accumulators defaultForUmachine4_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine4_no_next_value()
+        component streamConstantCIntArray defaultForUmachine4_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine4_no_next_value()
         
-        component aggregatingRequests_default_accumulators defaultForUmachine5_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine5_no_next_value()
+        component streamConstantCIntArray defaultForUmachine5_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine5_no_next_value()
 
-        component aggregatingRequests_default_accumulators defaultForUmachine6_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine6_no_next_value()
+        component streamConstantCIntArray defaultForUmachine6_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine6_no_next_value()
 
-        component aggregatingRequests_default_accumulators defaultForUmachine7_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine7_no_next_value()
+        component streamConstantCIntArray defaultForUmachine7_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine7_no_next_value()
 
-        component aggregatingRequests_default_accumulators defaultForUmachine8_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine8_no_next_value()
+        component streamConstantCIntArray defaultForUmachine8_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine8_no_next_value()
 
-        component aggregatingRequests_default_accumulators defaultForUmachine9_fromUserToInternet()
-        component aggregatingRequests_default_accumulators defaultForUmachine9_no_next_value()
+        component streamConstantCIntArray defaultForUmachine9_fromUserToInternet(100)
+        component aggregatingRequestsDevicePlaceholder defaultForUmachine9_no_next_value()
 
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests0(
                 umachine0.fromUserToInternet,
                 defaultForUmachine0_fromUserToInternet.output,
@@ -188,7 +317,7 @@ package System
                 defaultForUmachine0_no_next_value.output
             )
         
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests1(
                 umachine1.fromUserToInternet,
                 defaultForUmachine1_fromUserToInternet.output,
@@ -196,7 +325,7 @@ package System
                 defaultForUmachine1_no_next_value.output
             )
         
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests2(
                 umachine2.fromUserToInternet,
                 defaultForUmachine2_fromUserToInternet.output,
@@ -204,7 +333,7 @@ package System
                 defaultForUmachine2_no_next_value.output
             )
 
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests3(
                 umachine3.fromUserToInternet,
                 defaultForUmachine3_fromUserToInternet.output,
@@ -212,7 +341,7 @@ package System
                 defaultForUmachine3_no_next_value.output
             )
         
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests4(
                 umachine4.fromUserToInternet,
                 defaultForUmachine4_fromUserToInternet.output,
@@ -220,7 +349,7 @@ package System
                 defaultForUmachine4_no_next_value.output
             )
         
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests5(portCIntArrayCIntArrayIntArray_t
                 umachine5.fromUserToInternet,
                 defaultForUmachine5_fromUserToInternet.output,
@@ -228,7 +357,7 @@ package System
                 defaultForUmachine5_no_next_value.output
             )
 
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests6(
                 umachine6.fromUserToInternet,
                 defaultForUmachine6_fromUserToInternet.output,
@@ -236,7 +365,7 @@ package System
                 defaultForUmachine6_no_next_value.output
             )
         
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests7(
                 umachine7.fromUserToInternet,
                 defaultForUmachine7_fromUserToInternet.output,
@@ -244,7 +373,7 @@ package System
                 defaultForUmachine7_no_next_value.output
             )
         
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests8(
                 umachine8.fromUserToInternet,
                 defaultForUmachine8_fromUserToInternet.output,
@@ -252,7 +381,7 @@ package System
                 defaultForUmachine8_no_next_value.output
             )
 
-        connector collectConnector_aggregatingRequests_among_UserMachine 
+        connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests9(
                 umachine9.fromUserToInternet,
                 defaultForUmachine9_fromUserToInternet.output,
@@ -260,20 +389,21 @@ package System
                 defaultForUmachine9_no_next_value.output
             )
         
-        connector extract_targetOutputf ,collective__CIntArrayCIntArrayIntArray(collective_aggregatingRequests9, smachine.fromInternet)
+        connector extract_targetOutput_CIntArrayCIntArrayIntArray
+         collective_value4smachineFromInternet(collective_aggregatingRequests9, smachine.fromInternet)
 
-        component responseToTheRightUser_accumulator_eater userMachine0prevEater()
-        component responseToTheRightUser_accumulator_eater userMachine0nextEater()
+        component intEaterPlaceholder userMachine0prevEater()
+        component intEaterPlaceholder userMachine0nextEater()
 
-        component responseToTheRightUser_accumulator_eater userMachine1nextEater()
-        component responseToTheRightUser_accumulator_eater userMachine2nextEater()
-        component responseToTheRightUser_accumulator_eater userMachine3nextEater()
-        component responseToTheRightUser_accumulator_eater userMachine4nextEater()
-        component responseToTheRightUser_accumulator_eater userMachine5nextEater()
-        component responseToTheRightUser_accumulator_eater userMachine6nextEater()
-        component responseToTheRightUser_accumulator_eater userMachine7nextEater()
-        component responseToTheRightUser_accumulator_eater userMachine8nextEater()
-        component responseToTheRightUser_accumulator_eater userMachine9nextEater()
+        component intEaterPlaceholder userMachine1nextEater()
+        component intEaterPlaceholder userMachine2nextEater()
+        component intEaterPlaceholder userMachine3nextEater()
+        component intEaterPlaceholder userMachine4nextEater()
+        component intEaterPlaceholder userMachine5nextEater()
+        component intEaterPlaceholder userMachine6nextEater()
+        component intEaterPlaceholder userMachine7nextEater()
+        component intEaterPlaceholder userMachine8nextEater()
+        component intEaterPlaceholder userMachine9nextEater()
 
         connector spreadConnector_responseToTheRightUser_among_UserMachine
             collective_responseToTheRightUser0(
@@ -345,7 +475,7 @@ package System
                 umachine9.httpResponse
             )
 
-        connector flowInt_t startSpreadResponseToTheRightUser(
+        connector flowInt2CInt_t startSpreadResponseToTheRightUser(
             smachine.fromServerToInternet, collective_responseToTheRightUser9.accumulated
         )
 
@@ -413,10 +543,261 @@ package System
         connector flowInt_t id(umachine9id.output, umachine9.id)
 
         connector flowInt_t wps2smachine(wpservice.idToRespondTo, smachine.wpServed)
-        connector flowInt_t smachin2uaiNbData(smachine.nbData, uainterpreter.nbDataRcvd)
-        connector flowInt_t smachin2uaiAuth(smachine.authDataRcvd, uainterpreter.userAuth)
-        connector flowInt_t smachin2uaiUserID(smachine.userID, uainterpreter.userIDRcvd)
+        connector flowInt_t smachine2uaiNbData(smachine.nbData, uainterpreter.nbDataRcvd)
+        connector flowInt_t smachine2uaiAuth(smachine.authDataRcvd, uainterpreter.userAuth)
+        connector flowInt_t smachine2uaiUserID(smachine.userID, uainterpreter.userIDRcvd)
 
-        connector 
+        connector flowBool_t uai2auth(uainterpreter.authProvided, authenticator.authProvided)
+
+        connector flowInt_t uai2rvalidatorNbData(uainterpreter.nbData, rvalidator.nbData)
+        connector flowInt_t uai2rvalidatorReqID(uainterpreter.reqID)
+        connector flowBool_t uai2rvalidatorIsAuth(uainterpreter.isAuthenticated, rvalidator.isAuthenticated)
+        
+
+        component streamConstantInt maxUsers(100)
+        connector flowInt_t maxReqOfRLimiter(maxUsers.output,rlimiter.maxRequests)
+        connector flowInt_t rvalidator2rlimiterUserID(rvalidator.userID,rlimiter.userID_i)
+        connector flowInt_t rvalidator2rlimiterNbDataReq(rvalidator.nbDataRequested,rlimiter.nbDataToFetch)
+        connector flowBool_t rvalidator2rlimiterRedirection(rvalidator.redirection, rlimiter.redirection_i)
+
+
+        component streamConstantInt defaultForBackend0(0)
+        component streamConstantInt defaultForBackend1(0)
+        component streamConstantInt defaultForBackend2(0)
+        component streamConstantInt defaultForBackend3(0)
+
+        component numberOfRespondedRequestDevicePlaceholder nbReqPlaceholderBackend0prev()
+        component numberOfRespondedRequestDevicePlaceholder nbReqPlaceholderBackend0next()
+        component numberOfRespondedRequestDevicePlaceholder nbReqPlaceholderBackend1next()
+        component numberOfRespondedRequestDevicePlaceholder nbReqPlaceholderBackend3prev()
+        component numberOfRespondedRequestDevicePlaceholder nbReqPlaceholderBackend3next()
+
+
+        connector collect_numberOfRespondedRequests_among_Backend 
+            collect_numberOfRespondedRequests0(
+                dprovider0.oneLessPendingRequest,
+                defaultForBackend0.output,
+                nbReqPlaceholderBackend0prev.output,
+                nbReqPlaceholderBackend0next.output
+            )
+        
+        connector collect_numberOfRespondedRequests_among_Backend 
+            collect_numberOfRespondedRequests1(
+                dprovider1.oneLessPendingRequest,
+                defaultForBackend1.output,
+                collect_numberOfRespondedRequests0.accumulated,
+                nbReqPlaceholderBackend1next.output
+            )
+        
+        connector collect_numberOfRespondedRequests_among_Backend 
+            collect_numberOfRespondedRequests3(
+                dprovider3.oneLessPendingRequest,
+                defaultForBackend3.output,
+                nbReqPlaceholderBackend3prev.output,
+                nbReqPlaceholderBackend3next.output
+            )
+
+        connector collect_numberOfRespondedRequests_among_Backend 
+            collect_numberOfRespondedRequests2(
+                dprovider2.oneLessPendingRequest,
+                defaultForBackend2.output,
+                collect_numberOfRespondedRequests1.accumulated,
+                collect_numberOfRespondedRequests3.accumulated
+            )
+        
+        connector extract_targetOutput_CIntCIntInt 
+            collective_value4rlimiterNbAnsweredReqs(collect_numberOfRespondedRequests2.accumulated, rlimiter.nbAnsweredReqs)
+        
+        component redirection_accumulator_eater redirectionEater0prev()
+        component redirection_accumulator_eater redirectionEater0next()
+        component redirection_accumulator_eater redirectionEater1next()
+        component redirection_accumulator_eater redirectionEater3next()
+        component redirection_accumulator_eater redirectionEater3prev()
+
+        connector spreadConnector_broadcastRedirection_among_Backend
+            spread_redirection3(
+                redirectionEater3prev.input,
+                redirectionEater3next.input,
+                dprovider3.redirection
+            )
+        connector spreadConnector_broadcastRedirection_among_Backend
+            spread_redirection0(
+                redirectionEater0prev.input,
+                redirectionEater0next.input,
+                dprovider0.redirection
+            )
+        connector spreadConnector_broadcastRedirection_among_Backend
+            spread_redirection1(
+                spread_redirection0.accumulated,
+                redirectionEater0next.input,
+                dprovider1.redirection
+            )
+        connector spreadConnector_broadcastRedirection_among_Backend
+            spread_redirection2(
+                spread_redirection1.accumulated,
+                spread_redirection3.accumulated,
+                dprovider2.redirection
+            )
+
+        connector flowBool2CBool_t redirection2spreadRedirection(
+            rlimiter.redirection_o,
+            spread_redirection2.accumulated
+        )
+
+        component intEaterPlaceholder dataproviderNoComponent0prev()
+        component intEaterPlaceholder dataproviderNoComponent1prev()
+        component intEaterPlaceholder dataproviderNoComponent2prev()
+        component intEaterPlaceholder dataproviderNoComponent3next()
+        component intEaterPlaceholder dataproviderNoComponent3prev()
+
+        connector spreadConnector_findRightDataProvider_among_Backend
+            spread_findRightDataProvider3(
+                dataproviderNoComponent3prev.input,
+                dataproviderNoComponent3next.input,
+                dprovider3.userID_i
+            )
+        connector spreadConnector_findRightDataProvider_among_Backend
+            spread_findRightDataProvider2(
+                dataproviderNoComponent2prev.input,
+                spread_findRightDataProvider3.accumulated,
+                dprovider2.userID_i
+            )
+        connector spreadConnector_findRightDataProvider_among_Backend
+            spread_findRightDataProvider1(
+                dataproviderNoComponent1prev.input,
+                spread_findRightDataProvider2.accumulated,
+                dprovider1.userID_i
+            )
+        connector spreadConnector_findRightDataProvider_among_Backend
+            spread_userID_i0(
+                dataproviderNoComponent0prev.input,
+                spread_findRightDataProvider1.accumulated,
+                dprovider0.userID_i
+            )
+
+        connector flowInt2CInt_t userID_i2spreadUserID(
+            rlimiter.userID_o,
+            spread_findRightDataProvider2.accumulated
+        )
+
+
+        component intEaterPlaceholder dataproviderNoComponentDqty0prev()
+        component intEaterPlaceholder dataproviderNoComponentDqty1prev()
+        component intEaterPlaceholder dataproviderNoComponentDqty2prev()
+        component intEaterPlaceholder dataproviderNoComponentDqty3next()
+        component intEaterPlaceholder dataproviderNoComponentDqty3prev()
+
+        connector spreadConnector_broadcastDataQty_Among_Backend
+            spread_bdcastDqty3(
+                dataproviderNoComponentDqty3prev.input,
+                dataproviderNoComponentDqty3next.input,
+                dprovider3.dataQty
+            )
+        connector spreadConnector_broadcastDataQty_Among_Backend
+            spread_bdcastDqty2(
+                dataproviderNoComponentDqty2prev.input,
+                spread_bdcastDqty3.accumulated,
+                dprovider2.dataQty
+            )
+        connector spreadConnector_broadcastDataQty_Among_Backend
+            spread_bdcastDqty1(
+                dataproviderNoComponentDqty1prev.input,
+                spread_bdcastDqty2.accumulated,
+                dprovider1.dataQty
+            )
+        connector spreadConnector_broadcastDataQty_Among_Backend
+            spread_bdcastDqty0(
+                dataproviderNoComponentDqty0prev.input,
+                spread_bdcastDqty1.accumulated,
+                dprovider0.dataQty
+            )
+
+        connector flowInt2CInt_t userID_i2spreadUserID(
+            rlimiter.dataQty,
+            spread_bdcastDqty0.accumulated
+        )
+
+        connector flowBool_t cache02dprovider0(cache0.foundInCache, dprovider0.cacheResponse)
+        connector flowBool_t cache12dprovider1(cache1.foundInCache, dprovider1.cacheResponse)
+        connector flowBool_t cache22dprovider2(cache2.foundInCache, dprovider2.cacheResponse)
+        connector flowBool_t cache32dprovider3(cache3.foundInCache, dprovider3.cacheResponse)
+        
+        connector flowInt_t dprovider02cache0(dprovider0.cacheRequest, cache0.requestedData)
+        connector flowInt_t dprovider12cache1(dprovider1.cacheRequest, cache1.requestedData)
+        connector flowInt_t dprovider22cache2(dprovider2.cacheRequest, cache2.requestedData)
+        connector flowInt_t dprovider32cache3(dprovider3.cacheRequest, cache3.requestedData)
+
+        connector flowInt_t ctrl02cache0(ctrl0.knob, cache0.cacheSize)
+        connector flowInt_t ctrl12cache1(ctrl1.knob, cache1.cacheSize)
+        connector flowInt_t ctrl22cache2(ctrl2.knob, cache2.cacheSize)
+        connector flowInt_t ctrl32cache3(ctrl3.knob, cache3.cacheSize)
+
+        component streamConstantFloat controllerRequestedTime0(4.0)
+        connector flowFloat_t reqTime2ctrl0(controllerRequestedTime0.output, ctrl0.requested_time)
+
+        component streamConstantFloat controllerRequestedTime1(4.0)
+        connector flowFloat_t reqTime2ctrl1(controllerRequestedTime1.output, ctrl1.requested_time)
+
+        component streamConstantFloat controllerRequestedTime2(4.0)
+        connector flowFloat_t reqTime2ctrl2(controllerRequestedTime2.output, ctrl2.requested_time)
+
+        component streamConstantFloat controllerRequestedTime3(4.0)
+        connector flowFloat_t reqTime2ctrl3(controllerRequestedTime3.output, ctrl3.requested_time)
+    
+        connector flowFloat_t dprovider02ctrl0(dprovider0.timeSpentOnReq, ctrl0.resulting_time)
+        connector flowFloat_t dprovider12ctrl1(dprovider1.timeSpentOnReq, ctrl1.resulting_time)
+        connector flowFloat_t dprovider22ctrl2(dprovider2.timeSpentOnReq, ctrl2.resulting_time)
+        connector flowFloat_t dprovider32ctrl3(dprovider3.timeSpentOnReq, ctrl3.resulting_time)
+
+        connector flowFloat_t dprovider02ctrl0Enable(dprovider0.enableTimeReading, ctrl0.enabled)
+        connector flowFloat_t dprovider12ctrl1Enable(dprovider1.enableTimeReading, ctrl1.enabled)
+        connector flowFloat_t dprovider22ctrl2Enable(dprovider2.enableTimeReading, ctrl2.enabled)
+        connector flowFloat_t dprovider32ctrl3Enable(dprovider3.enableTimeReading, ctrl3.enabled)
+
+        
+        component streamConstantCIntArray userIdDefault0(100)
+        component aggregatingDataProviderOutputPlaceholder prevInputFor0()
+        component aggregatingDataProviderOutputPlaceholder nextInputFor0()
+        component streamConstantCIntArray userIdDefault1(100)
+        component aggregatingDataProviderOutputPlaceholder nextInputFor1()
+        component streamConstantCIntArray userIdDefault2(100)
+        component aggregatingDataProviderOutputPlaceholder nextInputFor2()
+        component streamConstantCIntArray userIdDefault3(100)
+        component aggregatingDataProviderOutputPlaceholder nextInputFor2()
+
+        connector collect_allDataProvidersOutputs_among_Backend
+            collect_userID0(
+                userIdDefault0.output,
+                dprovider0.userID_o,
+                prevInputFor0.output,
+                nextInputFor0.output
+            )
+        connector collect_allDataProvidersOutputs_among_Backend
+            collect_userID1(
+                userIdDefault1.output,
+                dprovider1.userID_o,
+                collect_userID0.accumulated,
+                nextInputFor1.output
+            )
+        connector collect_allDataProvidersOutputs_among_Backend
+            collect_userID2(
+                userIdDefault2.output,
+                dprovider2.userID_o,
+                collect_userID1.accumulated,
+                nextInputFor2.output
+            )
+        connector collect_allDataProvidersOutputs_among_Backend
+            collect_userID3(
+                userIdDefault3.output,
+                dprovider3.userID_o,
+                collect_userID2.accumulated,
+                nextInputFor3.output
+            )
+
+        connector extract_targetOutput_CIntArrayCIntArrayIntArray
+            aggregationOfIDs2wpservice(
+                collect_userID3.accumulated,
+                wpservice.respondToThisID
+            )
     end
 end

@@ -25,10 +25,15 @@ package base
     extern data type c_float
     extern data type c_bool
     extern data type c_IntArray
+    extern function c_int make(int)
+    extern function c_float make(float)
+    extern function c_bool make(bool)
+    extern function bool are_copies(c_int,c_int)
+    extern function bool are_copies(c_float, c_float)
+    extern function bool are_copies(c_bool, c_bool)
     extern function bool is_stop(c_int v)
     extern function bool is_stop(c_bool v)
     extern function bool is_stop(c_float v)
-    extern function bool is_stop(c_double v)
     
     // port that serves as a trigger
     port type port_t()
@@ -74,7 +79,9 @@ package base
 
     port type portCIntArray_t(c_IntArray v0)
 
-    port type portCIntArrayCIntArrayIntArray_t(c_IntArray v0, c_IntArrayv1, IntArray v2)
+    port type portCIntArrayCIntArrayIntArray_t(c_IntArray v0, c_IntArray v1, IntArray v2)
+
+    port type portCIntCIntInt_t(c_Int v0, c_Int v1 , int v2)
 
 
     connector type flowBool_t(portBool_t s0, portBool_t r0)

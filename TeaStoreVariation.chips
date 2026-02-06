@@ -472,6 +472,10 @@ system {
         link ctrl[i] to bobject[i];
         link dprovider[i] to bobject[i];
         link bobject[i] to smachine;
+        if (i<nbCaches-1){
+            bobject[i].next(bobject[i+1].prev);
+            bobject[i+1].prev(bobject[i].next);
+        }
     }
 
     link rvalidator to smachine;
