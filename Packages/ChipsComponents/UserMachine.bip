@@ -2,7 +2,6 @@
 package UserMachine
 
     use ChipsFunctions
-    use Contextual
     use base
     use bipio
     
@@ -34,8 +33,8 @@ package UserMachine
 
         port port_t start()
         port port_t calc()
-        export portInt_t getCtx(computerID)
-        export portInt_t freeCtx(computerID)
+        export port portInt_t getCtx(computerID)
+        export port portInt_t freeCtx(computerID)
         export port portIntIntIntIntInt_t recv(httpResponse, startTime, endTime, id, maxNbData)
         export port portInt_t send(fromUserToInternet)
 
@@ -52,28 +51,28 @@ package UserMachine
         on calc from THEN to WRITE_CTX do {
                         // (int,          int,       int,     int,int,       int,        bool,   bool,    int,  bool,         bool,    int,            int,         int)
             UserMachineThen(httpResponse, startTime, endTime, id, maxNbData, computerID, active, waiting, time, requiresAuth, newPage, currentRequest, httpRequest, fromUserToInternet);
-            printf("httpResponse:%i\t",httpResponse);
-            printf("startTime:%i\t",startTime);
-            printf("endTime:%i\t",endTime);
-            printf("id:%i\t",id);
-            printf("maxNbData:%i\t", maxNbData);
-            printf("computerID:%i\t",computerID);
-            if (active) then
-                printf("active!\t");
-            fi
-            if (waiting) then
-                printf("waiting...\t");
-            fi
-            printf("time:%i\t", time);
-            if (requiresAuth) then
-                printf("requiresAuth.\t");
-            fi
-            if (newPage) then
-                printf("newPage <3\t");
-            fi
-            printf("currentRequest:%i\t",currentRequest);
-            printf("httpRequest:%i\t", httpRequest);
-            printf("fromUserToInternet:%i\t", fromUserToInternet);            
+            // printf("httpResponse:%i\t",httpResponse);
+            // printf("startTime:%i\t",startTime);
+            // printf("endTime:%i\t",endTime);
+            // printf("id:%i\t",id);
+            // printf("maxNbData:%i\t", maxNbData);
+            // printf("computerID:%i\t",computerID);
+            // if (active) then
+            //     printf("active!\t");
+            // fi
+            // if (waiting) then
+            //     printf("waiting...\t");
+            // fi
+            // printf("time:%i\t", time);
+            // if (requiresAuth) then
+            //     printf("requiresAuth.\t");
+            // fi
+            // if (newPage) then
+            //     printf("newPage <3\t");
+            // fi
+            // printf("currentRequest:%i\t",currentRequest);
+            // printf("httpRequest:%i\t", httpRequest);
+            // printf("fromUserToInternet:%i\t", fromUserToInternet);            
         }
         on freeCtx from WRITE_CTX to SENDING
         on send from SENDING to RECEIVING
@@ -103,10 +102,10 @@ package UserMachine
     end
 
     compound type UserMachineTX()
-        component intTX httpRequest()
+        component intTX fromUserToInternet()
 
-        export port httpRequest.to_the_outside as httpRequest
-        export port httpRequest.from_the_core as from_the_core
+        export port fromUserToInternet.to_the_outside as fromUserToInternet
+        export port fromUserToInternet.from_the_core as from_the_core
     end
 
     compound type UserMachine(bool isSource)
@@ -115,10 +114,6 @@ package UserMachine
         component UserMachineTX outputParameters()
 
         component UserMachineCore core(isSource)
-        component ContextualInt computerID()
-
-        connector flowInt_t userMachineReadAccessToCtx(computerID.giveToken,core.getCtx)
-        connector flowInt_t userMachineWriteAccessToCtx(core.freeCtx, computerID.receiveToken)
 
         connector flowIntIntIntIntInt_t RX2Core(inputParameters.to_the_core, core.recv)
         connector flowInt_t Core2TX(core.send, outputParameters.from_the_core)
@@ -129,9 +124,8 @@ package UserMachine
         export port inputParameters.id as id
         export port inputParameters.maxNbData as maxNbData
         
-        export port outputParameters.httpRequest as httpRequest
-        export port computerID.giveToken as computerID_tx
-        export port computerID.receiveToken as computerID_rx
-        export port computerID.justRead as computerID_collective_read
+        export port outputParameters.fromUserToInternet as fromUserToInternet
+        export port core.getCtx as getCtx
+        export port core.freeCtx as freeCtx
     end
 end

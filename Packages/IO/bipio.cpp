@@ -22,16 +22,19 @@ CppOutStream openOutStream(std::string filename){
 }
 
 void printInStream(CppOutStream& outputstream, std::string txt){
-    outputstream << txt;
+    outputstream << txt << ';';
 }
 
 void printInStream(CppOutStream& outputstream, int n){
-    outputstream <<" "<< n;
+    outputstream << n <<';';
 }
 void printInStream(CppOutStream& outputstream, double x){
-    outputstream <<" "<< x;
+    outputstream << x <<';';
 }
 
+void printInStream(CppOutStream& outputstream, IntArray x){
+    outputstream << x <<';';
+}
 void closeStream(CppOutStream& outputstream){
     outputstream.close();
 }

@@ -1,4 +1,4 @@
-@cpp(include="stdio.h,resilience.hpp")
+@cpp(include="ChipsFunctions.hpp")
 
 
 package CollectiveConnectors
@@ -6,7 +6,7 @@ package CollectiveConnectors
     use ChipsFunctions
     use base
 
-    connector type spreadConnector_responseToTheRightUser_among_UserMachine(
+    connector type spreadConnectorResponseToTheRightUserAmongUserMachine(
         portInt_t computerID,
         portCInt_t transmitted_next, portCInt_t transmitted_prev,
         portInt_t target
@@ -16,17 +16,17 @@ package CollectiveConnectors
         export port portCInt_t accumulated(fromInternet)
 
         define computerID target transmitted_next transmitted_prev
-        up {
+        on computerID target transmitted_next transmitted_prev up {
             computerID_data = computerID.v0;
         }
         down {
             responseToTheRightUserSpread(
                 computerID_data,
-                accumulated.v0,
+                fromInternet,
                 transmitted_prev.v0,
                 transmitted_next.v0,
                 target.v0
-            )
+            );
         }
     end
 
@@ -35,8 +35,20 @@ package CollectiveConnectors
         portCInt_t r
     )
         define s r
-        down {
+        on s r down {
             r.v0 = make(s.v0);
+        }
+    end
+
+    connector type flowIntCInt2CIntCInt_t(
+        portInt_t s0,
+        portCInt_t s1,
+        portCIntCInt_t r
+    )
+        define s0 s1 r
+        on s0 s1 r down {
+            r.v0 = make(s0.v0);
+            r.v1 = s1.v0;
         }
     end
 
@@ -45,7 +57,7 @@ package CollectiveConnectors
         portCBool_t r
     )
         define s r
-        down {
+        on s r down {
             r.v0 = make(s.v0);
         }
     end
@@ -61,12 +73,16 @@ package CollectiveConnectors
         export port portCIntArrayCIntArrayIntArray_t accumulated(prevOutput,nextOutput,targetOutput)
 
         define input requests_default prev_input_requests next_input_requests
-        up {
+        on input requests_default prev_input_requests next_input_requests up {
             targetOutput = zeros(100);
-            aggregatingRequestsCollect(input.v0, requests_default.v0,
-                prev_input_requests.v1, next_input_requests.v0, // for prev_input, we use nextOutput value (.v1) and for next_input, we use prevOutput (.v0) since this is how components are plugged in chips description
-                prevOutput, nextOutput,
-                targetOutput)
+            aggregatingRequestsCollect(
+                input.v0, 
+                requests_default.v0,
+                prev_input_requests.v1,
+                next_input_requests.v0, // for prev_input, we use nextOutput value (.v1) and for next_input, we use prevOutput (.v0) since this is how components are plugged in chips description
+                prevOutput,
+                nextOutput,
+                targetOutput);
         }
     end
 
@@ -86,24 +102,24 @@ package CollectiveConnectors
         portCIntCIntInt_t prev_input_sum,
         portCIntCIntInt_t next_input_sum
     )
-        data c_Int prevOutput
-        data c_Int nextOutput
-        data Int targetOutput
+        data c_int prevOutput
+        data c_int nextOutput
+        data int targetOutput
         export port portCIntCIntInt_t accumulated(prevOutput,nextOutput,targetOutput)
 
         define input sum_default prev_input_sum next_input_sum
-        up {
+        on input sum_default prev_input_sum next_input_sum up {
             targetOutput = 0;
-            aggregatingRequestsCollect(input.v0, sum_default.v0,
+            numberOfRespondedRequestsCollect(input.v0, sum_default.v0,
                 prev_input_sum.v1, next_input_sum.v0, // for prev_input, we use nextOutput value (.v1) and for next_input, we use prevOutput (.v0) since this is how components are plugged in chips description
                 prevOutput, nextOutput,
-                targetOutput)
+                targetOutput);
         }
     end
 
     connector type extract_targetOutput_CIntCIntInt(
         portCIntCIntInt_t s,
-        portIntArray_t r
+        portInt_t r
     )
         define s r 
         on s r down {
@@ -117,16 +133,16 @@ package CollectiveConnectors
         portBool_t target
     )
         data c_bool v
-        export port portBool_t accumulated(v)
+        export port portCBool_t accumulated(v)
 
         define target transmitted_next transmitted_prev
-        down {
+        on target transmitted_next transmitted_prev down {
             broadcastRedirectionSpread(
                 v,
                 transmitted_prev.v0,
                 transmitted_next.v0,
                 target.v0
-            )
+            );
         }
     end
 
@@ -134,18 +150,21 @@ package CollectiveConnectors
         portCIntCInt_t transmitted_prev, portCIntCInt_t transmitted_next,
         portInt_t target
     )
-        data c_int v0
-        data c_int v1
-        export port portCIntCint_t accumulated(v0,v1)
+        data c_int input_userID
+        data c_int input_nbJumps
+        export port portCIntCInt_t accumulated(input_userID,input_nbJumps)
 
         define target transmitted_next transmitted_prev
-        down {
+        on target transmitted_next transmitted_prev down {
             findRightDataProviderSpread(
-                v,
-                transmitted_prev.v0,
-                transmitted_next.v0,
+                input_userID, //c_int& input_acc_userID,
+                input_nbJumps, //c_int& input_acc_nbJumps,
+                transmitted_prev.v0, //c_int& output_acc_prev_channel_userID,
+                transmitted_prev.v1, //c_int& output_acc_prev_channel_nbJumps,
+                transmitted_next.v0, //c_int& output_acc_next_channel_userID,
+                transmitted_next.v1, //c_int& output_acc_next_channel_nbJumps,
                 target.v0
-            )
+            );
         }
     end
 
@@ -153,17 +172,17 @@ package CollectiveConnectors
         portCInt_t transmitted_prev, portCInt_t transmitted_next,
         portInt_t target
     )
-        data c_Int v
+        data c_int v
         export port portCInt_t accumulated(v)
 
         define target transmitted_next transmitted_prev
-        down {
+        on target transmitted_next transmitted_prev down {
             broadcastDataQtySpread(
                 v,
                 transmitted_prev.v0,
                 transmitted_next.v0,
                 target.v0
-            )
+            );
         }
     end
 
@@ -173,21 +192,21 @@ package CollectiveConnectors
         portCIntArrayCIntArrayIntArray_t recvd_prev, portCIntArrayCIntArrayIntArray_t recvd_next
     )
         data IntArray output
-        data CIntArray transmitted_next
-        data CIntArray transmitted_prev
+        data c_IntArray transmitted_next
+        data c_IntArray transmitted_prev
         export port portCIntArrayCIntArrayIntArray_t accumulated(transmitted_prev, transmitted_next, output)
 
         define input recvd_next recvd_prev default_accumulator
-        up {
+        on input recvd_next recvd_prev default_accumulator up {
             allDataProvidersOutputsCollect(
-                input,
+                input.v0,
                 default_accumulator.v0, // c_IntArray& answers,
                 recvd_prev.v1, // c_IntArray& prev_input_answers,
                 recvd_next.v0, // c_IntArray& next_input_answers,
                 transmitted_prev, // c_IntArray& prev_output_answers, 
                 transmitted_next, // c_IntArray& next_output_answers,
                 output // IntArray& output
-            )
+            );
         }
     end
 

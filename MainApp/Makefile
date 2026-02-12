@@ -8,7 +8,7 @@ COMPOUND := $(PGM)Compound
 PPATH := ../Packages
 
 # Packages names
-PNAMES := IO Base ChipsFunctions
+PNAMES := IO Base ChipsFunctions ChipsComponents
 
 BIPSOURCES := $(shell find $(PPATH) -name '*.bip')
 CPPSOURCES := $(shell find $(PPATH) -name '*.cpp')

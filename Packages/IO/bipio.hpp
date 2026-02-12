@@ -17,8 +17,12 @@ CppOutStream openOutStream(std::string filename);
 void printInStream(CppOutStream& outputstream, std::string txt);
 void printInStream(CppOutStream& outputstream, int n);
 void printInStream(CppOutStream& outputstream, double x);
+void printInStream(CppOutStream& outputstream, IntArray x);
 void closeStream(CppOutStream& outputstream);
 
+inline const char* asConstCharStar(std::string s){
+    return s.c_str();
+}
 
 inline std::ostream& operator << ( std::ostream& os, const CppInStream& rhs ) {
     os << (rhs.is_open() ? "an instanciated file stream" : "no_file file_stream");

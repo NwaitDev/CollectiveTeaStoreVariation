@@ -11,6 +11,7 @@ package bipio
     extern function printf(string)
     extern function printf(string, int)
     extern function printf(string, float)
+    extern function string asConstCharStar(string)
 
 
     /////////////////////////OutputStreamManagement////////////////////////////////
@@ -18,8 +19,9 @@ package bipio
     extern function emptyFile(string)
     extern function CppOutStream openOutStream(string)
     extern function printInStream(CppOutStream, string) // adds the string to the stream as-is
-    //extern function printInStream(CppOutStream, float) // adds the number preceded by a space
-    extern function printInStream(CppOutStream, int) // adds the number preceded by a space
+    extern function printInStream(CppOutStream, float) // adds the number followed by a semicolumn
+    extern function printInStream(CppOutStream, int) // adds the number followed by a semicolumn
+    extern function printInStream(CppOutStream, IntArray) // adds the array followed by a semicolumn
 
     extern function closeStream(CppOutStream)
 
@@ -98,4 +100,129 @@ package bipio
             closeStream(stream);
         }
     end
+
+    atom type IntMonitor(string filename, string consoleLogger, int seq_len)
+        data int current_lines
+        data int d
+        data CppOutStream stream
+
+        export port portInt_t input(d)
+        export port portInt_t output(d)
+
+        place INPUT, OUTPUT, FINAL
+
+        initial to INPUT do {
+            current_lines = 0;
+            d = 0;
+            stream = openOutStream(filename);
+        }
+
+        on input from INPUT to OUTPUT do {
+            printInStream(stream, d);
+            printf(asConstCharStar(consoleLogger), d);
+            current_lines = current_lines+1;
+        }
+
+        on output from OUTPUT to INPUT provided (current_lines < seq_len)
+        
+        on output from OUTPUT to FINAL provided (current_lines >= seq_len) do {
+            closeStream(stream);
+        }
+    end
+
+
+    atom type IntArrayMonitor(string filename, string consoleLogger, int seq_len)
+        data int current_lines
+        data IntArray d
+        data CppOutStream stream
+
+        export port portIntArray_t input(d)
+        export port portIntArray_t output(d)
+
+        place INPUT, OUTPUT, FINAL
+
+        initial to INPUT do {
+            current_lines = 0;
+            d = zeros(1);
+            stream = openOutStream(filename);
+        }
+
+        on input from INPUT to OUTPUT do {
+            printInStream(stream, d);
+            printInStream("\n");
+            printf(asConstCharStar(consoleLogger));
+            current_lines = current_lines+1;
+        }
+
+        on output from OUTPUT to INPUT provided (current_lines < seq_len)
+        
+        on output from OUTPUT to FINAL provided (current_lines >= seq_len) do {
+            closeStream(stream);
+        }
+    end
+
+    atom type FloatMonitor(string filename, string consoleLogger, int seq_len)
+        data int current_lines
+        data float d
+        data CppOutStream stream
+
+        export port portFloat_t input(d)
+        export port portFloat_t output(d)
+
+        place INPUT, OUTPUT, FINAL
+
+        initial to INPUT do {
+            current_lines = 0;
+            d = 0.0;
+            stream = openOutStream(filename);
+        }
+
+        on input from INPUT to OUTPUT do {
+            printInStream(stream, d);
+            printf(asConstCharStar(consoleLogger), d);
+            current_lines = current_lines+1;
+        }
+
+        on output from OUTPUT to INPUT provided (current_lines < seq_len)
+        
+        on output from OUTPUT to FINAL provided (current_lines >= seq_len) do {
+            closeStream(stream);
+        }
+    end
+
+    atom type BoolMonitor(string filename, string consoleLoggerTrue, string consoleLoggerFalse, int seq_len)
+        data int current_lines
+        data bool d
+        data CppOutStream stream
+
+        export port portBool_t input(d)
+        export port portBool_t output(d)
+
+        place INPUT, OUTPUT, FINAL
+
+        initial to INPUT do {
+            current_lines = 0;
+            d = false;
+            stream = openOutStream(filename);
+        }
+
+        on input from INPUT to OUTPUT do {
+            if (d) then 
+                printInStream(stream, "true");
+                printf(asConstCharStar(consoleLoggerTrue));
+            else
+                printInStream(stream, "false");
+                printf(asConstCharStar(consoleLoggerFalse));
+
+            fi
+            current_lines = current_lines+1;
+        }
+
+        on output from OUTPUT to INPUT provided (current_lines < seq_len)
+        
+        on output from OUTPUT to FINAL provided (current_lines >= seq_len) do {
+            closeStream(stream);
+        }
+    end
+
 end

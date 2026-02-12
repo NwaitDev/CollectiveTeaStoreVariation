@@ -1,3 +1,5 @@
+#ifndef __CHIPS_FCTS_HPP__
+#define __CHIPS_FCTS_HPP__
 #include "../Base/base.hpp"
 
 void UserMachineInit(int&, int&, int&, int&, int&, int&, bool&, bool&, int&, bool&, bool&, int&, int&, int&);
@@ -19,11 +21,13 @@ void DataProviderThen(bool&, int&, int&, bool&, int&, int&, IntArray&, int&, int
 void allDataProvidersOutputsCollect(int&, c_IntArray&, c_IntArray&, c_IntArray&, c_IntArray&, c_IntArray&, IntArray&);
 void WebPageServiceInit(IntArray&,int&,IntArray&,bool&,int&);
 void WebPageServiceThen(IntArray&,int&,IntArray&,bool&,int&);
-void responseToTheRightUserSpread(int&, c_int&, c_int&, c_int&, c_int&);
+void responseToTheRightUserSpread(int&, c_int&, c_int&, c_int&, int&);
 void aggregatingRequestsCollect(int&, c_IntArray&, c_IntArray&, c_IntArray&, c_IntArray&, c_IntArray&, IntArray&);
 void PidControllerInit(double&,double&,bool&,double&,double&,double&,double&,double&,double&,double&,int&,int&,int&,int&);
 void PidControllerThen(double&,double&,bool&,double&,double&,double&,double&,double&,double&,double&,int&,int&,int&,int&);
-void numberOfRequestsCollected(bool&, c_int&, c_int&, c_int&, c_int&, c_int&, int&);
-void broadcastRedirectionSpread(c_bool&, c_bool&, c_bool&, c_bool&);
-void broadcastDataQtySpread(c_int&, c_int&, c_int&, c_int&);
-void findRightDataProviderSpread(c_int&, c_int&, c_int&, c_int&, c_int&,c_int&, c_int&);
+void numberOfRespondedRequestsCollect(bool&, c_int&, c_int&, c_int&, c_int&, c_int&, int&);
+void broadcastRedirectionSpread(c_bool&, c_bool&, c_bool&, bool&);
+void broadcastDataQtySpread(c_int&, c_int&, c_int&, int&);
+void findRightDataProviderSpread(c_int&, c_int&, c_int&, c_int&, c_int&,c_int&, int&);
+
+#endif // __CHIPS_FCTS_HPP__

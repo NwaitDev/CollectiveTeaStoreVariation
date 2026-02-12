@@ -29,6 +29,7 @@ with{
     if (!active) {
         httpRequest = 0;
     } else {
+
         if (!waiting){
             currentRequest = (int) (random()*(float)maxNbData)+1;
             httpRequest = (maxNbData+1)*ctx.computerID + currentRequest;
@@ -525,7 +526,7 @@ system {
         ctrl[i].requested_time(controllerRequestedTime);
         ctrl[i].resulting_time(dprovider[i].timeSpentOnReq);
         ctrl[i].enabled(dprovider[i].enableTimeReading);
-        wpservice.respondToThisID((allDataProvidersOutputs)dprovider[i].userID);
+        wpservice.respondToThisIDs((allDataProvidersOutputs)dprovider[i].userID);
     }
 
 }

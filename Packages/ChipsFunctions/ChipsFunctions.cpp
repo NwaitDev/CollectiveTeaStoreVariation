@@ -317,26 +317,28 @@ void DataProviderThen(bool& redirection_in, int& userID_in, int& dataQty_in, boo
 }
 
 
-void allDataProvidersOutputsCollect(int input, c_IntArray& answers, c_IntArray& prev_input_answers, c_IntArray& next_input_answers, c_IntArray& prev_output_answers, c_IntArray& next_output_answers, IntArray& output){
+void allDataProvidersOutputsCollect(int& input, c_IntArray& answers, c_IntArray& prev_input_answers, c_IntArray& next_input_answers, c_IntArray& prev_output_answers, c_IntArray& next_output_answers, IntArray& output){
+    
+    c_IntArray temp = cpy(answers);
     if(input!=0){
         if(input>0){
-            std::get<0>(answers)[input-1] = input;
+            std::get<0>(temp)[input-1] = input;
         } else {
-            std::get<0>(answers)[-input-1] = input;
+            std::get<0>(temp)[-input-1] = input;
         }
     }
     for (auto i : range(100)) {
         if(std::get<0>(prev_input_answers)[i]!=0){
-            std::get<0>(answers)[i] = std::get<0>(prev_input_answers)[i];
+            std::get<0>(temp)[i] = std::get<0>(prev_input_answers)[i];
         }
         if(std::get<0>(next_input_answers)[i]!=0){
-            std::get<0>(answers)[i] = std::get<0>(next_input_answers)[i];
+            std::get<0>(temp)[i] = std::get<0>(next_input_answers)[i];
         }
     }
 
-    next_output_answers = cpy(answers);
-    prev_output_answers = cpy(answers);
-    output = std::get<0>(answers);
+    next_output_answers = cpy(temp);
+    prev_output_answers = cpy(temp);
+    output = std::get<0>(temp);
 }
 
 
@@ -405,28 +407,28 @@ void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& outp
 
 
 
-void aggregatingRequestsCollect(int input, c_IntArray& requests, c_IntArray& prev_input_requests, c_IntArray& next_input_requests, c_IntArray& prev_output_requests, c_IntArray& next_output_requests, IntArray& output){
-
+void aggregatingRequestsCollect(int& input, c_IntArray& requests, c_IntArray& prev_input_requests, c_IntArray& next_input_requests, c_IntArray& prev_output_requests, c_IntArray& next_output_requests, IntArray& output){
+    c_IntArray temp = cpy(requests);
     if(input!=0){
         if(input<0){
-            std::get<0>(requests)[-input] = input;
+            std::get<0>(temp)[-input] = input;
         } else {
-            std::get<0>(requests)[input] = input;
+            std::get<0>(temp)[input] = input;
         }
     }
 
     for (auto i : range(100)) {
         if(std::get<0>(prev_input_requests)[i]!=0){
-            std::get<0>(requests)[i] = std::get<0>(prev_input_requests)[i];
+            std::get<0>(temp)[i] = std::get<0>(prev_input_requests)[i];
         }
         if(std::get<0>(next_input_requests)[i]!=0){
-            std::get<0>(requests)[i] = std::get<0>(next_input_requests)[i];
+            std::get<0>(temp)[i] = std::get<0>(next_input_requests)[i];
         }
     }
 
-    next_output_requests = cpy(requests);
-    prev_output_requests = cpy(requests);
-    output = std::get<0>(requests);
+    next_output_requests = cpy(temp);
+    prev_output_requests = cpy(temp);
+    output = std::get<0>(temp);
 }
 
 
@@ -463,17 +465,16 @@ void PidControllerThen(double& requested__time_in,double& resulting__time_in,boo
 }
 
 
-void numberOfRespondedRequestsCollect(bool input, c_int& sum, c_int& next_input_sum, c_int& next_output_sum, c_int& prev_input_sum, c_int& prev_output_sum, int& output){
-    // if not receiving next, assuming next == default (ie. int sum = 0)
-    // same for prev
-    std::get<0>(sum) = std::get<0>(sum) + std::get<0>(prev_input_sum) + std::get<0>(next_input_sum);
+void numberOfRespondedRequestsCollect(bool& input, c_int& sum, c_int& prev_input_sum, c_int& next_input_sum, c_int& prev_output_sum, c_int& next_output_sum, int& output){
+    c_int temp = cpy(sum);
+    std::get<0>(temp) = std::get<0>(temp) + std::get<0>(prev_input_sum) + std::get<0>(next_input_sum);
     if(input){
-        std::get<0>(sum) = std::get<0>(sum) + 1;
+        std::get<0>(temp) = std::get<0>(temp) + 1;
     }
 
-    output = std::get<0>(sum);
-    next_output_sum = cpy(sum);
-    prev_output_sum = cpy(sum);
+    output = std::get<0>(temp);
+    next_output_sum = cpy(temp);
+    prev_output_sum = cpy(temp);
 }
 
 void broadcastRedirectionSpread(c_bool& input_acc, c_bool& output_acc_prev_channel, c_bool& output_acc_next_channel, bool& output){

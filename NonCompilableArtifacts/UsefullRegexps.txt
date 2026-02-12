@@ -2,3 +2,4 @@
 
 ((.*\n){1}.*(uninitialized|Non-determinism|fresh)(.*\n){6})|(.*Previous transition was(.*\n){6})|\n{3}
 
+\[BIP ENGINE\]:   \[.*\].*|\n\n
