@@ -3,3 +3,8 @@
 *.log
 MainApp/output/
 ExploratoryTesting/output/
+*.csv
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/settings.json
+MainApp/.~lock.output.csv#
