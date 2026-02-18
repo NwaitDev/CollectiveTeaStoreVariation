@@ -10,7 +10,7 @@ package DataProvider
 
         // parameters
         data bool redirection
-        data int userID_i
+        data chips_int userID_i
         data int dataQty
         data bool cacheResponse
         
@@ -20,7 +20,7 @@ package DataProvider
         // inner variables
         data int maxDifferentData
         data int maxUserID
-        data IntArray dataPerUserID
+        data intarray dataPerUserID
         data int currentlyTreatedUserRequest
         data int idToRespondTo
         data int dataToFetch
@@ -38,7 +38,7 @@ package DataProvider
 
         port port_t start()
         port port_t calc()
-        export port portBoolIntIntBool_t recv(redirection,userID_i,dataQty,cacheResponse)
+        export port portBoolChipsIntIntBool_t recv(redirection,userID_i,dataQty,cacheResponse)
         export port portIntIntBoolFloatBool_t send(userID_o,cacheRequest,oneLessPendingRequest,timeSpentOnReq,enableTimeReading)
 
         place INIT, RECEIVING, THEN, SENDING
@@ -64,11 +64,11 @@ package DataProvider
 
 
         component boolRX redirection()
-        component intRX userID_i()
+        component chips_intRX userID_i()
         component intRX dataQty()
         component boolRX cacheResponse()
 
-        connector many2one_BoolIntIntBool_t to_the_core(redirection.to_the_core,userID_i.to_the_core,dataQty.to_the_core,cacheResponse.to_the_core)
+        connector many2one_BoolChipsIntIntBool_t to_the_core(redirection.to_the_core,userID_i.to_the_core,dataQty.to_the_core,cacheResponse.to_the_core)
         
         export port redirection.from_the_outside as redirection
         export port userID_i.from_the_outside as userID_i
@@ -106,7 +106,7 @@ package DataProvider
 
         component DataProviderCore core(isSource)
 
-        connector flowBoolIntIntBool_t RX2Core(inputParameters.to_the_core, core.recv)
+        connector flowBoolChipsIntIntBool_t RX2Core(inputParameters.to_the_core, core.recv)
         connector flowIntIntBoolFloatBool_t Core2TX(core.send, outputParameters.from_the_core)
         
         export port inputParameters.redirection as redirection

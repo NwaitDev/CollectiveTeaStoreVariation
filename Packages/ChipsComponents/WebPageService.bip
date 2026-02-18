@@ -9,14 +9,14 @@ package WebPageService
     atom type WebPageServiceCore(bool isSource)
 
         // parameters
-        data IntArray respondToThisIDs
+        data intarray respondToThisIDs
         
         // contextual
         
 
         // inner variables
         data int currentRequestAnswered
-        data IntArray requestsToAnswerTo
+        data intarray requestsToAnswerTo
         data bool requestFound
 
         // outputs

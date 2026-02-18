@@ -86,8 +86,8 @@ package System
     end
 
     atom type constant_IntArray_stream(int array_type, int array_size, int streamsize)
-        data IntArray the_data
-        data IntArray the_data_copy
+        data intarray the_data
+        data intarray the_data_copy
         data int ticks
         data bool testVariable
 
@@ -163,7 +163,7 @@ package System
     end
 
     atom type IntArray_stream_eater()
-        data IntArray the_data
+        data intarray the_data
 
         export port portIntArray_t input(the_data)
 

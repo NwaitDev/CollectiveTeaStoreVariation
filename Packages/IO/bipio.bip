@@ -6,7 +6,7 @@ package bipio
 
     use base 
     
-    extern function printIntArray(IntArray)
+    extern function printIntArray(intarray)
     // strict minimum of c printf functions
     extern function printf(string)
     extern function printf(string, int)
@@ -21,7 +21,8 @@ package bipio
     extern function printInStream(CppOutStream, string) // adds the string to the stream as-is
     extern function printInStream(CppOutStream, float) // adds the number followed by a semicolumn
     extern function printInStream(CppOutStream, int) // adds the number followed by a semicolumn
-    extern function printInStream(CppOutStream, IntArray) // adds the array followed by a semicolumn
+    extern function printInStream(CppOutStream, intarray) // adds the array followed by a semicolumn
+    extern function printInStream(CppOutStream, chips_int)
 
     extern function closeStream(CppOutStream)
 
@@ -119,7 +120,6 @@ package bipio
 
         on input from INPUT to OUTPUT do {
             printInStream(stream, d);
-            printf(asConstCharStar(consoleLogger), d);
             current_lines = current_lines+1;
         }
 
@@ -130,10 +130,39 @@ package bipio
         }
     end
 
+    atom type ChipsIntMonitor(string filename, string consoleLogger, int seq_len)
+        data int current_lines
+        data chips_int d
+        data CppOutStream stream
+
+        export port portChipsInt_t input(d)
+        export port portChipsInt_t output(d)
+
+        place INPUT, OUTPUT, FINAL
+
+        initial to INPUT do {
+            current_lines = 0;
+            assign(d,0);
+            stream = openOutStream(filename);
+        }
+
+        on input from INPUT to OUTPUT do {
+            printInStream(stream, d);
+            current_lines = current_lines+1;
+        }
+
+        on output from OUTPUT to INPUT provided (current_lines < seq_len) do {
+            tick(d);
+        }
+        
+        on output from OUTPUT to FINAL provided (current_lines >= seq_len) do {
+            closeStream(stream);
+        }
+    end
 
     atom type IntArrayMonitor(string filename, string consoleLogger, int seq_len)
         data int current_lines
-        data IntArray d
+        data intarray d
         data CppOutStream stream
 
         export port portIntArray_t input(d)
@@ -149,8 +178,7 @@ package bipio
 
         on input from INPUT to OUTPUT do {
             printInStream(stream, d);
-            printInStream("\n");
-            printf(asConstCharStar(consoleLogger));
+            printInStream(stream,"\n");
             current_lines = current_lines+1;
         }
 

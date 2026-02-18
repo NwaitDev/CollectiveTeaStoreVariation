@@ -12,29 +12,39 @@ package base
     extern function int intIdentity(int i)
     extern function float floatIdentity(float i)
 
-    extern data type IntArray
-    extern data type c_int
-    extern data type c_float
-    extern data type c_bool
-    extern data type c_IntArray
-    extern function c_int make(int)
-    extern function c_float make(float)
-    extern function c_bool make(bool)
-    extern function c_IntArray make(IntArray)
-    extern function bool are_copies(c_int,c_int)
-    extern function bool are_copies(c_int,int)
-    extern function bool are_copies(int,c_int)
-    extern function bool are_copies(c_float, c_float)
-    extern function bool are_copies(c_bool, c_bool)
-    extern function bool is_stop(c_int v)
-    extern function bool is_stop(c_bool v)
-    extern function bool is_stop(c_float v)
-    extern function IntArray zeros(int dim1)
-    extern function IntArray range(const int upto)
-    extern function bool are_copies(IntArray, IntArray)
-    extern function bool are_copies(c_IntArray, c_IntArray)
-    extern function bool are_copies(IntArray, c_IntArray)
-    extern function bool are_copies(c_IntArray, IntArray)
+    extern data type intarray
+    extern data type collective_int
+    extern data type collective_float
+    extern data type collective_bool
+    extern data type collective_intarray
+
+    extern data type chips_int
+
+    extern function assign(chips_int, int)
+    extern function assign(chips_int, collective_int)
+    extern function assign(chips_int, chips_int)
+    extern function assign(collective_int, chips_int)
+    extern function tick(chips_int)
+
+
+    extern function collective_int make(int)
+    extern function collective_float make(float)
+    extern function collective_bool make(bool)
+    extern function collective_intarray make(intarray)
+    extern function bool are_copies(collective_int,collective_int)
+    extern function bool are_copies(collective_int,int)
+    extern function bool are_copies(int,collective_int)
+    extern function bool are_copies(collective_float, collective_float)
+    extern function bool are_copies(collective_bool, collective_bool)
+    extern function bool is_stop(collective_int v)
+    extern function bool is_stop(collective_bool v)
+    extern function bool is_stop(collective_float v)
+    extern function intarray zeros(int dim1)
+    extern function intarray range(const int upto)
+    extern function bool are_copies(intarray, intarray)
+    extern function bool are_copies(collective_intarray, collective_intarray)
+    extern function bool are_copies(intarray, collective_intarray)
+    extern function bool are_copies(collective_intarray, intarray)
 
 
     // port that serves as a trigger
@@ -45,17 +55,20 @@ package base
 
     // port holding an integer
     port type portInt_t(int v0)
+    port type portChipsInt_t(chips_int v0)
 
     // port holding a boolean
     port type portBool_t(bool v0)
 
-    port type portIntArray_t(IntArray v0)
+    port type portIntArray_t(intarray v0)
 
     port type portIntIntIntIntIntInt_t(int v0, int v1, int v2, int v3, int v4, int v5)
 
     port type portIntIntIntIntInt_t(int v0, int v1, int v2, int v3, int v4)
 
-    port type portIntArrayIntInt_t(IntArray v0, int v1, int v2)
+    port type portChipsIntIntIntIntInt_t(chips_int v0, int v1, int v2, int v3, int v4)
+
+    port type portIntArrayIntInt_t(intarray v0, int v1, int v2)
 
     port type portIntIntIntBool_t(int v0, int v1, int v2, bool v3)
     
@@ -70,6 +83,7 @@ package base
     port type portIntIntBoolFloatBool_t(int v0, int v1, bool v2, float v3, bool v4)
 
     port type portBoolIntIntIntInt_t(bool v0, int v1, int v2, int v3, int v4)
+    port type portBoolChipsIntInt_t(bool v0, chips_int v1, int v2)
     
     port type portFloatFloatBool_t(float v0, float v1, bool v2)
 
@@ -77,18 +91,19 @@ package base
 
     port type portIntFloatFloatBool_t(int v0, float v1, float v2, bool v3)
 
-    port type portCInt_t(c_int v0)
+    port type portCInt_t(collective_int v0)
     
-    port type portCBool_t(c_bool v0)
+    port type portCBool_t(collective_bool v0)
 
-    port type portCIntArray_t(c_IntArray v0)
+    port type portCIntArray_t(collective_intarray v0)
 
-    port type portCIntArrayCIntArrayIntArray_t(c_IntArray v0, c_IntArray v1, IntArray v2)
+    port type portCIntArrayCIntArrayIntArray_t(collective_intarray v0, collective_intarray v1, intarray v2)
 
-    port type portCIntCIntInt_t(c_int v0, c_int v1 , int v2)
+    port type portCIntCIntInt_t(collective_int v0, collective_int v1 , int v2)
 
-    port type portCIntCInt_t(c_int v0, c_int v1)
+    port type portCIntCInt_t(collective_int v0, collective_int v1)
 
+    port type portBoolChipsIntIntBool_t(bool v0, chips_int v1, int v2, bool v3)
 
     connector type flowBool_t(portBool_t s0, portBool_t r0)
         define s0 r0
@@ -111,6 +126,22 @@ package base
         }
     end
 
+    connector type flowChipsInt_t(portChipsInt_t s0, portChipsInt_t r0)
+        define s0 r0
+        on s0 r0 down {
+            assign(r0.v0, s0.v0);
+        }
+    end
+
+    connector type flowBoolChipsIntInt_t(portBoolChipsIntInt_t s0, portBoolChipsIntInt_t r0)
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
+            r0.v2 = s0.v2;
+            assign(r0.v1, s0.v1);
+        }
+    end
+    
     connector type flowIntArray_t(portIntArray_t s0, portIntArray_t r0)
         define s0 r0
         on s0 r0 down {
@@ -185,6 +216,20 @@ package base
         }
     end
 
+    connector type flowChipsIntIntIntIntInt_t(
+        portChipsIntIntIntIntInt_t s0,
+        portChipsIntIntIntIntInt_t r0
+    )
+        define s0 r0
+        on s0 r0 down {
+            assign(r0.v0,s0.v0);
+            r0.v1 = s0.v1;
+            r0.v2 = s0.v2;
+            r0.v3 = s0.v3;
+            r0.v4 = s0.v4;
+        }
+    end
+
     connector type flowBoolIntIntIntInt_t (
         portBoolIntIntIntInt_t s0,
         portBoolIntIntIntInt_t r0
@@ -207,6 +252,19 @@ package base
         on s0 r0 down {
             r0.v0 = s0.v0;
             r0.v1 = s0.v1;
+            r0.v2 = s0.v2;
+            r0.v3 = s0.v3;
+        }
+    end
+
+    connector type flowBoolChipsIntIntBool_t (
+        portBoolChipsIntIntBool_t s0,
+        portBoolChipsIntIntBool_t r0
+    )
+        define s0 r0
+        on s0 r0 down {
+            r0.v0 = s0.v0;
+            assign(r0.v1, s0.v1);
             r0.v2 = s0.v2;
             r0.v3 = s0.v3;
         }
@@ -266,7 +324,7 @@ package base
     connector type many2one_IntArray_t(
         portIntArray_t s0
     )
-        data IntArray v0
+        data intarray v0
         export port portIntArray_t r0(v0)
 
         define s0
@@ -335,6 +393,26 @@ package base
         }
     end
 
+    connector type many2one_BoolChipsIntIntBool_t(
+        portBool_t s0,
+        portChipsInt_t s1,
+        portInt_t s2,
+        portBool_t s3
+    )
+        data chips_int v1
+        data int v2
+        data bool v0,v3
+        export port portBoolChipsIntIntBool_t r0(v0,v1,v2,v3)
+
+        define s0 s1 s2 s3
+        on s0 s1 s2 s3 up {
+            v0 = s0.v0;
+            assign(v1,s1.v0);
+            v2 = s2.v0;
+            v3 = s3.v0;
+        }
+    end
+
     connector type many2one_IntIntIntIntInt_t(
         portInt_t s0,
         portInt_t s1,
@@ -348,6 +426,27 @@ package base
         define s0 s1 s2 s3 s4
         on s0 s1 s2 s3 s4 up {
             v0 = s0.v0;
+            v1 = s1.v0;
+            v2 = s2.v0;
+            v3 = s3.v0;
+            v4 = s4.v0;
+        }
+    end
+
+    connector type many2one_ChipsIntIntIntIntInt_t(
+        portChipsInt_t s0,
+        portInt_t s1,
+        portInt_t s2,
+        portInt_t s3,
+        portInt_t s4
+    )
+        data int v1,v2,v3,v4
+        data chips_int v0
+        export port portChipsIntIntIntIntInt_t r0(v0,v1,v2,v3,v4)
+
+        define s0 s1 s2 s3 s4
+        on s0 s1 s2 s3 s4 up {
+            assign(v0, s0.v0);
             v1 = s1.v0;
             v2 = s2.v0;
             v3 = s3.v0;
@@ -414,7 +513,7 @@ package base
         portInt_t s1,
         portInt_t s2
     )
-        data IntArray v0
+        data intarray v0
         data int v1,v2
         export port portIntArrayIntInt_t r0(v0,v1,v2)
 
@@ -548,6 +647,25 @@ package base
         }
     end
 
+    connector type one2many_BoolChipsIntInt_t(
+        portBool_t r0,
+        portChipsInt_t r1,
+        portInt_t r2
+    )
+        data bool v0
+        data int v2
+        data chips_int v1
+
+        export port portBoolChipsIntInt_t s0(v0,v1,v2)
+        
+        define r0 r1 r2
+        on r0 r1 r2 down {
+            r0.v0 = v0;
+            assign(r1.v0,v1);
+            r2.v0 = v2;
+        }
+    end
+
 
     atom type intRX()
         data int the_data
@@ -562,6 +680,23 @@ package base
         on from_the_outside from DATA_RECEIVING to DATA_SENDING
 
         on to_the_core from DATA_SENDING to DATA_RECEIVING
+    end
+
+    atom type chips_intRX()
+        data chips_int the_data
+        
+        export port portChipsInt_t from_the_outside(the_data)
+        export port portChipsInt_t to_the_core(the_data)
+
+        place DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_outside from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_core from DATA_SENDING to DATA_RECEIVING do {
+            tick(the_data);
+        }
     end
 
     atom type floatRX()
@@ -595,7 +730,7 @@ package base
     end
 
     atom type IntArrayRX()
-        data IntArray the_data
+        data intarray the_data
         
         export port portIntArray_t from_the_outside(the_data)
         export port portIntArray_t to_the_core(the_data)
@@ -615,6 +750,21 @@ package base
         
         export port portInt_t to_the_outside(the_data)
         export port portInt_t from_the_core(the_data)
+
+        place DATA_RECEIVING, DATA_SENDING
+
+        initial to DATA_RECEIVING
+
+        on from_the_core from DATA_RECEIVING to DATA_SENDING
+
+        on to_the_outside from DATA_SENDING to DATA_RECEIVING
+    end
+
+    atom type chips_intTX()
+        data chips_int the_data
+        
+        export port portChipsInt_t to_the_outside(the_data)
+        export port portChipsInt_t from_the_core(the_data)
 
         place DATA_RECEIVING, DATA_SENDING
 
@@ -656,7 +806,7 @@ package base
     end
 
     atom type IntArrayTX()
-        data IntArray the_data
+        data intarray the_data
         
         export port portIntArray_t to_the_outside(the_data)
         export port portIntArray_t from_the_core(the_data)

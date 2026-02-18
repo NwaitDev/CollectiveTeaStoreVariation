@@ -1,7 +1,7 @@
 #include "bipio.hpp"
 #include <string>
 
-void printIntArray(IntArray& arr){
+void printIntArray(intarray& arr){
     std::cout<<"[";
     for (int i : arr) {
         std::cout<<i<<" ";
@@ -25,6 +25,10 @@ void printInStream(CppOutStream& outputstream, std::string txt){
     outputstream << txt << ';';
 }
 
+void printInStream(CppOutStream &outputstream, chips_int n){
+    outputstream << std::get<0>(n)<<'('<<std::get<1>(n)<<')'<< ';';
+}
+
 void printInStream(CppOutStream& outputstream, int n){
     outputstream << n <<';';
 }
@@ -32,7 +36,7 @@ void printInStream(CppOutStream& outputstream, double x){
     outputstream << x <<';';
 }
 
-void printInStream(CppOutStream& outputstream, IntArray x){
+void printInStream(CppOutStream& outputstream, intarray x){
     outputstream << x <<';';
 }
 void closeStream(CppOutStream& outputstream){

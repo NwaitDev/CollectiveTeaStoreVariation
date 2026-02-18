@@ -25,12 +25,12 @@ package ChipsFunctions
 
     // (output)
     // int fromUserToInternet
-    extern function UserMachineInit(int, int, int, int, int, int, bool, bool, int, bool, bool, int, int, int)
-    extern function UserMachineThen(int, int, int, int, int, int, bool, bool, int, bool, bool, int, int, int)
+    extern function UserMachineInit(chips_int, int, int, int, int, int, bool, bool, int, bool, bool, int, int, int, int)
+    extern function UserMachineThen(chips_int, int, int, int, int, int, bool, bool, int, bool, bool, int, int, int, int)
 
 
     // (input)
-    // IntArray fromInternet
+    // intarray fromInternet
     // int wpServed
     // int maxNbData
     
@@ -38,15 +38,15 @@ package ChipsFunctions
     // int httpResponse
     // int currentRequest
     // bool requestFound
-    // IntArray requestList
+    // intarray requestList
 
     // (output)
     // int fromServerToInternet
     // int nbData
     // int userID
     // bool userAuth
-    extern function ServerMachineInit(IntArray, int, int, int, int, bool, IntArray, int, int, int, bool)
-    extern function ServerMachineThen(IntArray, int, int, int, int, bool, IntArray, int, int, int, bool)
+    extern function ServerMachineInit(intarray, int, int, int, int, bool, intarray, int, int, int, bool)
+    extern function ServerMachineThen(intarray, int, int, int, int, bool, intarray, int, int, int, bool)
 
 
     // (input)
@@ -102,8 +102,8 @@ package ChipsFunctions
     // bool redirection
     // int userID
     // int dataQty
-    extern function RequestLimiterInit(bool, int, int, int, int, int, bool, int, int)
-    extern function RequestLimiterThen(bool, int, int, int, int, int, bool, int, int)
+    extern function RequestLimiterInit(bool, int, int, int, int, int, bool, chips_int, int)
+    extern function RequestLimiterThen(bool, int, int, int, int, int, bool, chips_int, int)
 
 
     // (input)
@@ -113,15 +113,15 @@ package ChipsFunctions
     // (inner variables)
     // int maxCacheSize
     // int minCacheSize
-    // IntArray cache
+    // intarray cache
     // int newestDataIndex
     // bool found
     // int foundIndex
 
     // (output)
     // bool foundInCache
-    extern function CacheInit(int, int, int, int, IntArray, int, bool, int, bool)
-    extern function CacheThen(int, int, int, int, IntArray, int, bool, int, bool)
+    extern function CacheInit(int, int, int, int, intarray, int, bool, int, bool)
+    extern function CacheThen(int, int, int, int, intarray, int, bool, int, bool)
 
 
     // (input)
@@ -133,7 +133,7 @@ package ChipsFunctions
     // (inner variables)
     // int maxDifferentData
     // int maxUserID
-    // IntArray dataPerUserID
+    // intarray dataPerUserID
     // int currentlyTreatedUserRequest
     // int idToRespondTo
     // int dataToFetch
@@ -147,54 +147,54 @@ package ChipsFunctions
     // oneLessPendingRequest
     // timeSpentOnReq
     // enableTimeReading
-    extern function DataProviderInit(bool, int, int, bool, int, int, IntArray, int, int, int, float, bool, bool, int, int, bool, float, bool)
-    extern function DataProviderThen(bool, int, int, bool, int, int, IntArray, int, int, int, float, bool, bool, int, int, bool, float, bool)
+    extern function DataProviderInit(bool, chips_int, int, bool, int, int, intarray, int, int, int, float, bool, bool, int, int, bool, float, bool)
+    extern function DataProviderThen(bool, chips_int, int, bool, int, int, intarray, int, int, int, float, bool, bool, int, int, bool, float, bool)
 
 
     // (default input accumulator) 
-    // c_IntArray answers
+    // collective_intarray answers
 
     // (target object)
-    // c_IntArray
+    // collective_intarray
 
     // (default channel output accumulator)
-    // c_IntArray
-    extern function allDataProvidersOutputsCollect(int input, c_IntArray, c_IntArray, c_IntArray, c_IntArray, c_IntArray, IntArray)
+    // collective_intarray
+    extern function allDataProvidersOutputsCollect(int input, collective_intarray, collective_intarray, collective_intarray, collective_intarray, collective_intarray, intarray)
 
 
     // (input)
-    // IntArray respondToThisIDs
+    // intarray respondToThisIDs
 
     // (inner variables)
     // int currentRequestAnswered
-    // IntArray requestsToAnswerTo
+    // intarray requestsToAnswerTo
     // bool requestFound
     
     // (output)
     // int idToRespondTo
-    extern function WebPageServiceInit(IntArray,int,IntArray,bool,int)
-    extern function WebPageServiceThen(IntArray,int,IntArray,bool,int)
+    extern function WebPageServiceInit(intarray,int,intarray,bool,int)
+    extern function WebPageServiceThen(intarray,int,intarray,bool,int)
 
 
     // (default input accumulator) 
-    // c_int fromInternet
+    // collective_int fromInternet
 
     // (target object)
-    // c_int
+    // collective_int
 
     // (default channel output accumulator)
-    // c_int
-    extern function responseToTheRightUserSpread(int, c_int, c_int, c_int, int)
+    // collective_int
+    extern function responseToTheRightUserSpread(int, collective_int, collective_int, collective_int, chips_int)
 
     // (default input accumulator) 
-    // c_IntArray currentListOfRequests
+    // collective_intarray currentListOfRequests
 
     // (target object)
-    // c_IntArray
+    // collective_intarray
 
     // (default channel output accumulator)
-    // c_IntArray
-    extern function aggregatingRequestsCollect(int, c_IntArray, c_IntArray, c_IntArray, c_IntArray, c_IntArray, IntArray)
+    // collective_intarray
+    extern function aggregatingRequestsCollect(int, collective_intarray, collective_intarray, collective_intarray, collective_intarray, collective_intarray, intarray)
 
 
     // (input)
@@ -220,41 +220,41 @@ package ChipsFunctions
     extern function PidControllerThen(float,float,bool,float,float,float,float,float,float,float,int,int,int,int)
 
 
-    extern function numberOfRespondedRequestsCollect(bool, c_int, c_int, c_int, c_int, c_int, int)
+    extern function numberOfRespondedRequestsCollect(bool, collective_int, collective_int, collective_int, collective_int, collective_int, int)
 
     // (default input accumulator)
-    // c_bool redirection
+    // collective_bool redirection
 
     // (target object)
-    // c_bool
+    // collective_bool
 
     // (default channel output accumulator)
-    // c_bool
-    extern function broadcastRedirectionSpread(c_bool, c_bool, c_bool, bool)
+    // collective_bool
+    extern function broadcastRedirectionSpread(collective_bool, collective_bool, collective_bool, bool)
 
     // (default input accumulator)
-    // c_int dataQtyToFind
+    // collective_int dataQtyToFind
 
     // (target object)
-    // c_int
+    // collective_int
 
     // (default channel output accumulator)
-    // c_int
-    extern function broadcastDataQtySpread(c_int, c_int, c_int, int)
+    // collective_int
+    extern function broadcastDataQtySpread(collective_int, collective_int, collective_int, int)
 
     // (default input accumulator)
-    // c_int userID
-    // c_int nbJumps
+    // collective_int userID
+    // collective_int nbJumps
 
     // (target object)
-    // c_int
+    // collective_int
 
     // (next object accumulator)
-    // c_int, c_int
+    // collective_int, collective_int
 
     // (prev object accumulator)
     // stop
-    extern function findRightDataProviderSpread(c_int, c_int, c_int, c_int, c_int,c_int, int)
+    extern function findRightDataProviderSpread(collective_int, collective_int, collective_int, collective_int, collective_int,collective_int, chips_int)
 
     
 end

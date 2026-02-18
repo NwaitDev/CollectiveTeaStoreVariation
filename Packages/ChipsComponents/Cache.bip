@@ -18,7 +18,7 @@ package Cache
         // inner variables
         data int maxCacheSize
         data int minCacheSize
-        data IntArray cache
+        data intarray cache
         data int newestDataIndex
         data bool found
         data int foundIndex

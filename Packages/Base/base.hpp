@@ -11,45 +11,83 @@
 
 
 
-using IntArray = std::vector<int>;
+using intarray = std::vector<int>;
 
 enum collective_optional{
     REGULAR,
     STOP
 };
 
+using collective_int = std::tuple<int, collective_optional>;
+using collective_float = std::tuple<double, collective_optional>;
+using collective_bool = std::tuple<bool, collective_optional>;
+using collective_intarray = std::tuple<intarray, collective_optional>;
 
-using c_int = std::tuple<int, collective_optional>;
-using c_float = std::tuple<double, collective_optional>;
-using c_bool = std::tuple<bool, collective_optional>;
-using c_IntArray = std::tuple<IntArray, collective_optional>;
-
-
-
-IntArray zeros(const int& dim1);
-IntArray range(const int& upto);
-bool are_copies(const IntArray&, const IntArray&);
-bool are_copies(const c_IntArray&, const c_IntArray&);
-bool are_copies(const IntArray&, const c_IntArray&);
-bool are_copies(const c_IntArray&, const IntArray&);
+using chips_int = std::tuple<int,int>;
+using chips_float = std::tuple<double,int>;
+using chips_bool = std::tuple<bool,int>;
+using chips_intarray = std::tuple<intarray,int>;
 
 
-c_int cpy(const c_int&);
-c_bool cpy(const c_bool&);
-c_float cpy(const c_float&);
-c_IntArray cpy(const c_IntArray&);
+void assign(chips_int&, const int&);
+void assign(chips_int&,  const collective_int&);
+void assign(chips_int&, const  chips_int&);
+void assign(collective_int&,  const chips_int&);
+void tick(chips_int&);
+bool is_fresh( const chips_int&);
+int operator + (const chips_int& a, const int& b);
+int operator - (const chips_int& a, const int& b);
+int operator - (const chips_int& a);
+bool operator != (const chips_int& a, const int& b);
+bool operator < (const chips_int& a, const int& b);
 
-c_int make(const int&);
-c_float make(const double&);
-c_bool make(const bool&);
-c_IntArray make(const IntArray&);
-bool are_copies(const c_int&, const c_int&);
-bool are_copies(const c_int&, const int&);
-bool are_copies(const int&, const c_int&);
-bool are_copies(const c_float&, const c_float&);
-bool are_copies(const c_bool&, const c_bool&);
+void assign(chips_float&, const double&);
+void assign(chips_float&,  const collective_float&);
+void assign(chips_float&,  const chips_float&);
+void assign(collective_float&,  const chips_float&);
+bool is_fresh( const chips_float&);
 
-inline std::ostream& operator << ( std::ostream& os, const IntArray& rhs ) {
+void assign(chips_bool&, const  bool&);
+void assign(chips_bool&, const  collective_bool&);
+void assign(chips_bool&, const  chips_bool&);
+void assign(collective_bool&, const  chips_bool&);
+bool is_fresh( const chips_bool&);
+
+void assign(chips_intarray&, const  intarray&);
+void assign(chips_intarray&,  const collective_intarray&);
+void assign(chips_intarray&,  const chips_intarray&);
+void assign(collective_intarray&,  const chips_intarray&);
+bool is_fresh( const chips_intarray&);
+
+
+intarray zeros(const int& dim1);
+intarray range(const int& upto);
+bool are_copies(const intarray&, const intarray&);
+bool are_copies(const collective_intarray&, const collective_intarray&);
+bool are_copies(const intarray&, const collective_intarray&);
+bool are_copies(const collective_intarray&, const intarray&);
+
+collective_int cpy(const collective_int&);
+collective_bool cpy(const collective_bool&);
+collective_float cpy(const collective_float&);
+collective_intarray cpy(const collective_intarray&);
+
+collective_int make(const int&);
+collective_float make(const double&);
+collective_bool make(const bool&);
+collective_intarray make(const intarray&);
+bool are_copies(const collective_int&, const collective_int&);
+bool are_copies(const collective_int&, const int&);
+bool are_copies(const int&, const collective_int&);
+bool are_copies(const collective_float&, const collective_float&);
+bool are_copies(const collective_bool&, const collective_bool&);
+
+inline std::ostream& operator << ( std::ostream& os, const chips_int& rhs ) {
+    os << std::get<0>(rhs) <<"(age:"<<std::get<1>(rhs)<<')';
+    return os;
+}
+
+inline std::ostream& operator << ( std::ostream& os, const intarray& rhs ) {
     os << "[int_array("<<rhs.size()<<") :";
     for( size_t i = 0; i<rhs.size(); ++i){
         os << rhs.at(i) <<" ";
@@ -58,7 +96,7 @@ inline std::ostream& operator << ( std::ostream& os, const IntArray& rhs ) {
     return os;
 }
 
-inline std::ostream& operator << ( std::ostream& os, const c_int& rhs ) {
+inline std::ostream& operator << ( std::ostream& os, const collective_int& rhs ) {
     os << "[collective int: ";
     if(std::get<1>(rhs) == STOP){
         os << "STOP ";
@@ -69,7 +107,7 @@ inline std::ostream& operator << ( std::ostream& os, const c_int& rhs ) {
     return os;
 }
 
-inline std::ostream& operator << ( std::ostream& os, const c_bool& rhs ) {
+inline std::ostream& operator << ( std::ostream& os, const collective_bool& rhs ) {
     os << "[collective bool: ";
     if(std::get<1>(rhs) == STOP){
         os << "STOP ";
@@ -80,7 +118,7 @@ inline std::ostream& operator << ( std::ostream& os, const c_bool& rhs ) {
     return os;
 }
 
-inline std::ostream& operator << ( std::ostream& os, const c_float& rhs ) {
+inline std::ostream& operator << ( std::ostream& os, const collective_float& rhs ) {
     os << "[collective float: ";
     if(std::get<1>(rhs) == STOP){
         os << "STOP ";
@@ -91,7 +129,7 @@ inline std::ostream& operator << ( std::ostream& os, const c_float& rhs ) {
     return os;
 }
 
-inline std::ostream& operator << ( std::ostream& os, const c_IntArray& rhs ) {
+inline std::ostream& operator << ( std::ostream& os, const collective_intarray& rhs ) {
     os << "[collective int_array: ";
     if(std::get<1>(rhs) == STOP){
         os << "STOP ";

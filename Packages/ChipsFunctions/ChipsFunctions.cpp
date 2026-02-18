@@ -1,47 +1,55 @@
 #include "ChipsFunctions.hpp"
 #include <algorithm>
+#include <cmath>
 
 
-void UserMachineInit(int& httpResponse_in, int& startTime_in, int& endTime_in, int& id_in, int& maxNbData_in, int& computerID_ctx, bool& active_inner, bool& waiting__inner, int& time_inner, bool& requiresAuth_inner, bool& newPage_inner, int&currentRequest_inner, int& httpRequest_inner, int& fromUserToInternet_out){
+void UserMachineInit(chips_int& httpResponse_in, int& startTime_in, int& endTime_in, int& id_in, int& maxNbData_in, int& computerID_ctx, bool& active_inner, bool& waiting__inner, int& time_inner, bool& requiresAuth_inner, bool& newPage_inner, int&currentRequest_inner, int& httpRequest_inner, int& lastRequest_inner, int& fromUserToInternet_out){
 
     // default values :
     maxNbData_in = 10;
-
+    
 
     waiting__inner = false;
     time_inner = 0;
+    active_inner = false;
+    waiting__inner = false;
+    requiresAuth_inner = false;
+    newPage_inner = false;
+
     //nb of data requested
-    currentRequest_inner = (int) (randomdouble()*((double)maxNbData_in))+1; 
+    currentRequest_inner = 0; 
 
      // (auth ? -1 : 1)*((maxNbData+1)*ID + nbData) with nbData in [1, maxNbData]
-    httpRequest_inner = (maxNbData_in+1)*computerID_ctx + currentRequest_inner;
-
-    // httpResponse in the form of
-    // response ? (authRequired ? -1 : 1)*(ID) : 0
-
+    httpRequest_inner = 0;
+    lastRequest_inner = 0;
     // outputs
     fromUserToInternet_out = httpRequest_inner;
 }
-void UserMachineThen(int& httpResponse_in, int& startTime_in, int& endTime_in, int& id_in, int& maxNbData_in, int& computerID_ctx, bool& active_inner, bool& waiting__inner, int& time_inner, bool& requiresAuth_inner, bool& newPage_inner, int&currentRequest_inner, int& httpRequest_inner, int& fromUserToInternet_out){
+
+void UserMachineThen(chips_int& httpResponse_in, int& startTime_in, int& endTime_in, int& id_in, int& maxNbData_in, int& computerID_ctx, bool& active_inner, bool& waiting__inner, int& time_inner, bool& requiresAuth_inner, bool& newPage_inner, int&currentRequest_inner, int& httpRequest_inner, int& lastRequest_inner, int& fromUserToInternet_out){
     computerID_ctx = id_in;
-    newPage_inner = httpResponse_in !=0;
-    requiresAuth_inner = httpResponse_in < 0;
+    newPage_inner = httpResponse_in !=0 && is_fresh(httpResponse_in);
+    requiresAuth_inner = (httpResponse_in < 0) || requiresAuth_inner;
     active_inner = (time_inner>=startTime_in) && (time_inner<endTime_in);
     if (!active_inner) {
         httpRequest_inner = 0;
     } else {
         if (!waiting__inner){
-            currentRequest_inner = (int) (randomdouble()*(double)maxNbData_in)+1;
-            httpRequest_inner = (maxNbData_in+1)*computerID_ctx + currentRequest_inner;
+            currentRequest_inner = (int)(randomdouble()*(maxNbData_in-1))+1;
+            httpRequest_inner = maxNbData_in*(computerID_ctx-1) + currentRequest_inner;
             if(requiresAuth_inner){
                 httpRequest_inner = -httpRequest_inner;
             }
+            lastRequest_inner = httpRequest_inner;
             waiting__inner = true;
         } else {
             if (newPage_inner){
-                waiting__inner = false;
                 if(requiresAuth_inner){
-                    httpRequest_inner = -httpRequest_inner;
+                    httpRequest_inner = -lastRequest_inner;
+                    waiting__inner = true;
+                }else{
+                    waiting__inner = false;
+                    httpRequest_inner = 0;
                 }
             } else {
                 waiting__inner = true;
@@ -55,24 +63,24 @@ void UserMachineThen(int& httpResponse_in, int& startTime_in, int& endTime_in, i
     fromUserToInternet_out = httpRequest_inner;
 }
 
-void ServerMachineInit(IntArray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, IntArray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
+void ServerMachineInit(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
     // default values :
     maxNbData_in = 10;
 
     httpResponse_inner = 0;
-    currentRequest_inner = 1;
+    currentRequest_inner = 0;
     requestFound_inner = false;
 
     requestList_inner = zeros(100);
 
     // outputs
     fromServerToInternet_out = httpResponse_inner;
-    nbData_out = requestList_inner[currentRequest_inner]%(maxNbData_in+1); 
-    userID_out = requestList_inner[currentRequest_inner]/(maxNbData_in+1);
+    nbData_out = requestList_inner[currentRequest_inner]%(maxNbData_in); 
+    userID_out = requestList_inner[currentRequest_inner]/(maxNbData_in);
     userAuth_out = requestList_inner[currentRequest_inner]<0;
 }
 
-void ServerMachineThen(IntArray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, IntArray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
+void ServerMachineThen(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
 
     ////////////////// treating client requests one by one
     requestList_inner[currentRequest_inner] = 0;
@@ -82,7 +90,7 @@ void ServerMachineThen(IntArray& fromInternet_in, int& wpServed_in, int& maxNbDa
             requestList_inner[i] = fromInternet_in[i];
         }
     }
-
+    requestFound_inner = false;
     for (auto reqShift : range(100)) { // weird way to do it to avoid starvation of clients
         if ( !requestFound_inner && (requestList_inner[(currentRequest_inner + reqShift)%100] != 0)) {
             requestFound_inner = true;
@@ -95,9 +103,21 @@ void ServerMachineThen(IntArray& fromInternet_in, int& wpServed_in, int& maxNbDa
 
     // outputs
     fromServerToInternet_out = httpResponse_inner;
-    nbData_out = requestList_inner[currentRequest_inner]%(maxNbData_in+1); 
-    userID_out = requestList_inner[currentRequest_inner]/(maxNbData_in+1);
-    userAuth_out = requestList_inner[currentRequest_inner]<0;
+    if(requestFound_inner){
+        userAuth_out = requestList_inner[currentRequest_inner]<0;
+        if(userAuth_out){
+            nbData_out = (-requestList_inner[currentRequest_inner])%(maxNbData_in);
+            userID_out = (-requestList_inner[currentRequest_inner])/(maxNbData_in)+1;
+        }else{
+            nbData_out = requestList_inner[currentRequest_inner]%(maxNbData_in);
+            userID_out = requestList_inner[currentRequest_inner]/(maxNbData_in)+1;
+        }
+    } else {
+        nbData_out = 0;
+        userID_out = 0;
+        userAuth_out = false;
+    }
+    
 }
 
 void UserActionInterpreterInit(int& nbDataRcvd_in, bool& authDataRcvd_in, int& userIDRcvd_in, int& nbData_out, int& reqID_out, bool& authProvided_out){
@@ -114,11 +134,11 @@ void UserActionInterpreterThen(int& nbDataRcvd_in, bool& authDataRcvd_in, int& u
 
 }
 
-void AuthenticatorInit(bool& authProvided_in,bool& isAuthenticated_out){
+void AuthenticatorInit(bool& authProvided_in, bool& isAuthenticated_out){
     // outputs
     isAuthenticated_out = authProvided_in;
 }
-void AuthenticatorThen(bool& authProvided_in,bool& isAuthenticated_out){
+void AuthenticatorThen(bool& authProvided_in, bool& isAuthenticated_out){
     // outputs
     isAuthenticated_out = authProvided_in;
 }
@@ -143,15 +163,15 @@ void RequestValidatorThen(int& nbData_in, int& requestID_in, bool& isAuthenticat
     redirection_out = needRedirection_inner;
 }
 
-void RequestLimiterInit(bool& redirection_in, int& maxRequests_in, int& userID_in, int& nbDataToFetch_in, int& nbAnsweredReqs_in, int& currentNbRequests_inner, bool& redirection_out, int& userID_out, int& dataQty_out){
+void RequestLimiterInit(bool& redirection_in, int& maxRequests_in, int& userID_in, int& nbDataToFetch_in, int& nbAnsweredReqs_in, int& currentNbRequests_inner, bool& redirection_out, chips_int& userID_out, int& dataQty_out){
     currentNbRequests_inner = 0;
 
     //outputs
     redirection_out = redirection_in;
-    userID_out = userID_in;
+    assign(userID_out,userID_in);
     dataQty_out = nbDataToFetch_in;
 }
-void RequestLimiterThen(bool& redirection_in, int& maxRequests_in, int& userID_in, int& nbDataToFetch_in, int& nbAnsweredReqs_in, int& currentNbRequests_inner, bool& redirection_out, int& userID_out, int& dataQty_out){
+void RequestLimiterThen(bool& redirection_in, int& maxRequests_in, int& userID_in, int& nbDataToFetch_in, int& nbAnsweredReqs_in, int& currentNbRequests_inner, bool& redirection_out, chips_int& userID_out, int& dataQty_out){
     
     currentNbRequests_inner = currentNbRequests_inner - nbAnsweredReqs_in;
     if(!redirection_in){
@@ -165,12 +185,12 @@ void RequestLimiterThen(bool& redirection_in, int& maxRequests_in, int& userID_i
 
     //outputs
     redirection_out = redirection_in;
-    userID_out = userID_in;
+    assign(userID_out,userID_in);
     dataQty_out = nbDataToFetch_in;
 }
 
 
-void CacheInit(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, IntArray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
+void CacheInit(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, intarray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
     maxCacheSize_inner = 100;
     minCacheSize_inner = 10;
     cache_inner = zeros(maxCacheSize_inner);
@@ -181,7 +201,7 @@ void CacheInit(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner
     //outputs
     foundInCache_out = found_inner;
 }
-void CacheThen(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, IntArray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
+void CacheThen(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner, int& minCacheSize_inner, intarray& cache_inner, int& newestDataIndex_inner, bool& found_inner, int& foundIndex_inner, bool& foundInCache_out){
     
     if(cacheSize_in > maxCacheSize_inner){
         cacheSize_in = maxCacheSize_inner;
@@ -193,10 +213,8 @@ void CacheThen(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner
         newestDataIndex_inner = 0;
     }
 
-    if (!(requestedData_in > 0)){
-        found_inner = false;
-    } else {
-        found_inner = false;
+    found_inner = false;
+    if (requestedData_in > 0){
         for (auto i : range(cacheSize_in)) {
             if((!found_inner) && (cache_inner[i] == requestedData_in)){
                 found_inner = true;
@@ -230,7 +248,7 @@ void CacheThen(int& requestedData_in, int& cacheSize_in, int& maxCacheSize_inner
     foundInCache_out = found_inner;
 }
 
-void DataProviderInit(bool& redirection_in, int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, IntArray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
+void DataProviderInit(bool& redirection_in, chips_int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, intarray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
     maxDifferentData_inner = 40;
     maxUserID_inner = 100;
     dataPerUserID_inner = zeros(maxUserID_inner);
@@ -253,10 +271,13 @@ void DataProviderInit(bool& redirection_in, int& userID_in, int& dataQty_in, boo
     timeSpentOnReq_out = time_inner;
     enableTimeReading_out = oneLessPendingRequest_inner;
 }
-void DataProviderThen(bool& redirection_in, int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, IntArray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
+void DataProviderThen(bool& redirection_in, chips_int& userID_in, int& dataQty_in, bool& cacheResponse_in, int& maxDifferentData_inner, int& maxUserID_inner, intarray& dataPerUserID_inner, int& currentlyTreatedUserRequest_inner, int& idToRespondTo_inner, int& dataToFetch_inner, double& time_inner, bool& cacheSearching_inner, bool& oneLessPendingRequest_inner, int& userID_out, int& cacheRequest_out, bool& oneLessPendingRequest_out, double& timeSpentOnReq_out, bool& enableTimeReading_out){
+    if(oneLessPendingRequest_inner){
+        time_inner = 0.0;
+    }
     oneLessPendingRequest_inner = false;
     idToRespondTo_inner = 0;
-    if(userID_in != 0){
+    if((userID_in != 0) && is_fresh(userID_in)){
         if(redirection_in){
             idToRespondTo_inner = -userID_in;
         } else {
@@ -317,9 +338,9 @@ void DataProviderThen(bool& redirection_in, int& userID_in, int& dataQty_in, boo
 }
 
 
-void allDataProvidersOutputsCollect(int& input, c_IntArray& answers, c_IntArray& prev_input_answers, c_IntArray& next_input_answers, c_IntArray& prev_output_answers, c_IntArray& next_output_answers, IntArray& output){
+void allDataProvidersOutputsCollect(int& input, collective_intarray& answers, collective_intarray& prev_input_answers, collective_intarray& next_input_answers, collective_intarray& prev_output_answers, collective_intarray& next_output_answers, intarray& output){
     
-    c_IntArray temp = cpy(answers);
+    collective_intarray temp = cpy(answers);
     if(input!=0){
         if(input>0){
             std::get<0>(temp)[input-1] = input;
@@ -342,7 +363,7 @@ void allDataProvidersOutputsCollect(int& input, c_IntArray& answers, c_IntArray&
 }
 
 
-void WebPageServiceInit(IntArray& respondToThisIDs_in, int& currentRequestAnswered_inner, IntArray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
+void WebPageServiceInit(intarray& respondToThisIDs_in, int& currentRequestAnswered_inner, intarray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
 
     currentRequestAnswered_inner = 0;
     requestsToAnswerTo_inner = zeros(100);
@@ -351,7 +372,7 @@ void WebPageServiceInit(IntArray& respondToThisIDs_in, int& currentRequestAnswer
     //outputs
     idToRespondTo_out = requestsToAnswerTo_inner[currentRequestAnswered_inner];
 }
-void WebPageServiceThen(IntArray& respondToThisIDs_in, int& currentRequestAnswered_inner, IntArray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
+void WebPageServiceThen(intarray& respondToThisIDs_in, int& currentRequestAnswered_inner, intarray& requestsToAnswerTo_inner, bool& requestFound_inner, int& idToRespondTo_out){
 
     requestsToAnswerTo_inner[currentRequestAnswered_inner] = 0;
     requestFound_inner = false;
@@ -374,7 +395,7 @@ void WebPageServiceThen(IntArray& respondToThisIDs_in, int& currentRequestAnswer
 
 
 
-void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& output_acc_prev_channel, c_int& output_acc_next_channel, int& output){
+void responseToTheRightUserSpread(int& computerID, collective_int& input_acc, collective_int& output_acc_prev_channel, collective_int& output_acc_next_channel, chips_int& output){
 
     if(std::get<1>(input_acc)==STOP){
         std::get<1>(output_acc_prev_channel) = STOP;
@@ -382,13 +403,13 @@ void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& outp
         return;
     }
 
-    c_int id = cpy(input_acc);
+    collective_int id = cpy(input_acc);
     
     if (std::get<0>(input_acc) < 0){
         std::get<0>(id) = -std::get<0>(id);
     }
-    c_int returned;
-    c_int transmitted;
+    collective_int returned;
+    collective_int transmitted;
     if((std::get<0>(input_acc)==0) || (std::get<0>(id) != computerID)){
         std::get<0>(returned) = 0;
         std::get<1>(returned) = REGULAR;
@@ -402,20 +423,31 @@ void responseToTheRightUserSpread(int& computerID, c_int& input_acc, c_int& outp
     output_acc_next_channel = cpy(transmitted);
     output_acc_prev_channel = cpy(transmitted);
 
-    output = std::get<1>(returned);
+    assign(output,returned);
 }
 
 
 
-void aggregatingRequestsCollect(int& input, c_IntArray& requests, c_IntArray& prev_input_requests, c_IntArray& next_input_requests, c_IntArray& prev_output_requests, c_IntArray& next_output_requests, IntArray& output){
-    c_IntArray temp = cpy(requests);
+void aggregatingRequestsCollect(int& input, collective_intarray& requests, collective_intarray& prev_input_requests, collective_intarray& next_input_requests, collective_intarray& prev_output_requests, collective_intarray& next_output_requests, intarray& output){
+    collective_intarray temp = cpy(requests);
+
+    // Magic const that I think of adding just righ now for a proper indexing system
+    // It would take too much time to correct the whole model to get this value propoerly 
+    int maxNbData = 10; 
     if(input!=0){
         if(input<0){
-            std::get<0>(temp)[-input] = input;
+            std::get<0>(temp)[-input/maxNbData] = input;
         } else {
-            std::get<0>(temp)[input] = input;
+            std::get<0>(temp)[input/maxNbData] = input;
         }
     }
+    // if(input!=0){
+    //     if(input<0){
+    //         std::get<0>(temp)[(-input)] = input;
+    //     } else {
+    //         std::get<0>(temp)[input] = input;
+    //     }
+    // }
 
     for (auto i : range(100)) {
         if(std::get<0>(prev_input_requests)[i]!=0){
@@ -465,8 +497,8 @@ void PidControllerThen(double& requested__time_in,double& resulting__time_in,boo
 }
 
 
-void numberOfRespondedRequestsCollect(bool& input, c_int& sum, c_int& prev_input_sum, c_int& next_input_sum, c_int& prev_output_sum, c_int& next_output_sum, int& output){
-    c_int temp = cpy(sum);
+void numberOfRespondedRequestsCollect(bool& input, collective_int& sum, collective_int& prev_input_sum, collective_int& next_input_sum, collective_int& prev_output_sum, collective_int& next_output_sum, int& output){
+    collective_int temp = cpy(sum);
     std::get<0>(temp) = std::get<0>(temp) + std::get<0>(prev_input_sum) + std::get<0>(next_input_sum);
     if(input){
         std::get<0>(temp) = std::get<0>(temp) + 1;
@@ -477,7 +509,7 @@ void numberOfRespondedRequestsCollect(bool& input, c_int& sum, c_int& prev_input
     prev_output_sum = cpy(temp);
 }
 
-void broadcastRedirectionSpread(c_bool& input_acc, c_bool& output_acc_prev_channel, c_bool& output_acc_next_channel, bool& output){
+void broadcastRedirectionSpread(collective_bool& input_acc, collective_bool& output_acc_prev_channel, collective_bool& output_acc_next_channel, bool& output){
     if(std::get<1>(input_acc)==STOP){
         std::get<1>(output_acc_prev_channel) = STOP;
         std::get<1>(output_acc_next_channel) = STOP;
@@ -490,7 +522,7 @@ void broadcastRedirectionSpread(c_bool& input_acc, c_bool& output_acc_prev_chann
 }
 
 
-void broadcastDataQtySpread(c_int& input_acc, c_int& output_acc_prev_channel, c_int& output_acc_next_channel, int& output){
+void broadcastDataQtySpread(collective_int& input_acc, collective_int& output_acc_prev_channel, collective_int& output_acc_next_channel, int& output){
 
     if(std::get<1>(input_acc)==STOP){
         std::get<1>(output_acc_prev_channel) = STOP;
@@ -504,9 +536,9 @@ void broadcastDataQtySpread(c_int& input_acc, c_int& output_acc_prev_channel, c_
 }
 
 
-void findRightDataProviderSpread(c_int& input_acc_userID, c_int& input_acc_nbJumps, c_int& output_acc_prev_channel_userID, c_int& output_acc_prev_channel_nbJumps, c_int& output_acc_next_channel_userID,c_int& output_acc_next_channel_nbJumps, int& output){
+void findRightDataProviderSpread(collective_int& input_acc_userID, collective_int& input_acc_nbJumps, collective_int& output_acc_prev_channel_userID, collective_int& output_acc_prev_channel_nbJumps, collective_int& output_acc_next_channel_userID,collective_int& output_acc_next_channel_nbJumps, chips_int& output){
 
-    if(std::get<1>(input_acc_userID)==STOP || std::get<1>(input_acc_nbJumps)==STOP){
+    if((std::get<1>(input_acc_userID)==STOP) || (std::get<1>(input_acc_nbJumps)==STOP)){
         std::get<1>(output_acc_prev_channel_nbJumps) = STOP;
         std::get<1>(output_acc_prev_channel_userID) = STOP;
         std::get<1>(output_acc_next_channel_nbJumps) = STOP;
@@ -514,8 +546,8 @@ void findRightDataProviderSpread(c_int& input_acc_userID, c_int& input_acc_nbJum
         return;
     }
 
-    c_int currentBackendTransmittedID;
-    c_int nextBackendData;
+    collective_int currentBackendTransmittedID;
+    collective_int nextBackendData;
 
     if (std::get<0>(input_acc_nbJumps) == (std::get<0>(input_acc_userID)%4)){
         currentBackendTransmittedID = cpy(input_acc_userID);
@@ -527,8 +559,8 @@ void findRightDataProviderSpread(c_int& input_acc_userID, c_int& input_acc_nbJum
     }
     
     
-    output = std::get<0>(currentBackendTransmittedID);
-    output_acc_next_channel_userID = cpy(input_acc_userID); 
+    assign(output,currentBackendTransmittedID);
+    output_acc_next_channel_userID = cpy(nextBackendData); 
     output_acc_next_channel_nbJumps = cpy(input_acc_nbJumps);
     std::get<1>(output_acc_prev_channel_userID) = STOP;
     std::get<1>(output_acc_prev_channel_nbJumps) = STOP;

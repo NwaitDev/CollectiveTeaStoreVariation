@@ -35,13 +35,7 @@ version:
 # Compile $(PGM)
 output/build/system: $(PGM).bip $(BIPSOURCES) $(CPPSOURCES)
 	mkdir -p output/build
-	bipc -p $(PGM) -d "$(COMPOUND)()" \
-		$(INCLUDE_BIP_PACKAGES) \
-		--genbip-follow-used-packages \
-		$(INCLUDE_CPP_PACKAGES) \
-		--gencpp-follow-used-packages \
-		$(CPP_EXTRA_OBJ)\
-		--gencpp-output output
+	bipc -p $(PGM) -d "$(COMPOUND)()" $(INCLUDE_BIP_PACKAGES) --genbip-follow-used-packages $(INCLUDE_CPP_PACKAGES) --gencpp-follow-used-packages $(CPP_EXTRA_OBJ) --gencpp-output output
 
 	cd output/build && cmake .. -Wno-dev
 

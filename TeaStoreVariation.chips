@@ -1,4 +1,3 @@
-// random(), zeros(int*) and range(int*) not implemented yet in chips
 
 physical UserMachine(sensor int httpResponse, int startTime, int endTime, int id, int maxNbData = 10) 
  // startTime >= 0 // endTime > startTime // 100 > id > 0
@@ -7,41 +6,46 @@ with{
     UserChannel prev;
     ctx int computerID;
 } init {
-    bool active;
+    bool active = false;
     bool waiting = false;
     int time = 0;
-    bool requiresAuth;
-    bool newPage;
+    bool requiresAuth = false;
+    bool newPage = false;
 
     //nb of data requested
-    int currentRequest = (int) (random()*((float)maxNbData))+1; 
+    int currentRequest = 0; 
 
      // (auth ? -1 : 1)*((maxNbData+1)*ID + nbData) with nbData in [1, maxNbData]
-    int httpRequest = (maxNbData+1)*ctx.computerID + currentRequest;
+    int httpRequest = 0;
+    int lastRequest = 0;
 
     // httpResponse in the form of
     // response ? (authRequired ? -1 : 1)*(ID) : 0
 } then {
     ctx.computerID = id;
     newPage = httpResponse !=0;
-    requiresAuth = httpResponse < 0;
+    requiresAuth = httpResponse < 0 || requiresAuth;
     active = (time>=startTime) && (time<endTime);
     if (!active) {
         httpRequest = 0;
     } else {
 
         if (!waiting){
-            currentRequest = (int) (random()*(float)maxNbData)+1;
-            httpRequest = (maxNbData+1)*ctx.computerID + currentRequest;
+            currentRequest = (int) (random()*((float)(maxNbData-1)))+1;
+            httpRequest = (maxNbData)*(ctx.computerID-1) + currentRequest;
             if(requiresAuth){
                 httpRequest = -httpRequest;
             }
+            lastRequest = httpRequest;
             waiting = true;
         } else {
             if (newPage){
-                waiting = false;
                 if(requiresAuth){
-                    httpRequest = -httpRequest;
+                    httpRequest = -lastRequest;
+                    waiting = true;
+                } else {
+                    waiting = false;
+                    httpRequest = 0;
                 }
             } else {
                 waiting = true;
@@ -53,7 +57,7 @@ with{
 } -> actuator fromUserToInternet(httpRequest)
 
 
-// from internet is equal to (auth ? -1 : 1)*((maxNbData+1)*ID + nbData) with nbData in [1, maxNbData]
+// from internet is equal to (auth ? -1 : 1)*(maxNbData*(ID-1) + nbData) with nbData in [1, maxNbData]
 physical ServerMachine(sensor int[100] fromInternet, int wpServed, int maxNbData = 10)
 with {
     ServerChannel next;
@@ -192,24 +196,28 @@ logical DataProvider (bool redirection, int userID, int dataQty, bool cacheRespo
 init {
     int maxDifferentData = 40;
     int maxUserID = 100;
+    int prevUserID = 0;
     int [maxUserID] dataPerUserID = zeros(maxUserID);
     int currentlyTreatedUserRequest = -1;
 
     ///////
     // Function output
     
-    int idToRespondTo = 0;
+    int httpResponse = 0;
     int dataToFetch = 0;
 
-    float time = 0.;
+    float time = 0.0;
     bool cacheSearching = false;
     bool oneLessPendingRequest = false;
 } then {
+    if(oneLessPendingRequest){
+        time = 0.0;
+    }
     oneLessPendingRequest = false;
-    idToRespondTo = 0;
-    if(userID != 0){
+    httpResponse = 0;
+    if(userID != 0 && isFresh(userID)){
         if(redirection){
-            idToRespondTo = -userID;
+            httpResponse = -userID;
         } else {
             dataPerUserID[userID-1] = dataQty;
             if (currentlyTreatedUserRequest < 0 ) {
@@ -219,7 +227,7 @@ init {
     }
 
     // if we have pending requests and we are not occupied sending a response
-    if (currentlyTreatedUserRequest >=0 && idToRespondTo==0) {
+    if (currentlyTreatedUserRequest >=0 && httpResponse==0) {
 
         if(cacheSearching) {
             if(cacheResponse){
@@ -234,12 +242,12 @@ init {
             dataPerUserID[currentlyTreatedUserRequest] = dataPerUserID[currentlyTreatedUserRequest] -1;
         }
 
-        if(dataPerUserID[currentlyTreatedUserRequest]>allDataProvidersOutputs0){
+        if(dataPerUserID[currentlyTreatedUserRequest]>0){
             dataToFetch = (int) (random()*((float)maxDifferentData))+1;
             cacheSearching = true;
         } else {
             //we finished treating the current request
-            idToRespondTo = currentlyTreatedUserRequest +1;
+            httpResponse = currentlyTreatedUserRequest +1;
             oneLessPendingRequest = true;
 
             bool foundNewRequestPending = false;
@@ -258,7 +266,7 @@ init {
             }
         }
     }
-}-> userID(idToRespondTo) // already formatted as the http answer
+}-> userID(httpResponse) // already formatted as the http answer
 -> cacheRequest(dataToFetch)
 -> oneLessPendingRequest(oneLessPendingRequest)
 -> timeSpentOnReq(time)
@@ -307,7 +315,7 @@ init {
         }
     }
 } // this is already the content of the httpAnswer
--> idToRespondTo(requestsToAnswerTo[currentRequestAnswered])
+-> httpResponse(requestsToAnswerTo[currentRequestAnswered])
 
 
 object UI with {
@@ -496,7 +504,7 @@ system {
         }
     }
     
-    smachine.wpServed(wpservice.idToRespondTo)
+    smachine.wpServed(wpservice.httpResponse)
 
     uainterpreter.nbDataRcvd(smachine.nbData);
     uainterpreter.authDataRcvd(smachine.userAuth);

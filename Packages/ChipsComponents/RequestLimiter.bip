@@ -23,13 +23,13 @@ package RequestLimiter
 
         // outputs
         data bool redirection_o
-        data int userID_o
+        data chips_int userID_o
         data int dataQty
 
         port port_t start()
         port port_t calc()
         export port portBoolIntIntIntInt_t recv(redirection_i,maxRequests,userID_i,nbDataToFetch,nbAnsweredReqs)
-        export port portBoolIntInt_t send(redirection_o,userID_o,dataQty)
+        export port portBoolChipsIntInt_t send(redirection_o,userID_o,dataQty)
 
         place INIT, RECEIVING, THEN, SENDING
 
@@ -74,10 +74,10 @@ package RequestLimiter
     compound type RequestLimiterTX()
 
         component boolTX redirection_o()
-        component intTX userID_o()
+        component chips_intTX userID_o()
         component intTX dataQty()
 
-        connector one2many_BoolIntInt_t from_the_core(redirection_o.from_the_core,userID_o.from_the_core,dataQty.from_the_core)
+        connector one2many_BoolChipsIntInt_t from_the_core(redirection_o.from_the_core,userID_o.from_the_core,dataQty.from_the_core)
 
         export port redirection_o.to_the_outside as redirection_o
         export port userID_o.to_the_outside as userID_o
@@ -95,7 +95,7 @@ package RequestLimiter
         component RequestLimiterCore core(isSource)
 
         connector flowBoolIntIntIntInt_t RX2Core(inputParameters.to_the_core, core.recv)
-        connector flowBoolIntInt_t Core2TX(core.send, outputParameters.from_the_core)
+        connector flowBoolChipsIntInt_t Core2TX(core.send, outputParameters.from_the_core)
         
         export port inputParameters.redirection_i as redirection_i
         export port inputParameters.maxRequests as maxRequests

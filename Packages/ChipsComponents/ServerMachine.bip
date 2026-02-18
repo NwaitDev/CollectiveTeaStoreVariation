@@ -8,7 +8,7 @@ package ServerMachine
     atom type ServerMachineCore(bool isSource)
 
         // parameters
-        data IntArray fromInternet
+        data intarray fromInternet
         data int wpServed
         data int maxNbData
         
@@ -18,7 +18,7 @@ package ServerMachine
         data int httpResponse
         data int currentRequest
         data bool requestFound
-        data IntArray requestList
+        data intarray requestList
         
         // outputs
         data int fromServerToInternet

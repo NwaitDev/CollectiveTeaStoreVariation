@@ -9,9 +9,9 @@ package CollectiveConnectors
     connector type spreadConnectorResponseToTheRightUserAmongUserMachine(
         portInt_t computerID,
         portCInt_t transmitted_next, portCInt_t transmitted_prev,
-        portInt_t target
+        portChipsInt_t target
     )
-        data c_int fromInternet
+        data collective_int fromInternet
         data int computerID_data
         export port portCInt_t accumulated(fromInternet)
 
@@ -52,6 +52,18 @@ package CollectiveConnectors
         }
     end
 
+    connector type flowChipsIntCInt2CIntCInt_t(
+        portChipsInt_t s0,
+        portCInt_t s1,
+        portCIntCInt_t r
+    )
+        define s0 s1 r
+        on s0 s1 r down {
+            assign(r.v0,s0.v0);
+            r.v1 = s1.v0;
+        }
+    end
+
     connector type flowBool2CBool_t(
         portBool_t s,
         portCBool_t r
@@ -67,9 +79,9 @@ package CollectiveConnectors
         portCIntArrayCIntArrayIntArray_t prev_input_requests,
         portCIntArrayCIntArrayIntArray_t next_input_requests
     )
-        data c_IntArray prevOutput
-        data c_IntArray nextOutput
-        data IntArray targetOutput
+        data collective_intarray prevOutput
+        data collective_intarray nextOutput
+        data intarray targetOutput
         export port portCIntArrayCIntArrayIntArray_t accumulated(prevOutput,nextOutput,targetOutput)
 
         define input requests_default prev_input_requests next_input_requests
@@ -102,8 +114,8 @@ package CollectiveConnectors
         portCIntCIntInt_t prev_input_sum,
         portCIntCIntInt_t next_input_sum
     )
-        data c_int prevOutput
-        data c_int nextOutput
+        data collective_int prevOutput
+        data collective_int nextOutput
         data int targetOutput
         export port portCIntCIntInt_t accumulated(prevOutput,nextOutput,targetOutput)
 
@@ -132,7 +144,7 @@ package CollectiveConnectors
         portCBool_t transmitted_prev, portCBool_t transmitted_next,
         portBool_t target
     )
-        data c_bool v
+        data collective_bool v
         export port portCBool_t accumulated(v)
 
         define target transmitted_next transmitted_prev
@@ -148,21 +160,21 @@ package CollectiveConnectors
 
     connector type spreadConnector_findRightDataProvider_among_Backend(
         portCIntCInt_t transmitted_prev, portCIntCInt_t transmitted_next,
-        portInt_t target
+        portChipsInt_t target
     )
-        data c_int input_userID
-        data c_int input_nbJumps
+        data collective_int input_userID
+        data collective_int input_nbJumps
         export port portCIntCInt_t accumulated(input_userID,input_nbJumps)
 
         define target transmitted_next transmitted_prev
         on target transmitted_next transmitted_prev down {
             findRightDataProviderSpread(
-                input_userID, //c_int& input_acc_userID,
-                input_nbJumps, //c_int& input_acc_nbJumps,
-                transmitted_prev.v0, //c_int& output_acc_prev_channel_userID,
-                transmitted_prev.v1, //c_int& output_acc_prev_channel_nbJumps,
-                transmitted_next.v0, //c_int& output_acc_next_channel_userID,
-                transmitted_next.v1, //c_int& output_acc_next_channel_nbJumps,
+                input_userID, //collective_int& input_acc_userID,
+                input_nbJumps, //collective_int& input_acc_nbJumps,
+                transmitted_prev.v0, //collective_int& output_acc_prev_channel_userID,
+                transmitted_prev.v1, //collective_int& output_acc_prev_channel_nbJumps,
+                transmitted_next.v0, //collective_int& output_acc_next_channel_userID,
+                transmitted_next.v1, //collective_int& output_acc_next_channel_nbJumps,
                 target.v0
             );
         }
@@ -172,7 +184,7 @@ package CollectiveConnectors
         portCInt_t transmitted_prev, portCInt_t transmitted_next,
         portInt_t target
     )
-        data c_int v
+        data collective_int v
         export port portCInt_t accumulated(v)
 
         define target transmitted_next transmitted_prev
@@ -191,21 +203,21 @@ package CollectiveConnectors
         portInt_t input,
         portCIntArrayCIntArrayIntArray_t recvd_prev, portCIntArrayCIntArrayIntArray_t recvd_next
     )
-        data IntArray output
-        data c_IntArray transmitted_next
-        data c_IntArray transmitted_prev
+        data intarray output
+        data collective_intarray transmitted_next
+        data collective_intarray transmitted_prev
         export port portCIntArrayCIntArrayIntArray_t accumulated(transmitted_prev, transmitted_next, output)
 
         define input recvd_next recvd_prev default_accumulator
         on input recvd_next recvd_prev default_accumulator up {
             allDataProvidersOutputsCollect(
                 input.v0,
-                default_accumulator.v0, // c_IntArray& answers,
-                recvd_prev.v1, // c_IntArray& prev_input_answers,
-                recvd_next.v0, // c_IntArray& next_input_answers,
-                transmitted_prev, // c_IntArray& prev_output_answers, 
-                transmitted_next, // c_IntArray& next_output_answers,
-                output // IntArray& output
+                default_accumulator.v0, // collective_intarray& answers,
+                recvd_prev.v1, // collective_intarray& prev_input_answers,
+                recvd_next.v0, // collective_intarray& next_input_answers,
+                transmitted_prev, // collective_intarray& prev_output_answers, 
+                transmitted_next, // collective_intarray& next_output_answers,
+                output // intarray& output
             );
         }
     end

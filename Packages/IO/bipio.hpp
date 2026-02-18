@@ -10,14 +10,15 @@ inline std::ostream& operator << ( std::ostream& os, const CppOutStream& rhs ) {
     return os;
 }
 
-void printIntArray(IntArray & arr);
+void printIntArray(intarray & arr);
 
 void emptyFile(std::string filename);
 CppOutStream openOutStream(std::string filename);
 void printInStream(CppOutStream& outputstream, std::string txt);
+void printInStream(CppOutStream& outputstream, chips_int n);
 void printInStream(CppOutStream& outputstream, int n);
 void printInStream(CppOutStream& outputstream, double x);
-void printInStream(CppOutStream& outputstream, IntArray x);
+void printInStream(CppOutStream& outputstream, intarray x);
 void closeStream(CppOutStream& outputstream);
 
 inline const char* asConstCharStar(std::string s){

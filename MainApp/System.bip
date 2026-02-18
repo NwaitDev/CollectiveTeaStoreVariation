@@ -19,10 +19,10 @@ package System
 
 
     atom type aggregatingRequestsDevicePlaceholder()
-        data IntArray default_value // for the accumulator (to allow checking no modification has been applied to other values)
-        data c_IntArray prev_output_data
-        data c_IntArray next_output_data
-        data IntArray target_output_data
+        data intarray default_value // for the accumulator (to allow checking no modification has been applied to other values)
+        data collective_intarray prev_output_data
+        data collective_intarray next_output_data
+        data intarray target_output_data
         data bool is_constant
 
         export port portCIntArrayCIntArrayIntArray_t output(prev_output_data,next_output_data,target_output_data)
@@ -55,7 +55,7 @@ package System
     end
 
     atom type cIntEaterPlaceholder()
-        data c_int accumulated
+        data collective_int accumulated
 
         export port portCInt_t input(accumulated)
 
@@ -66,8 +66,8 @@ package System
     end
 
     atom type cIntCIntEaterPlaceholder()
-        data c_int accumulated0
-        data c_int accumulated1
+        data collective_int accumulated0
+        data collective_int accumulated1
 
         export port portCIntCInt_t input(accumulated0,accumulated1)
 
@@ -78,7 +78,7 @@ package System
     end
 
     atom type redirection_accumulator_eater()
-        data c_bool accumulated
+        data collective_bool accumulated
 
         export port portCBool_t input(accumulated)
 
@@ -112,7 +112,7 @@ package System
     end
 
     atom type streamConstantCInt(int cst)
-        data c_int constant
+        data collective_int constant
         data bool is_constant
 
         export port portCInt_t output(constant)
@@ -135,7 +135,7 @@ package System
     end
 
     atom type streamConstantCIntArray(int size)
-        data c_IntArray constant
+        data collective_intarray constant
         data bool is_constant
 
         export port portCIntArray_t output(constant)
@@ -182,8 +182,8 @@ package System
 
     atom type numberOfRespondedRequestDevicePlaceholder()
         data int default_value
-        data c_int prev_output_data
-        data c_int next_output_data
+        data collective_int prev_output_data
+        data collective_int next_output_data
         data int target_output_data
         data bool is_constant
 
@@ -217,10 +217,10 @@ package System
     end
 
     atom type aggregatingDataProviderOutputPlaceholder()
-        data IntArray default_value // for the accumulator (to allow checking no modification has been applied to other values)
-        data c_IntArray prev_output_data
-        data c_IntArray next_output_data
-        data IntArray target_output_data
+        data intarray default_value // for the accumulator (to allow checking no modification has been applied to other values)
+        data collective_intarray prev_output_data
+        data collective_intarray next_output_data
+        data intarray target_output_data
         data bool is_constant
 
         export port portCIntArrayCIntArrayIntArray_t output(prev_output_data,next_output_data,target_output_data)
@@ -258,64 +258,74 @@ package System
         component ContextualInt computerID0()
         connector flowInt_t userMachineReadAccessToCtx0(computerID0.giveToken,umachine0.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx0(umachine0.freeCtx, computerID0.receiveToken)
-        connector plugInt_t stopUMachine0MaxNbData(umachine0.maxNbData)
+        component streamConstantInt maxNbData(10)
+        connector flowInt_t UMachine0MaxNbData(maxNbData.output, umachine0.maxNbData)
 
         component UserMachine umachine1(true)
         component ContextualInt computerID1()
         connector flowInt_t userMachineReadAccessToCtx1(computerID1.giveToken,umachine1.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx1(umachine1.freeCtx, computerID1.receiveToken)
-        connector plugInt_t stopUMachine1MaxNbData(umachine1.maxNbData)
+        connector flowInt_t UMachine1MaxNbData(maxNbData.output, umachine1.maxNbData)
+        
 
         component UserMachine umachine2(true)
         component ContextualInt computerID2()
         connector flowInt_t userMachineReadAccessToCtx2(computerID2.giveToken,umachine2.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx2(umachine2.freeCtx, computerID2.receiveToken)
-        connector plugInt_t stopUMachine2MaxNbData(umachine2.maxNbData)
+        connector flowInt_t UMachine2MaxNbData(maxNbData.output, umachine2.maxNbData)
+
 
         component UserMachine umachine3(true)
         component ContextualInt computerID3()
         connector flowInt_t userMachineReadAccessToCtx3(computerID3.giveToken,umachine3.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx3(umachine3.freeCtx, computerID3.receiveToken)
-        connector plugInt_t stopUMachine3MaxNbData(umachine3.maxNbData)
+        connector flowInt_t UMachine3MaxNbData(maxNbData.output, umachine3.maxNbData)
+
 
         component UserMachine umachine4(true)
         component ContextualInt computerID4()
         connector flowInt_t userMachineReadAccessToCtx4(computerID4.giveToken,umachine4.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx4(umachine4.freeCtx, computerID4.receiveToken)
-        connector plugInt_t stopUMachine4MaxNbData(umachine4.maxNbData)
+        connector flowInt_t UMachine4MaxNbData(maxNbData.output, umachine4.maxNbData)
+
 
         component UserMachine umachine5(true)
         component ContextualInt computerID5()
         connector flowInt_t userMachineReadAccessToCtx5(computerID5.giveToken,umachine5.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx5(umachine5.freeCtx, computerID5.receiveToken)
-        connector plugInt_t stopUMachine5MaxNbData(umachine5.maxNbData)
+        connector flowInt_t UMachine5MaxNbData(maxNbData.output, umachine5.maxNbData)
+
         
         component UserMachine umachine6(true)
         component ContextualInt computerID6()
         connector flowInt_t userMachineReadAccessToCtx6(computerID6.giveToken,umachine6.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx6(umachine6.freeCtx, computerID6.receiveToken)
-        connector plugInt_t stopUMachine6MaxNbData(umachine6.maxNbData)
+        connector flowInt_t UMachine6MaxNbData(maxNbData.output, umachine6.maxNbData)
+
 
         component UserMachine umachine7(true)
         component ContextualInt computerID7()
         connector flowInt_t userMachineReadAccessToCtx7(computerID7.giveToken,umachine7.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx7(umachine7.freeCtx, computerID7.receiveToken)
-        connector plugInt_t stopUMachine7MaxNbData(umachine7.maxNbData)
+        connector flowInt_t UMachine7MaxNbData(maxNbData.output, umachine7.maxNbData)
+
         
         component UserMachine umachine8(true)
         component ContextualInt computerID8()
         connector flowInt_t userMachineReadAccessToCtx8(computerID8.giveToken,umachine8.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx8(umachine8.freeCtx, computerID8.receiveToken)
-        connector plugInt_t stopUMachine8MaxNbData(umachine8.maxNbData)
+        connector flowInt_t UMachine8MaxNbData(maxNbData.output, umachine8.maxNbData)
+
 
         component UserMachine umachine9(true)
         component ContextualInt computerID9()
         connector flowInt_t userMachineReadAccessToCtx9(computerID9.giveToken,umachine9.getCtx)
         connector flowInt_t userMachineWriteAccessToCtx9(umachine9.freeCtx, computerID9.receiveToken)
-        connector plugInt_t stopUMachine9MaxNbData(umachine9.maxNbData)
+        connector flowInt_t UMachine9MaxNbData(maxNbData.output, umachine9.maxNbData)
+
 
         component ServerMachine smachine(false)
-        connector plugInt_t stopSmachineMaxNbData(smachine.maxNbData)
+        connector flowInt_t smachineMaxNbData(maxNbData.output,smachine.maxNbData)
 
         component UserActionInterpreter uainterpreter(false)
 
@@ -374,87 +384,107 @@ package System
         component streamConstantCIntArray defaultForUmachine9_fromUserToInternet(100)
         component aggregatingRequestsDevicePlaceholder defaultForUmachine9_no_next_value()
 
+        component IntMonitor umachine0FromUserToInternetOutput("output/umachine0FromUserToInternetOutput.csv", "umachine0FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine0FromUserToInternetOutput(umachine0.fromUserToInternet, umachine0FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests0(
-                umachine0.fromUserToInternet,
+                umachine0FromUserToInternetOutput.output,
                 defaultForUmachine0_fromUserToInternet.output,
                 defaultForUmachine0_no_prev_value.output,
                 defaultForUmachine0_no_next_value.output
             )
         
+        component IntMonitor umachine1FromUserToInternetOutput("output/umachine1FromUserToInternetOutput.csv", "umachine1FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine1FromUserToInternetOutput(umachine1.fromUserToInternet, umachine1FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests1(
-                umachine1.fromUserToInternet,
+                umachine1FromUserToInternetOutput.output,
                 defaultForUmachine1_fromUserToInternet.output,
                 collective_aggregatingRequests0.accumulated,
                 defaultForUmachine1_no_next_value.output
             )
-        
+    
+        component IntMonitor umachine2FromUserToInternetOutput("output/umachine2FromUserToInternetOutput.csv", "umachine2FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine2FromUserToInternetOutput(umachine2.fromUserToInternet, umachine2FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests2(
-                umachine2.fromUserToInternet,
+                umachine2FromUserToInternetOutput.output,
                 defaultForUmachine2_fromUserToInternet.output,
                 collective_aggregatingRequests1.accumulated,
                 defaultForUmachine2_no_next_value.output
             )
 
+        component IntMonitor umachine3FromUserToInternetOutput("output/umachine3FromUserToInternetOutput.csv", "umachine3FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine3FromUserToInternetOutput(umachine3.fromUserToInternet, umachine3FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests3(
-                umachine3.fromUserToInternet,
+                umachine3FromUserToInternetOutput.output,
                 defaultForUmachine3_fromUserToInternet.output,
                 collective_aggregatingRequests2.accumulated,
                 defaultForUmachine3_no_next_value.output
             )
         
+        component IntMonitor umachine4FromUserToInternetOutput("output/umachine4FromUserToInternetOutput.csv", "umachine4FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine4FromUserToInternetOutput(umachine4.fromUserToInternet, umachine4FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests4(
-                umachine4.fromUserToInternet,
+                umachine4FromUserToInternetOutput.output,
                 defaultForUmachine4_fromUserToInternet.output,
                 collective_aggregatingRequests3.accumulated,
                 defaultForUmachine4_no_next_value.output
             )
         
+        component IntMonitor umachine5FromUserToInternetOutput("output/umachine5FromUserToInternetOutput.csv", "umachine5FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine5FromUserToInternetOutput(umachine5.fromUserToInternet, umachine5FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests5(
-                umachine5.fromUserToInternet,
+                umachine5FromUserToInternetOutput.output,
                 defaultForUmachine5_fromUserToInternet.output,
                 collective_aggregatingRequests4.accumulated,
                 defaultForUmachine5_no_next_value.output
             )
 
+        component IntMonitor umachine6FromUserToInternetOutput("output/umachine6FromUserToInternetOutput.csv", "umachine6FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine6FromUserToInternetOutput(umachine6.fromUserToInternet, umachine6FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests6(
-                umachine6.fromUserToInternet,
+                umachine6FromUserToInternetOutput.output,
                 defaultForUmachine6_fromUserToInternet.output,
                 collective_aggregatingRequests5.accumulated,
                 defaultForUmachine6_no_next_value.output
             )
         
+        component IntMonitor umachine7FromUserToInternetOutput("output/umachine7FromUserToInternetOutput.csv", "umachine7FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine7FromUserToInternetOutput(umachine7.fromUserToInternet, umachine7FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests7(
-                umachine7.fromUserToInternet,
+                umachine7FromUserToInternetOutput.output,
                 defaultForUmachine7_fromUserToInternet.output,
                 collective_aggregatingRequests6.accumulated,
                 defaultForUmachine7_no_next_value.output
             )
         
+        component IntMonitor umachine8FromUserToInternetOutput("output/umachine8FromUserToInternetOutput.csv", "umachine8FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine8FromUserToInternetOutput(umachine8.fromUserToInternet, umachine8FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests8(
-                umachine8.fromUserToInternet,
+                umachine8FromUserToInternetOutput.output,
                 defaultForUmachine8_fromUserToInternet.output,
                 collective_aggregatingRequests7.accumulated,
                 defaultForUmachine8_no_next_value.output
             )
 
+        component IntMonitor umachine9FromUserToInternetOutput("output/umachine9FromUserToInternetOutput.csv", "umachine9FromUserToInternetOutput: %d\n",100) 
+        connector flowInt_t monitoringumachine9FromUserToInternetOutput(umachine9.fromUserToInternet, umachine9FromUserToInternetOutput.input)
         connector collect_aggregatingRequests_among_UserMachine 
             collective_aggregatingRequests9(
-                umachine9.fromUserToInternet,
+                umachine9FromUserToInternetOutput.output,
                 defaultForUmachine9_fromUserToInternet.output,
                 collective_aggregatingRequests8.accumulated,
                 defaultForUmachine9_no_next_value.output
             )
         
-        component IntArrayMonitor collectAggregatingReqOutput("output/collectAggregatingReqOutput.csv", "collectAggregatingReqOutput: %d\n",100) // printing 100 samples then blocking
+        component IntArrayMonitor collectAggregatingReqOutput("output/collectAggregatingReqOutput.csv", "collectAggregatingReqOutput: %d\n",100) 
         connector flowIntArray_t monitoringcollectAggregatingReqOutput(collectAggregatingReqOutput.output, smachine.fromInternet)
         
         connector extract_targetOutput_CIntArrayCIntArrayIntArray
@@ -473,79 +503,101 @@ package System
         component cIntEaterPlaceholder userMachine8nextEater()
         component cIntEaterPlaceholder userMachine9nextEater()
 
-
+        component ChipsIntMonitor monitorUser0("output/user0httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user0(monitorUser0.output, umachine0.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser0(
                 computerID0.justRead,
                 userMachine0nextEater.input, userMachine0prevEater.input,
-                umachine0.httpResponse
+                monitorUser0.input
             )
         
+        component ChipsIntMonitor monitorUser1("output/user1httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user1(monitorUser1.output, umachine1.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser1(
                 computerID1.justRead,
                 userMachine1nextEater.input, collectiveResponseToTheRightUser0.accumulated,
-                umachine1.httpResponse
+                monitorUser1.input
             )
 
+        component ChipsIntMonitor monitorUser2("output/user2httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user2(monitorUser2.output, umachine2.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser2(
                 computerID2.justRead,
                 userMachine2nextEater.input, collectiveResponseToTheRightUser1.accumulated,
-                umachine2.httpResponse
+                monitorUser2.input
             )
         
+        component ChipsIntMonitor monitorUser3("output/user3httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user3(monitorUser3.output, umachine3.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser3(
                 computerID3.justRead,
                 userMachine3nextEater.input, collectiveResponseToTheRightUser2.accumulated,
-                umachine3.httpResponse
+                monitorUser3.input
             )
 
+        component ChipsIntMonitor monitorUser4("output/user4httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user4(monitorUser4.output, umachine4.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser4(
                 computerID4.justRead,
                 userMachine4nextEater.input, collectiveResponseToTheRightUser3.accumulated,
-                umachine4.httpResponse
+                monitorUser4.input
             )
 
+        component ChipsIntMonitor monitorUser5("output/user5httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user5(monitorUser5.output, umachine5.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser5(
                 computerID5.justRead,
                 userMachine5nextEater.input, collectiveResponseToTheRightUser4.accumulated,
-                umachine5.httpResponse
+                monitorUser5.input
             )
 
+        component ChipsIntMonitor monitorUser6("output/user6httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user6(monitorUser6.output, umachine6.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser6(
                 computerID6.justRead,
                 userMachine6nextEater.input, collectiveResponseToTheRightUser5.accumulated,
-                umachine6.httpResponse
+                monitorUser6.input
             )
 
+        component ChipsIntMonitor monitorUser7("output/user7httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user7(monitorUser7.output, umachine7.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser7(
                 computerID7.justRead,
                 userMachine7nextEater.input, collectiveResponseToTheRightUser6.accumulated,
-                umachine7.httpResponse
+                monitorUser7.input
             )
 
+        component ChipsIntMonitor monitorUser8("output/user8httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user8(monitorUser8.output, umachine8.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser8(
                 computerID8.justRead,
                 userMachine8nextEater.input, collectiveResponseToTheRightUser7.accumulated,
-                umachine8.httpResponse
+                monitorUser8.input
             )
 
+        component ChipsIntMonitor monitorUser9("output/user9httpResponse.csv","",100)
+        connector flowChipsInt_t monitor2user9(monitorUser9.output, umachine9.httpResponse)
         connector spreadConnectorResponseToTheRightUserAmongUserMachine
             collectiveResponseToTheRightUser9(
                 computerID9.justRead,
                 userMachine9nextEater.input, collectiveResponseToTheRightUser8.accumulated,
-                umachine9.httpResponse
+                monitorUser9.input
             )
 
+        component IntMonitor monitoringsmachineHttpResponse("output/smachineHttpResponse.csv", "",100)
+        connector flowInt_t smachine2monitor(smachine.fromServerToInternet,monitoringsmachineHttpResponse.input)
+        
         connector flowInt2CInt_t collectiveResponseToTheRightUser(
-            smachine.fromServerToInternet, collectiveResponseToTheRightUser9.accumulated
+            monitoringsmachineHttpResponse.output, collectiveResponseToTheRightUser9.accumulated
         )
 
         component streamConstantInt umachine0StartTime(0)
@@ -612,14 +664,27 @@ package System
         connector flowInt_t flowID9(umachine9id.output, umachine9.id)
 
         connector flowInt_t wps2smachine(wpservice.idToRespondTo, smachine.wpServed)
-        connector flowInt_t smachine2uaiNbData(smachine.nbData, uainterpreter.nbDataRcvd)
+
+        component IntMonitor smachineNbDataOutput("output/smachineNbDataOutput.csv", "smachineNbDataOutput: %d\n",100) 
+        connector flowInt_t monitoringsmachineNbDataOutput(smachine.nbData, smachineNbDataOutput.input)
+        connector flowInt_t smachine2uaiNbData(smachineNbDataOutput.output, uainterpreter.nbDataRcvd)
+
         connector flowBool_t smachine2uaiAuth(smachine.userAuth, uainterpreter.authDataRcvd)
-        connector flowInt_t smachine2uaiUserID(smachine.userID, uainterpreter.userIDRcvd)
+
+        component IntMonitor smachineUserIDOutput("output/smachineUserIDOutput.csv", "smachineUserIDOutput: %d\n",100) 
+        connector flowInt_t monitoringsmachineUserIDOutput(smachine.userID, smachineUserIDOutput.input)
+        connector flowInt_t smachine2uaiUserID(smachineUserIDOutput.output, uainterpreter.userIDRcvd)
 
         connector flowBool_t uai2auth(uainterpreter.authProvided, authenticator.authProvided)
 
-        connector flowInt_t uai2rvalidatorNbData(uainterpreter.nbData, rvalidator.nbData)
-        connector flowInt_t uai2rvalidatorReqID(uainterpreter.reqID,rvalidator.requestID)
+        component IntMonitor uaiNbDataOutput("output/uaiNbDataOutput.csv", "uaiNbDataOutput: %d\n",100) 
+        connector flowInt_t monitoringuaiNbDataOutput(uainterpreter.nbData, uaiNbDataOutput.input)
+        connector flowInt_t uai2rvalidatorNbData(uaiNbDataOutput.output, rvalidator.nbData)
+
+        component IntMonitor uaiReqIDOutput("output/uaiReqIDOutput.csv", "uaiReqIDOutput: %d\n",100) 
+        connector flowInt_t monitoringuaiReqIDOutput(uainterpreter.reqID, uaiReqIDOutput.input)
+        connector flowInt_t uai2rvalidatorReqID(uaiReqIDOutput.output,rvalidator.requestID)
+        
         connector flowBool_t authenticator2rvalidatorIsAuth(authenticator.isAuthenticated, rvalidator.isAuthenticated)
         
 
@@ -719,39 +784,51 @@ package System
         component cIntCIntEaterPlaceholder dataproviderNoComponent3next()
         component cIntCIntEaterPlaceholder dataproviderNoComponent3prev()
 
+        component ChipsIntMonitor dprovider3userIDinput("output/dprovider3userIDinput.csv", "dprovider3userIDinput: %d\n",100) 
+        connector flowChipsInt_t monitoringdprovider3userIDinput(dprovider3userIDinput.output,dprovider3.userID_i)
+        
         connector spreadConnector_findRightDataProvider_among_Backend
             spread_findRightDataProvider3(
                 dataproviderNoComponent3prev.input,
                 dataproviderNoComponent3next.input,
-                dprovider3.userID_i
+                dprovider3userIDinput.input
             )
+
+        component ChipsIntMonitor dprovider2userIDinput("output/dprovider2userIDinput.csv", "dprovider2userIDinput: %d\n",100) 
+        connector flowChipsInt_t monitoringdprovider2userIDinput(dprovider2userIDinput.output,dprovider2.userID_i)
         connector spreadConnector_findRightDataProvider_among_Backend
             spread_findRightDataProvider2(
                 dataproviderNoComponent2prev.input,
                 spread_findRightDataProvider3.accumulated,
-                dprovider2.userID_i
+                dprovider2userIDinput.input
             )
+
+        component ChipsIntMonitor dprovider1userIDinput("output/dprovider1userIDinput.csv", "dprovider1userIDinput: %d\n",100) 
+        connector flowChipsInt_t monitoringdprovider1userIDinput(dprovider1userIDinput.output,dprovider1.userID_i)
         connector spreadConnector_findRightDataProvider_among_Backend
             spread_findRightDataProvider1(
                 dataproviderNoComponent1prev.input,
                 spread_findRightDataProvider2.accumulated,
-                dprovider1.userID_i
+                dprovider1userIDinput.input
             )
+        
+        component ChipsIntMonitor dprovider0userIDinput("output/dprovider0userIDinput.csv", "dprovider0userIDinput: %d\n",100) 
+        connector flowChipsInt_t monitoringdprovider0userIDinput(dprovider0userIDinput.output,dprovider0.userID_i)
         connector spreadConnector_findRightDataProvider_among_Backend
             spread_findRightDataProvider0(
                 dataproviderNoComponent0prev.input,
                 spread_findRightDataProvider1.accumulated,
-                dprovider0.userID_i
+                dprovider0userIDinput.input
             )
 
         
 
         
-        component IntMonitor rLimiterUserIDOutput("output/rLimiterUserIDOutput.csv", "rLimiterUserIDOutput: %d\n",100) // printing 100 samples then blocking
-        connector flowInt_t monitoringRLimiterUserIDOutput(rlimiter.userID_o, rLimiterUserIDOutput.input)
+        component ChipsIntMonitor rLimiterUserIDOutput("output/rLimiterUserIDOutput.csv", "rLimiterUserIDOutput: %d\n",100) 
+        connector flowChipsInt_t monitoringRLimiterUserIDOutput(rlimiter.userID_o, rLimiterUserIDOutput.input)
         
         component streamConstantCInt nbJumpsDefault(0)
-        connector flowIntCInt2CIntCInt_t userID_i2dataProviders(
+        connector flowChipsIntCInt2CIntCInt_t userID_i2dataProviders(
             rLimiterUserIDOutput.output,
             nbJumpsDefault.output,
             spread_findRightDataProvider0.accumulated
@@ -790,7 +867,7 @@ package System
             )
 
         
-        component IntMonitor rLimiterDataQtyOutput("output/rLimiterDataQtyOutput.csv", "rLimiterDataQtyOutput: %d\n",100) // printing 100 samples then blocking
+        component IntMonitor rLimiterDataQtyOutput("output/rLimiterDataQtyOutput.csv", "rLimiterDataQtyOutput: %d\n",100) 
         connector flowInt_t monitoringrLimiterDataQtyOutput(rlimiter.dataQty, rLimiterDataQtyOutput.input)
 
         connector flowInt2CInt_t userID_i2spreadUserID(
@@ -798,30 +875,53 @@ package System
             spread_bdcastDqty0.accumulated
         )
 
-        connector flowBool_t cache02dprovider0(cache0.foundInCache, dprovider0.cacheResponse)
-        connector flowBool_t cache12dprovider1(cache1.foundInCache, dprovider1.cacheResponse)
-        connector flowBool_t cache22dprovider2(cache2.foundInCache, dprovider2.cacheResponse)
-        connector flowBool_t cache32dprovider3(cache3.foundInCache, dprovider3.cacheResponse)
+        component BoolMonitor monitorcache02dprovider0("output/cache02dprovider0.csv", "", "", 100)
+        connector flowBool_t cache02monitor(cache0.foundInCache, monitorcache02dprovider0.input)
+        connector flowBool_t cache02dprovider0(monitorcache02dprovider0.output, dprovider0.cacheResponse)
+
+        component BoolMonitor monitorcache12dprovider1("output/cache12dprovider1.csv", "", "", 100)
+        connector flowBool_t cache12monitor(cache1.foundInCache, monitorcache12dprovider1.input)
+        connector flowBool_t cache12dprovider1(monitorcache12dprovider1.output, dprovider1.cacheResponse)
+
+        component BoolMonitor monitorcache22dprovider2("output/cache22dprovider2.csv", "", "", 100)
+        connector flowBool_t cache22monitor(cache2.foundInCache, monitorcache22dprovider2.input)
+        connector flowBool_t cache22dprovider2(monitorcache22dprovider2.output, dprovider2.cacheResponse)
+
+        component BoolMonitor monitorcache32dprovider3("output/cache32dprovider3.csv", "", "", 100)
+        connector flowBool_t cache32monitor(cache3.foundInCache, monitorcache32dprovider3.input)
+        connector flowBool_t cache32dprovider3(monitorcache32dprovider3.output, dprovider3.cacheResponse)
+
         
-        component IntMonitor dprovider0CacheRequestOutput("output/dprovider0CacheRequestOutput.csv", "dprovider0CacheRequestOutput: %d\n",100) // printing 100 samples then blocking
+        
+        component IntMonitor dprovider0CacheRequestOutput("output/dprovider0CacheRequestOutput.csv", "dprovider0CacheRequestOutput: %d\n",100) 
         connector flowInt_t monitoringdprovider0CacheRequestOutput(dprovider0.cacheRequest, dprovider0CacheRequestOutput.input)
         connector flowInt_t dprovider02cache0(dprovider0CacheRequestOutput.output, cache0.requestedData)
-        component IntMonitor dprovider1CacheRequestOutput("output/dprovider1CacheRequestOutput.csv", "dprovider1CacheRequestOutput: %d\n",100) // printing 100 samples then blocking
+        component IntMonitor dprovider1CacheRequestOutput("output/dprovider1CacheRequestOutput.csv", "dprovider1CacheRequestOutput: %d\n",100) 
         connector flowInt_t monitoringdprovider1CacheRequestOutput(dprovider1.cacheRequest, dprovider1CacheRequestOutput.input)
         connector flowInt_t dprovider12cache1(dprovider1CacheRequestOutput.output, cache1.requestedData)
-        component IntMonitor dprovider2CacheRequestOutput("output/dprovider2CacheRequestOutput.csv", "dprovider2CacheRequestOutput: %d\n",100) // printing 100 samples then blocking
+        component IntMonitor dprovider2CacheRequestOutput("output/dprovider2CacheRequestOutput.csv", "dprovider2CacheRequestOutput: %d\n",100) 
         connector flowInt_t monitoringdprovider2CacheRequestOutput(dprovider2.cacheRequest, dprovider2CacheRequestOutput.input)
         connector flowInt_t dprovider22cache2(dprovider2CacheRequestOutput.output, cache2.requestedData)
-        component IntMonitor dprovider3CacheRequestOutput("output/dprovider3CacheRequestOutput.csv", "dprovider3CacheRequestOutput: %d\n",100) // printing 100 samples then blocking
+        component IntMonitor dprovider3CacheRequestOutput("output/dprovider3CacheRequestOutput.csv", "dprovider3CacheRequestOutput: %d\n",100) 
         connector flowInt_t monitoringdprovider3CacheRequestOutput(dprovider3.cacheRequest, dprovider3CacheRequestOutput.input)
         connector flowInt_t dprovider32cache3(dprovider3CacheRequestOutput.output, cache3.requestedData)
 
         
+        component IntMonitor ctrl0command("output/ctrl0command.csv", "ctrl0command: %d\n",100) 
+        connector flowInt_t monitoringctrl0command(ctrl0.knob, ctrl0command.input)
+        connector flowInt_t ctrl02cache0(ctrl0command.output, cache0.cacheSize)
 
-        connector flowInt_t ctrl02cache0(ctrl0.knob, cache0.cacheSize)
-        connector flowInt_t ctrl12cache1(ctrl1.knob, cache1.cacheSize)
-        connector flowInt_t ctrl22cache2(ctrl2.knob, cache2.cacheSize)
-        connector flowInt_t ctrl32cache3(ctrl3.knob, cache3.cacheSize)
+        component IntMonitor ctrl1command("output/ctrl1command.csv", "ctrl1command: %d\n",100)
+        connector flowInt_t monitoringctrl1command(ctrl1.knob, ctrl1command.input)
+        connector flowInt_t ctrl12cache1(ctrl1command.output, cache1.cacheSize)
+
+        component IntMonitor ctrl2command("output/ctrl2command.csv", "ctrl2command: %d\n",100) 
+        connector flowInt_t monitoringctrl2command(ctrl2.knob, ctrl2command.input)
+        connector flowInt_t ctrl22cache2(ctrl2command.output, cache2.cacheSize)
+
+        component IntMonitor ctrl3command("output/ctrl3command.csv", "ctrl3command: %d\n",100) 
+        connector flowInt_t monitoringctrl3command(ctrl3.knob, ctrl3command.input)
+        connector flowInt_t ctrl32cache3(ctrl3command.output, cache3.cacheSize)
 
         component streamConstantFloat controllerRequestedTime0(4.0)
         connector flowFloat_t reqTime2ctrl0(controllerRequestedTime0.output, ctrl0.requested_time)
@@ -835,10 +935,21 @@ package System
         component streamConstantFloat controllerRequestedTime3(4.0)
         connector flowFloat_t reqTime2ctrl3(controllerRequestedTime3.output, ctrl3.requested_time)
     
-        connector flowFloat_t dprovider02ctrl0(dprovider0.timeSpentOnReq, ctrl0.resulting_time)
-        connector flowFloat_t dprovider12ctrl1(dprovider1.timeSpentOnReq, ctrl1.resulting_time)
-        connector flowFloat_t dprovider22ctrl2(dprovider2.timeSpentOnReq, ctrl2.resulting_time)
-        connector flowFloat_t dprovider32ctrl3(dprovider3.timeSpentOnReq, ctrl3.resulting_time)
+        component FloatMonitor feedback0("output/feedback0.csv", "feedback0: %d\n",100) 
+        connector flowFloat_t monitoringfeedback0(dprovider0.timeSpentOnReq, feedback0.input)
+        connector flowFloat_t dprovider02ctrl0(feedback0.output, ctrl0.resulting_time)
+
+        component FloatMonitor feedback1("output/feedback1.csv", "feedback1: %d\n",100) 
+        connector flowFloat_t monitoringfeedback1(dprovider1.timeSpentOnReq, feedback1.input)
+        connector flowFloat_t dprovider12ctrl1(feedback1.output, ctrl1.resulting_time)
+
+        component FloatMonitor feedback2("output/feedback2.csv", "feedback2: %d\n",100) 
+        connector flowFloat_t monitoringfeedback2(dprovider2.timeSpentOnReq, feedback2.input)
+        connector flowFloat_t dprovider22ctrl2(feedback2.output, ctrl2.resulting_time)
+
+        component FloatMonitor feedback3("output/feedback3.csv", "feedback3: %d\n",100) 
+        connector flowFloat_t monitoringfeedback3(dprovider3.timeSpentOnReq, feedback3.input)
+        connector flowFloat_t dprovider32ctrl3(feedback3.output, ctrl3.resulting_time)
 
         connector flowBool_t dprovider02ctrl0Enable(dprovider0.enableTimeReading, ctrl0.enabled)
         connector flowBool_t dprovider12ctrl1Enable(dprovider1.enableTimeReading, ctrl1.enabled)
@@ -885,10 +996,12 @@ package System
                 nextInputFor3.output
             )
 
+        component IntArrayMonitor wpserviceInput("output/wpserviceInput.csv", "",100)
+        connector flowIntArray_t conneccccccc(wpserviceInput.output, wpservice.respondToThisIDs)
         connector extract_targetOutput_CIntArrayCIntArrayIntArray
             aggregationOfIDs2wpservice(
                 collect_userID3.accumulated,
-                wpservice.respondToThisIDs
+                wpserviceInput.input
             )
     end
 end

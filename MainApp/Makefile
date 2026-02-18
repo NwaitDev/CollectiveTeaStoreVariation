@@ -16,9 +16,9 @@ CPPOBJ := $(shell find $(PPATH) -name '*.o')
 HPPSOURCES := $(shell find $(PPATH) -name '*.hpp')
 PDIRS := $(foreach n, $(PNAMES),$(PPATH)/$n)
 
-INCLUDE_BIP_PACKAGES := $(foreach n, $(PDIRS), -I $n)
-INCLUDE_CPP_PACKAGES := $(foreach d, $(PDIRS), --gencpp-cc-I $d)
-CPP_EXTRA_OBJ := $(foreach o, $(CPPOBJ), --gencpp-ld-extra-obj $o)
+INCLUDE_BIP_PACKAGES := $(foreach n, $(PDIRS),-I $n)
+INCLUDE_CPP_PACKAGES := $(foreach d, $(PDIRS),--gencpp-cc-I $d)
+CPP_EXTRA_OBJ := $(foreach o, $(CPPOBJ),--gencpp-ld-extra-obj $o)
 
 
 COLOR_RESET := \033[0m
@@ -31,17 +31,13 @@ COLOR_BLUE := \033[34m
 all: output/build/system
 
 version:
-	$(COMPILER_DISTRIB_PATH)/bipc --version
+	bipc --version
 
 # Compile $(PGM)
 output/build/system: $(PGM).bip $(BIPSOURCES) $(CPPSOURCES)
 	mkdir -p output/build
 
-	bipc -p $(PGM) -d "$(COMPOUND)()" $(INCLUDE_BIP_PACKAGES) $(INCLUDE_CPP_PACKAGES) \
-		--genbip-follow-used-packages \
-		--gencpp-follow-used-packages \
-		$(CPP_EXTRA_OBJ)\
-		--gencpp-output output
+	bipc -p $(PGM) -d "$(COMPOUND)()" $(INCLUDE_BIP_PACKAGES) --genbip-follow-used-packages $(INCLUDE_CPP_PACKAGES) --gencpp-follow-used-packages $(CPP_EXTRA_OBJ) --gencpp-output output
 
 	cd output/build && cmake .. -Wno-dev
 
@@ -55,13 +51,16 @@ clean:
 run: output/build/system
 	@rm -f output/*.csv
 	@echo "$(COLOR_BLUE)Running program...$(COLOR_RESET)"
-	@./output/build/system --silent 1> output/stdout.log 2>output/stderr.log
+	@./output/build/system --silent 1> output/stdout.log 2>output/stderr.
+	@python3 mergecsv.py 1> output/stdout.log
 	@echo "$(COLOR_BLUE)Running complete!$(COLOR_RESET)"
+
 
 runverb:
 	@rm -f output/*.csv
 	@echo "$(COLOR_BLUE)Running program...$(COLOR_RESET)"
-	@./output/build/system  1> output/stdout.log 2>output/stderr.log
+	@./output/build/system  1>output/stdout.log 2>output/stderr.log
+	@python3 mergecsv.py 1> output/stdout.log
 	@echo "$(COLOR_BLUE)Running complete! trace written to output/std{out,err}.log$(COLOR_RESET)"
 
 generatexmi:
