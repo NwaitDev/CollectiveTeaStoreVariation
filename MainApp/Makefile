@@ -52,16 +52,16 @@ run: output/build/system
 	@rm -f output/*.csv
 	@echo "$(COLOR_BLUE)Running program...$(COLOR_RESET)"
 	@./output/build/system --silent 1> output/stdout.log 2>output/stderr.
-	@python3 mergecsv.py 1> output/stdout.log
 	@echo "$(COLOR_BLUE)Running complete!$(COLOR_RESET)"
+	python3 mergecsv.py 1> output/pyout.log
 
 
 runverb:
 	@rm -f output/*.csv
 	@echo "$(COLOR_BLUE)Running program...$(COLOR_RESET)"
 	@./output/build/system  1>output/stdout.log 2>output/stderr.log
-	@python3 mergecsv.py 1> output/stdout.log
 	@echo "$(COLOR_BLUE)Running complete! trace written to output/std{out,err}.log$(COLOR_RESET)"
+	@python3 mergecsv.py 1> output/pyout.log
 
 generatexmi:
 	$(COMPILER_DISTRIB_PATH)bipc.sh -p $(PGM) -d "$(COMPOUND)()" $(INCLUDE_BIP_PACKAGES) $(INCLUDE_CPP_PACKAGES) \

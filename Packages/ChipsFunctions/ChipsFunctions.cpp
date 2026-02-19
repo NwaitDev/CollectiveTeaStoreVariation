@@ -40,12 +40,12 @@ void UserMachineThen(chips_int& httpResponse_in, int& startTime_in, int& endTime
             if(requiresAuth_inner){
                 httpRequest_inner = -httpRequest_inner;
             }
-            lastRequest_inner = httpRequest_inner;
             waiting__inner = true;
         } else {
             if (newPage_inner){
                 if(requiresAuth_inner){
-                    httpRequest_inner = -lastRequest_inner;
+                    currentRequest_inner = (int)(randomdouble()*(maxNbData_in-1))+1;
+                    httpRequest_inner = -(maxNbData_in*(computerID_ctx-1) + currentRequest_inner);
                     waiting__inner = true;
                 }else{
                     waiting__inner = false;
@@ -309,7 +309,7 @@ void DataProviderThen(bool& redirection_in, chips_int& userID_in, int& dataQty_i
             cacheSearching_inner = true;
         } else {
             //we finished treating the current request
-            idToRespondTo_inner = currentlyTreatedUserRequest_inner +1;
+            idToRespondTo_inner = (currentlyTreatedUserRequest_inner +1)%maxUserID_inner;
             oneLessPendingRequest_inner = true;
 
             bool foundNewRequestPending = false;
@@ -328,6 +328,7 @@ void DataProviderThen(bool& redirection_in, chips_int& userID_in, int& dataQty_i
             }
         }
     }
+    oneLessPendingRequest_inner = oneLessPendingRequest_inner || (redirection_in && (userID_in != 0) && is_fresh(userID_in));
 
     // outputs
     userID_out = idToRespondTo_inner; // already formatted as the http answer
@@ -471,7 +472,7 @@ void PidControllerInit(double& requested__time_in,double& resulting__time_in,boo
     dt_inner = 0;
 
     p_inner = -1;
-    i_inner = -0.01;
+    i_inner = -0.04;
     d_inner = 0;
 
     knob__value_inner = 20;
