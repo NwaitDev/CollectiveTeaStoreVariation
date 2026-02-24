@@ -19,11 +19,9 @@ with{
     int httpRequest = 0;
     int lastRequest = 0;
 
-    // httpResponse in the form of
-    // response ? (authRequired ? -1 : 1)*(ID) : 0
 } then {
     ctx.computerID = id;
-    newPage = httpResponse !=0;
+    newPage = httpResponse !=0 && is_fresh(httpResponse);
     requiresAuth = httpResponse < 0 || requiresAuth;
     active = (time>=startTime) && (time<endTime);
     if (!active) {
@@ -41,7 +39,8 @@ with{
         } else {
             if (newPage){
                 if(requiresAuth){
-                    httpRequest = -lastRequest;
+                    currentRequest = (int)(random()*((float)(maxNbData-1)))+1;
+                    httpRequest = -(maxNbData_in*(computerID_ctx-1) + currentRequest_inner);
                     waiting = true;
                 } else {
                     waiting = false;
@@ -64,10 +63,14 @@ with {
     ServerChannel prev;
 } init {
     int httpResponse = 0;
-    int currentRequest = 1;
+    int currentRequest = 0
     bool requestFound = false;
 
     int [100] requestList = zeros(100);
+
+    int nbDataToOutput;
+    int userIDToOutput;
+    bool userAuthToOutput;
 } then {
 
     ////////////////// treating client requests one by one
@@ -88,11 +91,27 @@ with {
 
     ////////////////// treating server responses one by one
     httpResponse = wpServed;
-} 
+
+    // outputs
+    if (requestFound){
+        userAuthToOutput = requestList[currentRequest]<0;
+        if(userAuthToOutput){
+            nbDataToOutput = (-requestList[currentRequest])%(maxNbData);
+            userIDToOutput = (-requestList[currentRequest])/(maxNbData)+1;
+        }else{
+            nbDataToOutput = requestList[currentRequest]%(maxNbData);
+            userIDToOutput = requestList[currentRequest]/(maxNbData)+1;
+        }
+    } else {
+        nbDataToOutput = 0;
+        userIDToOutput = 0;
+        userAuthToOutput = false;
+    }
+}
 -> actuator fromServerToInternet(httpResponse)
--> nbData(requestList[currentRequest]%(maxNbData+1)) 
--> userID(requestList[currentRequest]/(maxNbData+1))
--> userAuth(requestList[currentRequest]<0)
+-> nbData(nbDataToOutput) 
+-> userID(userIDToOutput)
+-> userAuth(userAuthToOutput)
 
 
 logical UserActionInterpreter(int nbDataRcvd, bool authDataRcvd, int userIDRcvd)
@@ -156,10 +175,8 @@ logical Cache (int requestedData, int cacheSize) init {
         newestDataIndex = 0;
     }
 
-    if (!(requestedData > 0)){
-        found = false;
-    } else {
-        found = false;
+    found = false;
+    if (requestedData > 0){
         for i in range(cacheSize) {
             if((!found) && (cache[i] == requestedData)){
                 found = true;
@@ -196,7 +213,6 @@ logical DataProvider (bool redirection, int userID, int dataQty, bool cacheRespo
 init {
     int maxDifferentData = 40;
     int maxUserID = 100;
-    int prevUserID = 0;
     int [maxUserID] dataPerUserID = zeros(maxUserID);
     int currentlyTreatedUserRequest = -1;
 

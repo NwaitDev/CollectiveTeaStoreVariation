@@ -5,30 +5,32 @@ package _ComponentName_
     use base
     use bipio
     
-
+    // "isSource" parameter allows to specify which component should 
+    // emit its output data before reading its input data
+    // Only Chips components with all their input parameters filled with 
+    // default value should be set as sources.
     atom type _ComponentName_Core(bool isSource)
 
         // parameters
-        data _p_ _p_
-        
-        // contextual
+        data _datatype_ _variable_in_
         
 
         // inner variables
+        data _datatype_ _variable_inner_ 
 
         // outputs
-        data _p_ _p_
+        data _datatype_ _variable_out_
 
 
         port port_t start()
         port port_t calc()
-        export port port_p__t recv(_p_)
-        export port port_p__t send(_p_)
+        export port _porttype_ recv(_variable_in_)
+        export port _porttype_ send(_variable_out_)
 
         place INIT, RECEIVING, THEN, SENDING
 
         initial to INIT do {
-            _ComponentName_Init(_p_);
+            _ComponentName_Init(_variable_in_, _variable_inner_, _variable_out_); // defined in ChipsFunctions
         }
 
         on start from INIT to RECEIVING provided(!isSource)
@@ -36,7 +38,7 @@ package _ComponentName_
 
         on recv from RECEIVING to THEN 
         on calc from THEN to SENDING do {
-            _ComponentName_Then(_p_);          
+            _ComponentName_Then(_variable_in_, _variable_inner_, _variable_out_); // defined in ChipsFunctions
         }
         on send from SENDING to RECEIVING
 
@@ -46,12 +48,11 @@ package _ComponentName_
 
     compound type _ComponentName_RX()
 
+        component _RXtype_RX _variable_in_name_()
 
-        component _RXorTX_type_RX _p_()
-
-        connector many2one__p__t to_the_core(_p_.to_the_core)
+        connector many2one_porttype_t to_the_core(_variable_in_name_.to_the_core)
         
-        export port _p_.from_the_outside as _p_
+        export port _variable_in_name_.from_the_outside as _variable_in_name_
 
         export port to_the_core.r0 as to_the_core
     end
@@ -59,14 +60,13 @@ package _ComponentName_
 
     compound type _ComponentName_TX()
 
-        component _RXorTX_type_TX _p_()
+        component _TXtype_TX _variable_out_name_()
 
-        connector one2many__p__t from_the_core(_p_.from_the_core)
+        connector one2many_porttype_t from_the_core(_variable_out_name_.from_the_core)
+        
+        export port _variable_out_name_.to_the_outside as _variable_out_name_
 
-        export port _p_.to_the_outside as _p_
-
-        export port from_the_core.s0 as from_the_core
-
+        export port from_the_core.r0 as from_the_core
     end
 
     compound type _ComponentName_(bool isSource)
@@ -79,9 +79,9 @@ package _ComponentName_
         connector _flowconnector_ RX2Core(inputParameters.to_the_core, core.recv)
         connector _flowconnector_ Core2TX(core.send, outputParameters.from_the_core)
         
-        export port inputParameters._p_ as _p_
+        export port inputParameters._variable_in_name_ as _variable_in_name_
         
-        export port outputParameters._p_ as _p_
+        export port outputParameters._variable_out_name_ as _variable_out_name_
 
     end
 end

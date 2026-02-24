@@ -1,7 +1,6 @@
 @cpp(src="bipio.cpp",include="bipio.hpp,stdio.h")
 
 // utility functions to write information to external files of the bip system
-// see bipio.hpp for more information
 package bipio
 
     use base 

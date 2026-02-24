@@ -4,8 +4,8 @@
 
 void UserMachineInit(chips_int&, int&, int&, int&, int&, int&, bool&, bool&, int&, bool&, bool&, int&, int&, int&, int&);
 void UserMachineThen(chips_int&, int&, int&, int&, int&, int&, bool&, bool&, int&, bool&, bool&, int&, int&, int&, int&);
-void ServerMachineInit(intarray&, int&, int&, int&, int&, bool&, intarray&, int&, int&, int&, bool&);
-void ServerMachineThen(intarray&, int&, int&, int&, int&, bool&, intarray&, int&, int&, int&, bool&);
+void ServerMachineInit(intarray&, int&, int&, int&, int&, bool&, intarray&, int&, int&, bool&, int&, int&, int&, bool&);
+void ServerMachineThen(intarray&, int&, int&, int&, int&, bool&, intarray&, int&, int&, bool&, int&, int&, int&, bool&);
 void UserActionInterpreterInit(int&, bool&, int&, int&, int&, bool&);
 void UserActionInterpreterThen(int&, bool&, int&, int&, int&, bool&);
 void AuthenticatorInit(bool&,bool&);

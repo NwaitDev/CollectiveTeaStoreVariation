@@ -45,8 +45,8 @@ package ChipsFunctions
     // int nbData
     // int userID
     // bool userAuth
-    extern function ServerMachineInit(intarray, int, int, int, int, bool, intarray, int, int, int, bool)
-    extern function ServerMachineThen(intarray, int, int, int, int, bool, intarray, int, int, int, bool)
+    extern function ServerMachineInit(intarray, int, int, int, int, bool, intarray, int,int,bool, int, int, int, bool)
+    extern function ServerMachineThen(intarray, int, int, int, int, bool, intarray, int,int,bool, int, int, int, bool)
 
 
     // (input)

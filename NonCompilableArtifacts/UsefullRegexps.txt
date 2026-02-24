@@ -1,5 +1,5 @@
-// Detect useless warnings
-
+// Detect useless warnings (useless because intended within our transformations)
 ((.*\n){1}.*(uninitialized|Non-determinism|fresh)(.*\n){6})|(.*Previous transition was(.*\n){6})|\n{3}
 
+// Detect an item of a list of available transitions within the BIP ENGINE trace generated when using "make runverb" command
 \[BIP ENGINE\]:   \[.*\].*|\n\n

@@ -9,8 +9,6 @@
 #include <cstdlib>
 #include <ctime>
 
-
-
 using intarray = std::vector<int>;
 
 enum collective_optional{

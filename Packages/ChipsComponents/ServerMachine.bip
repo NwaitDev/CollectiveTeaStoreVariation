@@ -19,7 +19,9 @@ package ServerMachine
         data int currentRequest
         data bool requestFound
         data intarray requestList
-        
+        data int nbDataToOutput
+        data int userIDToOutput 
+        data bool userAuthToOutput
         // outputs
         data int fromServerToInternet
         data int nbData
@@ -34,7 +36,7 @@ package ServerMachine
         place INIT, RECEIVING, THEN, SENDING
 
         initial to INIT do {
-            ServerMachineInit(fromInternet,wpServed,maxNbData,httpResponse,currentRequest,requestFound,requestList,fromServerToInternet,nbData,userID,userAuth);
+            ServerMachineInit(fromInternet,wpServed,maxNbData,httpResponse,currentRequest,requestFound,requestList,nbDataToOutput, userIDToOutput, userAuthToOutput,fromServerToInternet, nbData,userID,userAuth);
         }
 
         on start from INIT to RECEIVING provided(!isSource)
@@ -42,7 +44,7 @@ package ServerMachine
 
         on recv from RECEIVING to THEN 
         on calc from THEN to SENDING do {
-            ServerMachineThen(fromInternet,wpServed,maxNbData,httpResponse,currentRequest,requestFound,requestList,fromServerToInternet,nbData,userID,userAuth);      
+            ServerMachineThen(fromInternet,wpServed,maxNbData,httpResponse,currentRequest,requestFound,requestList,nbDataToOutput, userIDToOutput, userAuthToOutput,fromServerToInternet,nbData,userID,userAuth);      
         }
         on send from SENDING to RECEIVING
 

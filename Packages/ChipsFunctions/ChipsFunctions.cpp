@@ -9,10 +9,9 @@ void UserMachineInit(chips_int& httpResponse_in, int& startTime_in, int& endTime
     maxNbData_in = 10;
     
 
-    waiting__inner = false;
-    time_inner = 0;
     active_inner = false;
     waiting__inner = false;
+    time_inner = 0;
     requiresAuth_inner = false;
     newPage_inner = false;
 
@@ -63,7 +62,7 @@ void UserMachineThen(chips_int& httpResponse_in, int& startTime_in, int& endTime
     fromUserToInternet_out = httpRequest_inner;
 }
 
-void ServerMachineInit(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
+void ServerMachineInit(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& nbDataToOutput_inner, int& userIDToOutput_inner, bool& userAuthToOutput_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
     // default values :
     maxNbData_in = 10;
 
@@ -72,15 +71,9 @@ void ServerMachineInit(intarray& fromInternet_in, int& wpServed_in, int& maxNbDa
     requestFound_inner = false;
 
     requestList_inner = zeros(100);
-
-    // outputs
-    fromServerToInternet_out = httpResponse_inner;
-    nbData_out = requestList_inner[currentRequest_inner]%(maxNbData_in); 
-    userID_out = requestList_inner[currentRequest_inner]/(maxNbData_in);
-    userAuth_out = requestList_inner[currentRequest_inner]<0;
 }
 
-void ServerMachineThen(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
+void ServerMachineThen(intarray& fromInternet_in, int& wpServed_in, int& maxNbData_in, int& httpResponse_inner, int& currentRequest_inner, bool& requestFound_inner, intarray& requestList_inner, int& nbDataToOutput_inner, int& userIDToOutput_inner, bool& userAuthToOutput_inner, int& fromServerToInternet_out, int& nbData_out, int& userID_out, bool& userAuth_out){
 
     ////////////////// treating client requests one by one
     requestList_inner[currentRequest_inner] = 0;
@@ -102,22 +95,25 @@ void ServerMachineThen(intarray& fromInternet_in, int& wpServed_in, int& maxNbDa
     httpResponse_inner = wpServed_in;
 
     // outputs
-    fromServerToInternet_out = httpResponse_inner;
     if(requestFound_inner){
-        userAuth_out = requestList_inner[currentRequest_inner]<0;
-        if(userAuth_out){
-            nbData_out = (-requestList_inner[currentRequest_inner])%(maxNbData_in);
-            userID_out = (-requestList_inner[currentRequest_inner])/(maxNbData_in)+1;
+        userAuthToOutput_inner = requestList_inner[currentRequest_inner]<0;
+        if(userAuthToOutput_inner){
+            nbDataToOutput_inner = (-requestList_inner[currentRequest_inner])%(maxNbData_in);
+            userIDToOutput_inner = (-requestList_inner[currentRequest_inner])/(maxNbData_in)+1;
         }else{
-            nbData_out = requestList_inner[currentRequest_inner]%(maxNbData_in);
-            userID_out = requestList_inner[currentRequest_inner]/(maxNbData_in)+1;
+            nbDataToOutput_inner = requestList_inner[currentRequest_inner]%(maxNbData_in);
+            userIDToOutput_inner = requestList_inner[currentRequest_inner]/(maxNbData_in)+1;
         }
     } else {
-        nbData_out = 0;
-        userID_out = 0;
-        userAuth_out = false;
+        nbDataToOutput_inner = 0;
+        userIDToOutput_inner = 0;
+        userAuthToOutput_inner = false;
     }
-    
+
+    fromServerToInternet_out = httpResponse_inner;
+    userAuth_out = userAuthToOutput_inner;
+    nbData_out = nbDataToOutput_inner;
+    userID_out = userIDToOutput_inner;
 }
 
 void UserActionInterpreterInit(int& nbDataRcvd_in, bool& authDataRcvd_in, int& userIDRcvd_in, int& nbData_out, int& reqID_out, bool& authProvided_out){
