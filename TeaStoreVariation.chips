@@ -511,15 +511,26 @@ system {
     for i in range(nbUsers){
         smachine.fromInternet((aggregatingRequests) umachine[i].fromUserToInternet);
         umachine[i].httpResponse((responseToTheRightUser) smachine.fromServerToInternet);
-        umachine[i].startTime(2*i);
-        umachine[i].endTime(2*i+30);
         umachine[i].id(i+1);
+        umachine[i].endTime(1000);
         if (i<nbUsers-1){
             umachine[i].next(umachine[i+1].prev);
             umachine[i+1].prev(umachine[i].next);
         }
     }
-    
+
+    // current scenario
+    umachine[0].startTime(0);
+    umachine[1].startTime(100);
+    umachine[2].startTime(100);
+    umachine[3].startTime(100);
+    umachine[4].startTime(400);
+    umachine[5].startTime(400);
+    umachine[6].startTime(400);
+    umachine[7].startTime(400);
+    umachine[8].startTime(400);
+    umachine[9].startTime(400);
+
     smachine.wpServed(wpservice.httpResponse)
 
     uainterpreter.nbDataRcvd(smachine.nbData);
