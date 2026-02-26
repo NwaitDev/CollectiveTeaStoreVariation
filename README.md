@@ -6,13 +6,16 @@ The associated paper presents the compilation chain currently developed to desig
 
 ## Content of this repository
 
-In this repository, you will find:
+In this repository, at the root, you will find the following files:
 
 - <code>TeaStoreVariation.chips</code>, the Chips designed model for the adaptive web server application.
 - <code>chips1.1.ecore</code>, the metamodel of the Chips language, augmented to include collective primitives <code>spread</code> and <code>collect</code>. This artifact is also available in the Chips dedicated GitHub repository.
-- <code>TeaStoreVariation.xmi</code>, the parsed version of the Chips model, respecting the specifications of the <code>chips1.1.ecore</code> metamodel.
-- the <code>Packages</code> folder, which contains all the different BIP/C++ artifacts generated to implement the behavior of each Chips component and collective primitive defined by the Chips model. Also note that the <code>Packages/IO</code> components and functions are not generated from the Chips specifications. It is a set of utility artifacts that can (and are) introduced into the model description to measure and output the states of the different signals that flow throug the model.
-- the <code>MainApp</code> folder, which contains the BIP model of the <code>system</code> section of the Chips description. along with a python script that can be used to merge the different traces written by the monitors tracking the state of the dataflows.
+- <code>TeaStoreVariation.xmi</code>, the parsed version of the Chips model, respecting the specifications of the <code>chips1.1.ecore</code> metamodel,
+- <code>bipinstaller.sh</code>, a linux bash script to quickly install the BIP compiler, the only requirement to replicate the experiments presented here. Run this script in the directory where you want BIP to be installed.
+
+And the following packages :
+- the <code>Packages</code> folder, which contains all the different BIP/C++ artifacts generated to implement the behavior of each Chips component and collective primitive defined by the Chips model. Also note that the <code>Packages/IO</code> components and functions are not generated from the Chips specifications. It is a set of utility artifacts that can be (and are) introduced into the model description to output the states of the different signals that flow throug the model.
+- the <code>MainApp</code> folder, which contains the BIP model of the <code>system</code> section of the Chips description. along with python scripts that can be used to merge and analyze the different traces written by the monitors tracking the state of the dataflows.
 - And finally, the <code>NonCompilableArtifacts</code> folder, which contains:
   - a template for the implantation of a Chips Functionnal Block within the BIP framework,
   - a <code>.txt</code> file containing regular expressions to quickly eliminate uninteresting informations from the traces of compilation or execution of the model.

@@ -51,7 +51,7 @@ clean:
 run: output/build/system
 	@rm -f output/*.csv
 	@echo "$(COLOR_BLUE)Running program...$(COLOR_RESET)"
-	@./output/build/system --silent 1> output/stdout.log 2>output/stderr.
+	@./output/build/system --silent 1> output/stdout.log 2>output/stderr.log
 	@echo "$(COLOR_BLUE)Running complete!$(COLOR_RESET)"
 	python3 mergecsv.py 1> output/pyout.log
 
