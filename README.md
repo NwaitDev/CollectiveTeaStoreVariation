@@ -12,6 +12,7 @@ In this repository, at the root, you will find the following files:
 - <code>chips1.1.ecore</code>, the metamodel of the Chips language, augmented to include collective primitives <code>spread</code> and <code>collect</code>. This artifact is also available in the Chips dedicated GitHub repository.
 - <code>TeaStoreVariation.xmi</code>, the parsed version of the Chips model, respecting the specifications of the <code>chips1.1.ecore</code> metamodel,
 - <code>bipinstaller.sh</code>, a linux bash script to quickly install the BIP compiler, the only requirement to replicate the experiments presented here. Run this script in the directory where you want BIP to be installed.
+- <code>Dockerfile</code> and <code>compose.yaml</code> that allow to create a Docker image automating the full experiment.
 
 And the following packages :
 - the <code>Packages</code> folder, which contains all the different BIP/C++ artifacts generated to implement the behavior of each Chips component and collective primitive defined by the Chips model. Also note that the <code>Packages/IO</code> components and functions are not generated from the Chips specifications. It is a set of utility artifacts that can be (and are) introduced into the model description to output the states of the different signals that flow throug the model.
