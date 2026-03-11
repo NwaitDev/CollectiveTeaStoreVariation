@@ -52,7 +52,7 @@ Install <code>docker</code> to build an image able to run all the previously men
 ```
 docker compose up --build 
 ```
-
+Note that once the image is built, it automatically runs the <code>entrypoint.sh</code> script
 If you are using Windows, you might need to use tools like WSL to run the command.
 
 
